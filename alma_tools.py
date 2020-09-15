@@ -47,7 +47,10 @@ class Alma_tools():
 			Parameters:
 				key (str) - Alma API key could be for Production or for a Sandbox
 		"""
-		self.alma_key = str(key)
+		if key == "sb":
+			self.alma_key = str(sb_key)
+		elif key == "prod":
+			self.alma_key = str(pr_key)
 		self.status_code = None
 		self.xml_data = None
 		self.mms = None
