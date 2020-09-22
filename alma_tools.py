@@ -1,5 +1,5 @@
 import requests
-from settings import  sb_key, pr_key
+from settings import sb_key, pr_key
 from find_ie import getting_reps
 
 
@@ -7,280 +7,241 @@ from find_ie import getting_reps
 class Alma_tools():
 	
 	""" 
-		Alma_tools - a class which contains Alma APIs
+	This class contains methods for getting, updating and deleting Alma data via Alma's APIs.
 
-		Attributes
-		----------
-		mms : str
-			Alma mms id
-		holding: str
-			Alma holding id
-		item : str
-			Alma item id
-		xml : str
-			xml data to submit to Alma
-		options : dict
-			dictionary which contain API request options listed in url after API key and connected by '&'
-		status_code : int
-			status code for the Alma request
+	Attributes
+	----------
+	mms_id : str
+		Alma MMS ID
+	holding_id: str
+		Alma holding ID
+	item_pid : str
+		Alma item ID
+	xml_record_data : str
+		XML data to submit to Alma
+	options : dict
+		dictionary which contains any API request parameters additional to the necessary API key. Example: "{"limit":"100"}"
+	status_code : int
+		status code for the Alma request
 
-		Methods
-		-------
-			__init__(self, key)
-			get_bib(self, mms, options)
-			update_bib(self, mms, xml, options)
-			get_holdings(self, mms, options )
-			get_holding(self, mms, holding, options)
-			get_items(self, mms,  holding, options)
-			get_item(self, mms, holding, item, options)
-			delete_item( self, mms, holding, item)
-			delete_holding ( self, mms, holding)
-			update_item (self, mms, holding, item, options)
-			get (reps)
+	Methods
+	-------
+		__init__(self, key)
+		get_bib(self, mms_id, options)
+		update_bib(self, mms_id, xml_record_data, options)
+		get_holdings(self, mms_id, options)
+		get_holding(self, mms_id, holding_id, options)
+		delete_holding(self, mms_id, holding_id)
+		get_items(self, mms_id, holding_id, options)
+		get_item(self, mms_id, holding_id, item_pid, options)
+		update_item(self, mms_id, holding_id, item_pid, xml_record_data, options)
+		delete_item(self, mms_id, holding_id, item_pid)
+		get_representations(self, mms_id, options)
 
 	"""
 
-	def __init__(self, key):
+	def __init__(self, alma_key):
 		
-		"""	Constructs all  the neccessary attributes for Alma_tools
+		"""	Initialises all the neccessary attributes for an Alma_tools object.
 			
 			Parameters:
-				key (str) - Alma API key could be for Production or for a Sandbox
+				alma_key (str) - Alma API key (either production or sandbox)
 		"""
-		self.alma_key = str(key)
+		self.alma_key = str(alma_key)
+		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
+		self.mms_id = None
+		self.holding_id = None
+		self.item_pid = None
+		self.xml_response_data = None
 		self.status_code = None
-		self.xml_data = None
-		self.mms = None
-		self.holding = None
-		self.item = None 
 		
-	def get_bib( self, mms, options ):
+	def get_bib(self, mms_id, options={}):
 
-		""" Retrieves bibliographic record xml
+		""" Retrieves the bibliographic record in XML for a given Alma MMS ID
 		Parameters:
-			mms(str) - alma mms id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}?apikey={}'.format( mms, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-		r = requests.get( url)
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}", params=parameters)
+		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
-	def update_bib(self, mms, xml, options):
+	def update_bib(self, mms_id, xml_record_data, options={}):
 
 		"""
 		Updates bibliographic record.
 		Parameters:
-			mms(str) - alma mms id
-			xml(str) - xml for alma bib record
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			xml_record_data(str) - xml of updated bib record data
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}?apikey={}'.format(mms, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
 		headers = {'content-type': 'application/xml'}
-		r = requests.put( url, headers=headers, data = xml.encode("utf-8"))
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.base_api_url}{mms_id}", headers=headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
-	def get_holdings( self, mms, options ):
+	def get_holdings(self, mms_id, options={}):
 
 		"""
-		Retrieves holdings for mms id
+		Retrieves all holdings attached to a given MMS ID
 		Parameters:
-			mms(str) - alma mms id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings?apikey={}'.format(mms, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-		r = requests.get( url)
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings", params=parameters)
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def get_holding(self, mms, holding, options):
+	def get_holding(self, mms_id, holding_id, options={}):
 
 		"""
-		Retrieves holding by holding id
+		Retrieves an individual holding by holding ID
 		Parameters:
-			mms(str) - alma mms id
-			holding(str) -alma holding id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			holding_id(str) - Alma holding ID
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings{}?apikey={}'.format(mms, holding, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-		r = requests.get( url)
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings{holding_id}", params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def delete_holding(self, mms_id, holding_id):
+
+		"""
+		Deletes a holding by holding ID
+		Parameters:
+			mms_id(str) - Alma MMS ID
+			holding_id(str) - Alma holding ID
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}?apikey={self.alma_key}")
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
 	
-	def get_items(self, mms,  holding, options):
+	def get_items(self, mms_id,  holding_id, options={}):
 
 		"""
-		Retrieves items for mms id and holdings
+		Retrieves all items for MMS ID and holding ID
 		Parameters:
-			mms(str) - alma mms id
-			holding(str) Alma holding id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			holding_id(str) - Alma holding ID
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings/{}/items?apikey={}'.format(mms,holding, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-		r = requests.get( url)
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", params=parameters)
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def get_item(self, mms, holding, item, options):
+	def get_item(self, mms_id, holding_id, item_pid, options={}):
 
 		"""
-		Retrieves items for item id
+		Retrieves an individual item by item PID
 		Parameters:
-			mms(str) - alma mms id
-			holding(str) Alma holding id
-			item(str) - Alma item id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			holding_id(str) Alma holding ID
+			item_pid(str) - Alma item PID
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings/{}/items/{}?apikey={}'.format(mms,holding, item, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-		r = requests.get( url)
-		self.xml_data=  r.text
-		self.status_code = r.status_code
-	
-	def delete_holding(self, mms, holding):
-
-		"""
-		Deletes holding by holding id
-		Parameters:
-			mms(str) - alma mms id
-			holding(str) Alma holding id
-		Returns:
-			None
-		"""
-
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings/{}?apikey={}'.format(mms, holding, self.alma_key)
-		r = requests.delete( url )
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", params=parameters)
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def delete_item( self, mms, holding, item):
+	def update_item(self, mms_id, holding_id, item_pid, xml_record_data, options={}):
 
 		"""
-		Deletes item by item id
-		Parameters:
-			mms(str) - Alma mms id
-			holding(str) Alma holding id
-			item(str) - Alma item id
-		Returns:
-			None
-		"""
-
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings/{}/items/{}?apikey={}'.format(mms, holding, item, self.alma_key)
-		r = requests.delete( url )
-		self.xml_data=  r.text
-		self.status_code = r.status_code	
-
-
-	def update_item(self, mms, holding, item, xml, options):
-
-		"""Updates item with new item xml data
+		Updates item with new item XML data
 
 		Parameters:
-			mms(str) - alma mms id
-			xml(str) - xml for alma bib record
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			xml_record_data(str) - XML of updated item record data
+			options(dict) - optional parameters for request
 		Returns:
-			None
+			self.xml_response_data
+			self.status_code
 		"""
-
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/holdings/{}/items/{}?apikey={}'.format(mms, holding, item, self.alma_key)
-		headers = {  'Content-Type':'application/xml'  }
-
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
 		headers = {'content-type': 'application/xml'}
-		r = requests.put( url, headers=headers, data = xml.encode("utf-8"))
-		self.xml_data=  r.text
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
-
-	def get_reps(self, mms, options):
+	def delete_item( self, mms_id, holding_id, item_pid):
 
 		"""
-		Retrieves representations for mms 
+		Deletes item by item PID
 		Parameters:
-			mms(str) - alma mms id
-			options(dict) - options for request
+			mms_id(str) - Alma MMS ID
+			holding_id(str) Alma holding ID
+			item_pid(str) - Alma item PID
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}?apikey={self.alma_key}")
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_representations(self, mms_id, options={}):
+
+		"""
+		Retrieves digital representations attached to a given MMS ID 
+		Parameters:
+			mms_id(str) - Alma MMS ID
+			options(dict) - optional parameters for request
 		Returns:
 			None
 		"""
-
-		url = 'https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/{}/representations?apikey={}'.format(mms, self.alma_key)
-		if options:
-			option_string = ""
-			for key in options.keys():
-				url = url + "&"
-				url = url + key + "=" + options[key]
-
-		r = requests.get(url)
-		self.xml_data=  r.text
-		self.status_code = r.status_code
-
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/representations", params=parameters)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code 
 	
 
 def main():
 
 	"""Example of usage"""
 
-	mms = "9918975967302836"
+	mms_id = "9918975967302836"
 
-	my_api = Alma_tools(pr_key)
+	my_api = Alma_tools(sb_key)
 
 	#######################################
-	my_api.get_bib(mms, {"limit":"100"})
-	print(my_api.xml_data.encode("utf-8"))
+	# my_api.get_bib(mms_id, {"limit":"100"})
+	# print(my_api.xml_response_data.encode("utf-8"))
+	# #######################################
+	# my_api.get_holdings(mms_id, {"limit":"100"})
+	# print(my_api.xml_response_data.encode("utf-8"))
 	#######################################
-	# my_api.update_bib(mms, my_api.xml_data, None)
+	# my_api.update_bib(mms_id, my_api.xml_record_data)
 	# print(my_api.status_code)
 	#######################################
-	my_api.get_reps(mms, None)
-	print(my_api.xml_data.encode("utf-8"))
+	# my_api.get_representations(mms_id)
+	# print(my_api.xml_response_data.encode("utf-8"))
 
 
 if __name__ == '__main__':
