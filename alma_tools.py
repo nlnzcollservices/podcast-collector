@@ -45,9 +45,12 @@ class Alma_tools():
 		"""	Initialises all the neccessary attributes for an Alma_tools object.
 			
 			Parameters:
-				alma_key (str) - Alma API key (either production or sandbox)
+			alma_key (str) - Code for appropriate Alma API key - "sb" for sandbox or "prod" for production
 		"""
-		self.alma_key = str(alma_key)
+		if key == "sb":
+		  self.alma_key = str(sb_key)
+		elif key == "prod":
+			self.alma_key = str(pr_key)
 		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
 		self.mms_id = None
 		self.holding_id = None
