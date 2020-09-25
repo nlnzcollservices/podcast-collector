@@ -4,7 +4,7 @@ from find_ie import getting_reps
 
 
 ##################################################################################################
-class Alma_tools():
+class AlmaTools():
 	
 	""" 
 	This class contains methods for getting, updating and deleting Alma data via Alma's APIs.
