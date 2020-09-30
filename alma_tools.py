@@ -86,7 +86,7 @@ class AlmaTools():
 		"""
 		
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.post(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
