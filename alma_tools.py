@@ -47,9 +47,9 @@ class AlmaTools():
 			Parameters:
 			alma_key (str) - Code for appropriate Alma API key - "sb" for sandbox or "prod" for production
 		"""
-		if key == "sb":
-		  self.alma_key = str(sb_key)
-		elif key == "prod":
+		if alma_key == "sb":
+			self.alma_key = str(sb_key)
+		elif alma_key == "prod":
 			self.alma_key = str(pr_key)
 		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
 		self.mms_id = None
