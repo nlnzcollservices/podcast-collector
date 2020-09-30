@@ -74,7 +74,7 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def create_bib(self, xml_record_datam, options = {}):
+	def create_bib(self, xml_record_data, options = {}):
 
 		"""
 		Creates bibliographic record
@@ -106,7 +106,7 @@ class AlmaTools():
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
-		self.xml_response_data=  r.text
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
 	def get_holdings(self, mms_id, options={}):
@@ -248,7 +248,7 @@ def main():
 
 	mms_id = "9918975967302836"
 
-	my_api = Alma_tools(sb_key)
+	my_api = AlmaTools(sb_key)
 
 	#######################################
 	# my_api.get_bib(mms_id, {"limit":"100"})
