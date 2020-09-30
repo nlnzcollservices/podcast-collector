@@ -57,6 +57,7 @@ class AlmaTools():
 		self.item_pid = None
 		self.xml_response_data = None
 		self.status_code = None
+		self.headers = {'content-type': 'application/xml'}
 		
 	def get_bib(self, mms_id, options={}):
 
@@ -70,8 +71,26 @@ class AlmaTools():
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}", params=parameters)
-		self.xml_response_data=  r.text
+		self.xml_response_data = r.text
 		self.status_code = r.status_code
+
+	def create_bib(self, xml_record_datam, options = {}):
+
+		"""
+		Creates bibliographic record
+		Paramrters:			
+			xml_record_data(str) - xml of updated bib record data
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+		"""
+		
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+
 
 	def update_bib(self, mms_id, xml_record_data, options={}):
 
@@ -85,9 +104,8 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
-		headers = {'content-type': 'application/xml'}
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}{mms_id}", headers=headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
@@ -187,9 +205,8 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
-		headers = {'content-type': 'application/xml'}
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
