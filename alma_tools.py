@@ -1,6 +1,5 @@
 import requests
 from settings import sb_key, pr_key
-from find_ie import getting_reps
 
 
 ##################################################################################################
@@ -12,7 +11,7 @@ class AlmaTools():
 	Attributes
 	----------
 	mms_id : str
-		Alma MMS ID
+		Alma MMS IDF
 	holding_id: str
 		Alma holding ID
 	item_pid : str
@@ -106,7 +105,7 @@ class AlmaTools():
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
-		self.xml_response_data = r.text
+		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
 	def get_holdings(self, mms_id, options={}):
