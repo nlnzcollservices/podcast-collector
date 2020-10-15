@@ -133,6 +133,10 @@ class DbHandler():
 
     def update_the_last_issue(self):
 
+        """Updates db with the maximum date as timestamp of all the episode as the last_issue for each podcast name"""
+
+
+        logging.info("Updating the last issues....")
         podcasts = Podcast.select()
         for pod in podcasts:
             episodes = Episode.select().where(Episode.podcast == pod.id)
@@ -140,11 +144,12 @@ class DbHandler():
             for epis in episodes:
                 if epis.date > max_date:
                     max_date = epis.date
-            if pod.last_issue != max_date:
-                q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
-                q.execute()
+        if pod.last_issue != max_date:
+            q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
+            q.execute()
 
     def insert_the_last_issue(self, podcast_name, last_issue):
+        
         """
         Converts input last issue to time stamp and updates db by podcast name with new last_issue
         Args: 
@@ -160,12 +165,12 @@ class DbHandler():
 
     def ticked_titles(self):
 
-            self.titles_done = []
-            episodes = Episode.select()
-            for ep in episodes:
-                if ep.tick == True:
-                    self.titles_done.append(ep.episode_title)
-            return self.titles_done
+        self.titles_done = []
+        episodes = Episode.select()
+        for ep in episodes:
+            if ep.tick == True:
+                self.titles_done.append(ep.episode_title)
+        return self.titles_done
 
     def db_update_ie(self, ie_num, episode_id):
 
@@ -195,7 +200,9 @@ class DbHandler():
     def db_update_mms(self, mms_id, episode_title):
 
         """ Updating Alma mms id in db"""
-
+        print("here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(episode_title)
+        print(mms_id)
         q = Episode.update(mis_mms = mms_id ).where(Episode.episode_title == episode_title)
         q.execute()
 

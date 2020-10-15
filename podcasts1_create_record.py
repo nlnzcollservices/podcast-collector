@@ -108,8 +108,7 @@ class RecordCreator():
 
 		if self.podcast_name in ["Dirt Church Radio"]:
 			if "-" in self.episode_title:
-				self.episode_title = self.episode_title.lstrip("DCR").lstrip(" ")
-				f245 = self.episode_title.split("-")[-1].lstrip(" ")
+				f245 = self.episode_title.lstrip("DCR").lstrip(" ").split("-")[-1].lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(" ")
 
 		if self.podcast_name in ["Advanced analytics"]:
@@ -118,9 +117,10 @@ class RecordCreator():
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 				f830v = str(f490v)
 
-		if self.podcast_name in ["Taringa","The creative spear"]:
+		if self.podcast_name in ["Taringa","The creative spear", "You're gonna' die in bed"]:
 			f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
-			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ")
+			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
+			f830v = f490v.lower().replace(", ", " ")
 
 		if self.podcast_name in ["A Neesh audience","The lip","Stupid Questions for Scientists","Back to the disc-player podcast","DOC sounds of science podcast",  "All Blacks", "Never Repeats podcast", "The Rubbish trip", "Back to the disc-player podcast", "Snacks and chats"]:
 			if ":" in self.episode_title: 
@@ -173,7 +173,6 @@ class RecordCreator():
 				f490v = self.episode_title.split("-")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
 
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
-			print("here")
 			print(self.episode_title)
 			if  ":" in self.episode_title and ("NZ Tech Podcast" in self.episode_title or "Episode" in self.episode_title) and not "Running time" in self.episode_title:
 				ep_number = None
@@ -200,7 +199,7 @@ class RecordCreator():
 					f830v = "episode "+ep_number
 				except:
 					pass
-				
+			
 		if self.podcast_name in ["Retrogasmic"]:
 			if " Se" in self.episode_title and  " Ep" in self.episode_title:
 				f245 = "Se".join(self.episode_title.split("Se")[:-1]).rstrip(" ")
@@ -227,6 +226,11 @@ class RecordCreator():
 			f245 = self.episode_title.split(" | ")[0]
 			if  " | EP" in self.episode_title:
 				f490v = "EP"+self.episode_title.split("EP")[1].split(" ")[0]
+
+		if self.podcast_name in  ["Dont give up your day job"]:
+			f245  = " ".join(self.episode_title.split(" ")[2:])
+			f490v = " ".join(self.episode_title.split(" ")[:2])
+
 
 		if f490v and not f830v:
 			f830v = f490v.lower()
@@ -386,16 +390,22 @@ class RecordCreator():
 
 		my_db = DbHandler()
 		my_dict=my_db.db_reader(
-			["podcast_name", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","tags","description",
+			["podcast_name", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","ie_num","tags","description",
 			"date","episode_link","harvest_link","date_harvested","f100","f600_first","f600_second","f600_third","f610_first",
 			"f610_second","f610_third","f650_first","f650_second","f650_third","f650_forth","f655","f700_first","f700_second",
 			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
 			)
 		for epis  in my_dict:
-			logging.info(epis["podcast_name"])
+			print(epis)
+			print('here')
+			#logging.info(epis["podcast_name"])
 			if "tick" in epis.keys() and epis["tick"]:
-					logging.info(epis["episode_title"])
+					print('here1')
+					print(epis["episode_title"])
 					self.mis_mms = epis["mis_mms"]
+					print('here2')
+					print(self.mis_mms)
+					print(epis["ie_num"])
 					self.template_path = os.path.join(template_folder, epis["template_name"])
 					self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
 					self.podcast_name = epis["podcast_name"]
@@ -437,11 +447,17 @@ class RecordCreator():
 						if not self.mis_mms:		
 							my_alma.create_bib(self.bib_data)
 							logging.info(my_alma.xml_response_data)
+							print(my_alma.status_code)
+
 							if my_alma.status_code == 200:
 								bib_grab = BeautifulSoup( my_alma.xml_response_data, 'lxml-xml' )
 								try:
-									self.mis_mms = bib_grab.find( 'bib' ).find( 'mms_id' ).string  
+									print('here3')
+									self.mis_mms = bib_grab.find( 'bib' ).find( 'mms_id' ).string
+									print('here4')
+									print(self.mis_mms)
 									statement = 'MMS_ID: '+self.mis_mms + " " +str(my_alma.xml_response_data)
+									print('here5')
 									logging.info(statement)
 									with open (os.path.join(report_folder, "mms.txt"),"a" ) as mms_file:
 										mms_file.write( self.mis_mms )
@@ -449,7 +465,7 @@ class RecordCreator():
 								except Exception as e:
 									statement =  "Could not grab mms from {}. {}".format ( my_alma.xml_response_data, str(e)  ) 
 									logging.debug(statement)
-
+								
 					else:
 						if self.mis_mms:
 							print(f"Updating record {self.mis_mms}")
@@ -460,14 +476,15 @@ class RecordCreator():
 					if self.mis_mms:
 						my_db.db_update_mms (self.mis_mms, self.episode_title)
 
-					
+						print("here7")
 	
+					
 	
 
 def main():
 
 	my_rec = RecordCreator("prod")
-	my_rec.record_creating_routine(True, ["NZ tech podcast with Paul Spain", "Phoenix city"])#,"Taxpayer talk", "The fold", "Love this podcast"])
+	my_rec.record_creating_routine(False, ["Dirt Church Radio"])#,"Taxpayer talk", "The fold", "Love this podcast"])
 	#my_rec.record_creating_routine(True, [])
 
 

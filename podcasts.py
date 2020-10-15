@@ -137,7 +137,7 @@ class Podcast_pipeline():
 		my_alma = AlmaTools("prod")
 		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num"],None,True)
 		print(mms_dict)
-		rosetta_ies_list = self.read_ies_file()
+		# rosetta_ies_list = self.read_ies_file()
 		for mm in mms_dict:
 			if mm != {}:
 				ies_list = []
@@ -159,15 +159,15 @@ class Podcast_pipeline():
 							print("trying to get ie")
 							logging.info("IE for db: " + ies_list[0])
 							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
-							if not ies_list[0] in rosetta_ies_list:
-								logging.warning("Check if the SIP {} was processed well through Rosetta".format(mms))
-								quit()
+							# if not ies_list[0] in rosetta_ies_list:
+							# 	logging.warning("Check if the SIP {} was processed well through Rosetta".format(mms))
+							# 	quit()
 
 
 	def file_cleaning(self):
 
 		"""Deletes files which were replaced in file folders during multirun of downloading pricess and not in database"""
-		
+		print("File cleaning...")
 		#contains dictionaries of filepaths in db
 		file_dictionary = self.db_handler.db_reader(["filepath"],None,True)
 		#list of files to delete
@@ -184,13 +184,16 @@ class Podcast_pipeline():
 		logging.info(file_list_to_delete)
 
 	def finish_existing_records_and_delete_files(self, key):
+		
+		"""Runs the process of 
 
+		print("Finish existing...")
 		mms_list_for_items = []
 		existing_items_mms_list = []
 		mms_list_for_updating = []
 		new_mms_list_for_updating = []
-		item_dictionary = self.db_handler.db_reader(["mis_mms", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
-		print(item_dictionary)
+		item_dictionary = self.db_handler.db_reader(["podcast_name","mis_mms", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
+
 		for itm in item_dictionary:
 			if itm != {}:
 				if itm["ie_num"]:
@@ -358,21 +361,21 @@ class Podcast_pipeline():
 
 	def podcast_routine(self):
 
-		#shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
+		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		#self.file_cleaning()
-		self.get_ies_from_reports()
-		print("here")
-		lst = self.read_ies_file()
-		print(lst)
-		#self.insert_ies()
-		#self.finish_existing_records_and_delete_files("prod")
-		#self.db_handler.update_the_last_issue()
-		#self.db_handler.delete_done_from_db()
+		self.file_cleaning()
+		# self.get_ies_from_reports()
+		# print("here")
+		# lst = self.read_ies_file()
+		# print(lst)
+		# self.insert_ies()
+		self.finish_existing_records_and_delete_files("prod")
+		self.db_handler.update_the_last_issue()
+		self.db_handler.delete_done_from_db()
 		#self.update_database_from_spreadsheetand_delete_row()
-		#Set "sb" if whould like records ins "sb"
-		#Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		#Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
+		# Set "sb" if whould like records ins "sb"
+		# Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
+		# Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
 		#my_rec = RecordCreator(self.alma_key)
 		#my_rec.record_creating_routine()
 		#sip_routine()

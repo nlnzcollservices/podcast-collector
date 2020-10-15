@@ -89,7 +89,13 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+	def delete_bib(self, mms_id,options = {}):
 
+		parameters = {**{"apikey": self.alma_key}, **options}
+		print(parameters)
+		r = requests.delete(f"{self.base_api_url}{mms_id}", params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
 
 	def update_bib(self, mms_id, xml_record_data, options={}):
 
