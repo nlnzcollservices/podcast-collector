@@ -7,8 +7,11 @@ import datetime as DT
 from datetime import time
 from bs4 import BeautifulSoup as bs
 from podcast_dict import podcasts_dict
-from settings import logging
-
+try:
+    from settings import logging
+except:
+    from settings_prod import logging
+logger = logging.getLogger(__name__)
 
 
 class DbHandler():
@@ -86,13 +89,16 @@ class DbHandler():
                 q.execute()
 
 
+    def get_podcast_id(self, podcast_name):
 
-
+        podcasts= Podcast.select().where(Podcast.podcast_name == podcast_name)
+        for podcast in podcasts:
+            return podcast.id
 
     def table_creator(self, table, my_data):
 
-        logging.info("create table {}".format(table))
-        logging.info(my_data)
+        logger.info("create table {}".format(table))
+        logger.info(my_data)
         if table == "Podcast":
             my_id = Podcast.create(podcast_name=my_data["podcast_name"], serial_mms = my_data["serial_mms"], rss_link = my_data["rss_filename"], serial_pol = my_data["serial_pol"], access_policy = my_data["access_policy"], automated_flag = my_data["automated_flag"], publish_link_ro_record = my_data["publish_link_ro_record"], last_issue = 0)
         if table == "Episode":
@@ -136,20 +142,23 @@ class DbHandler():
         """Updates db with the maximum date as timestamp of all the episode as the last_issue for each podcast name"""
 
 
-        logging.info("Updating the last issues....")
+        logger.info("Updating the last issues....")
         podcasts = Podcast.select()
         for pod in podcasts:
+            logger.debug(pod.podcast_name)
             episodes = Episode.select().where(Episode.podcast == pod.id)
             max_date = pod.last_issue
             for epis in episodes:
+                logger.debug(epis.episode_title)
                 if epis.date > max_date:
                     max_date = epis.date
-        if pod.last_issue != max_date:
-            q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
-            q.execute()
+            logger.debug(max_date)
+            if pod.last_issue != max_date:
+                q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
+                q.execute()
 
     def insert_the_last_issue(self, podcast_name, last_issue):
-        
+
         """
         Converts input last issue to time stamp and updates db by podcast name with new last_issue
         Args: 
@@ -159,7 +168,10 @@ class DbHandler():
         Returns:
         None
         """
-        last_issue = mktime(dt.strptime(my_date, "%B %d %Y").timetuple())
+        logger.info("Inserting the last issue in db")
+        last_issue = mktime(dt.strptime(last_issue, "%B %d %Y").timetuple())
+        # logger.debug(last_issue)
+        # logger.debug(podcast_name)
         q = Podcast.update(last_issue = last_issue).where(Podcast.podcast_name == podcast_name)
         q.execute()
 
@@ -191,18 +203,16 @@ class DbHandler():
         q = Episode.update(updated = True).where(Episode.mis_mms == mms_id)
         q.execute()
 
-    def db_update_item(self, mms_id, item_pid):
+    def db_update_item_id(self, mms_id, item_pid):
 
         """Updating Alma item id in db"""
+        logger.debug("Updating item in db")
         q = Episode.update(item = item_pid ).where(Episode.mis_mms == mms_id)
         q.execute()
 
     def db_update_mms(self, mms_id, episode_title):
 
         """ Updating Alma mms id in db"""
-        print("here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(episode_title)
-        print(mms_id)
         q = Episode.update(mis_mms = mms_id ).where(Episode.episode_title == episode_title)
         q.execute()
 
@@ -221,6 +231,7 @@ class DbHandler():
             podcast_names(list) - names of podcasts
             returning (bool) - set True if return or False to print
         """
+        logger.info("Reading DB")
         self.full_dict = {}
         self.returning_dict = {}
         self.returning_list = []
@@ -395,8 +406,9 @@ def main():
     ###Set True if return and False to print
     ### the names of values to return could be seen in "podcaast_models.py" and can return everything except of "cataloguing fields" (650,655,700 etc)
     my_db = DbHandler()
-    my_db.db_reader(["podcast_name","episode_title","description", "mis_mms", "holdings", "item"],[],  False)
+    #my_db.db_reader(["podcast_name","episode_title","description", "mis_mms", "holdings", "item"],[],  False)
     #print(my_list)
+    my_db.insert_the_last_issue("How to save the world", "October 04 2020")
 
 if __name__ == '__main__':
     main()

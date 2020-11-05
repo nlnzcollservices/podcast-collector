@@ -12,40 +12,111 @@ from pymarc import parse_xml_to_array,record_to_xml, Field
 from datetime import datetime as dt
 from podcast_models import Podcast, Episode, File
 from bs4 import BeautifulSoup
-from settings import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key#
+try:
+	from settings import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items
+except:
+	from settings_prod import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items_holdings
 from openpyxl import load_workbook
 from podcast_dict import podcasts_dict
 from database_handler import DbHandler
 from alma_tools import AlmaTools
+logger = logging.getLogger(__name__)
+
 
 class Holdings_items():
 
-	def __init__(self, key, mms_list, update):
+	""" 
+	This class contains methods for managing process of creating holding and item  records in Alma , update existing items and delete duplicates
 
-		self.mms = None
-		self.item_pid  = None
-		self.holding_id = None
+	Attributes
+	----------
+	key : str
+		"sb" for sandbox or  "prod" for production
+	update : bool
+		True for updating items, False for creating new items
+	mms_list : list
+		list of mms ids to process
+	mms_id : str
+		Alma MMS IDF
+	holding_id: str
+		Alma holding ID
+	item_pid : str
+		Alma item ID
+	ie_num : str
+		ie number from database
+	bib_data : str
+		xml of Alma bibliographic record
+	podcast_name :
+		name of podcast from database
+	podcast_bib_name:
+		name of podcast from bib record 490 field
+	enum : str
+		enumiration b
+	date : str
+		publishing date from bib revcord
+	holdings_data : str
+		xml from holdings request
+	holding_data : str
+		xml from holding template
+	items_data : str
+		xml response from get items request
+	item_data : str
+		xml from item template
+	holdings_list : list
+		list of holdings belonging to particular mms id
+	items_list : list
+		list of items belonging to particular mms id and holding id
+	year : str
+		year of publishing from bibliographic record
+
+
+
+	Methods
+	-------
+	__init__(self, key, mms_list)
+	parsing_bib_xml(self)
+	parse_holding(self)
+	parsing_item_data_replace_tags(self, tag_dict, item_data)
+	parsing_items_data(self)
+	dups_deleting_routine(self)
+	item_routine(self,update = False)
+	"""
+
+	def __init__(self, key):
+
+
+
+		self.mms_id = None
 		self.bib_data = None
-		self.alma_key = None
 		self.key = key
-		self.hold_data = None
+		self.holding_data = None
 		self.enum =  None
 		self.ie_num = None
-		self.mms_list = mms_list
+		self.item_data = None
+		self.items_data = None
 		self.holdings_list = []
 		self.items_list = []
 		self.year = None
-		self.update = update
-		self.mms_list = []
+		self.podcast_name = None
+		self.podcast_bib_name = None
+		self.date = None
+		
+
 
 	
 	def parsing_bib_xml(self):
 
+		"""Parses bibliographic record and extracts podcast name from 490 field, 800 or 830 field to extract subfield b for description.
+		Extracts date if it is possible or eumrtation if there is no date.
+		"""
+
 		self.enum = None
+		self.podcast_bib_name = None
+		self.date = None
 		record = parse_xml_to_array(io.StringIO(self.bib_data))[0]
-		self.podcast_name = record["490"]["a"].rstrip(", ")
+		self.podcast_bib_name = record["490"]["a"].rstrip(", ")
 		year = record["264"]["c"].strip("[]")
-		logging(year)
+		logger.debug(year)
 		self.year = dateparser.parse(year)
 		if record["830"]:
 			my_alma = record["830"]["v"]
@@ -60,26 +131,40 @@ class Holdings_items():
 				self.enum = re.findall(r"(?<!\d)\d{2}(?!\d)",my_alma)[0]
 			elif len(re.findall(r"(?<!\d)\d{3}(?!\d)",my_alma)) == 1:
 				self.enum =  re.findall(r"(?<!\d)\d{3}(?!\d)",my_alma)[0]
-		
-				
 
 
 	def parse_holding(self):
-		print("here888")
 
-		"""Parsing holding data to find holding numbers. Makeing holding_list""" 
+		"""Parses holding xml data to find holding numbers. Making holdings_list
+		""" 
 
-		self.holding_list = []
-		hold_grab = BeautifulSoup( self.holding_data, 'lxml-xml' )
+		self.holdings_list = []
 		try:
-			print("finding holding numbers")
-			self.hold_list = hold_grab.find_all("holding_id")
+			hold_grab = BeautifulSoup( self.holdings_data, 'lxml-xml' )
+			self.hold_list = hold_grab.find("holdings").find_all("holding_id")
 			for hold_line in self.hold_list:
-				self.holding_list.append(hold_line.text)
+				self.holdings_list.append(hold_line.text)
+				logger.info(self.holdings_list)
+		except Exception as e:
+			logger.exception(str(e))
 
-		except AttributeError as e:
-			statement =  "Error during creating bib {}, {}. Data: {} ".format ( type( e ),str( e ), str(self.holding_data) ) 
-		
+
+
+
+	def parsing_item_data_replace_tags(self, tag_dict, item_data):
+
+		"""Replaces tags of item xml data to tags from tag dictionary
+		Arguments:
+			tag_dict(dict) -  tage names and new tag contant
+			item_data(str) - item record xml
+
+		Returns:
+			item_data(str) - new item record xml
+		"""
+
+		for el in tag_dict.keys():
+			item_data = item_data.replace(str(item_grab.find("item").find(el)), tag_dict[el])
+		return item_data	    
 
 
 	def parsing_items_data(self):
@@ -87,169 +172,150 @@ class Holdings_items():
 		"""Searching for item numbers in items xml file. Makes item_list"""
 
 		self.items_list = []
-		item_grab = BeautifulSoup( self.item_data, 'lxml-xml' )
 		try:
+			item_grab = BeautifulSoup( self.items_data, 'lxml-xml' )
 			items_list = item_grab.find("items").find_all("item")
-			print("Finding item numbers")
 			for item_line in items_list:
 				self.items_list.append(item_line.attrs["link"].split("/")[-1])
-
-		except Exceptions as e:
-			print(str(e)) 
+			logger.info(self.items_list)
+		except Exception as e:
+			logger.exception(str(e))
 
 	
-	def dups_deleting_routine(self):
+	def dups_deleting_routine(self, mms_list):
 
-		"""Running routine for deleting dupped items and holdings"""
-		sb_mms = None
-		if self.key=="sb":
-			sb_mms = "9918602951502836"
-		for mms in self.mms_list:
-			self.mms = str(mms)
-			my_alma=Alma_tools(self.key)
-			my_alma.get_holding(self.mms)
-			self.holding_data = my_alma.xml_data
+		"""Deleting dupped items and holdings. Leaving the last holding and the last item in the last holding"""
+
+		logger.info("Cheking and deleting holding and item duplicates...")
+		for mmsline in mms_list:
+			self.mms_id = str(mmsline[0])
+			logger.info(self.mms_id)
+			self.item_pid = ""
+			my_alma=AlmaTools(self.key)
+			my_alma.get_holdings(self.mms_id)
+			self.holdings_data = my_alma.xml_response_data
 			self.parse_holding()
-			print(self.holding_list)
-			if len(self.holding_list) >1:
-				print("The number of holdings is ",len(self.holding_list))
-				for ind in range(len(self.holding_list)-1):
-					print(self.holding_list[ind])
-					self.holding_id = self.holding_list[ind]
-					my_alma.get_items(self.mms,self.holding)
-					self.item_data = my_alma.xml_data
+			if len(self.holdings_list) >=1:
+				logger.info("The number of holdings is " +len(self.holdings_list))
+				for ind in range(len(self.holdings_list)):
+					#checks if this is the last holding to set minus one for keeping the last item of this holding and then to delete all other holdings.
+					if ind<len(self.holdings_list)-1:
+						not_last_holding=0
+					else:
+						not_last_holding=1
+					self.holding_id = self.holdings_list[ind]
+					my_alma.get_items(self.mms_id, elf.holding_id)
+					self.items_data = my_alma.xml_response_data
 					self.parsing_items_data()
-					for item in self.items_list:
-						self.item_pid  = item
-						my_alma.get_item(self.mms, self.holding, self.item)
-						self.item_data=my_alma.item_data
-						self.parsing_item_data()
-						my_alma.update_item(self.mms, self.holding, self.item,self.item_data)
-						my_alma.delete_item(self.mms, self.holding, self.item)
-						print("item " + self.item_pid  + " deleted")
-						with open('deleted.txt',"a") as fl:
-							fl.write(self.item)
-							fl.write("\n")
-					self.delete_holdings()
-					print("holding " + self.holding_id + " deleted")
-					with open('deleted.txt',"a") as fl:
-						fl.write(self.item)
-						fl.write("\n")
+					logger.info("Number of items is " + len(self.items_list))
+					if len(self.items_list) >1:
+						for idx in range(len(self.items_list)-not_last_holding):
+							self.item_pid  = self.items_list[idx]
+							my_alma.get_item(self.mms_id, self.holding_id, self.item_pid)
+							self.item_data = my_alma.xml_response_data
+							#item could not be deleted if PO_line attached to it.
+							self.parsing_item_data_replace_tags({"po_line":""}, self.item_data)
+							#updates item with empty po_line
+							my_alma.update_item(self.mms_id, self.holding_id, self.item_pid,self.item_data)
+							my_alma.delete_item(self.mms_id, self.holding_id, self.item_pid)
+							logger.info("item " + self.item_pid  + " deleted")
+							with open(deleted_items_holdings,"a") as fl:
+								fl.write(self.item_pid)
+								fl.write("\n")
+					if not_last_holding ==0:
+						my_alma.delete_holding(self.mms_id, self.holding_id)
+						logger.info("holding " + self.holding_id + " deleted")
+						with open(deleted_items_holdings,"a") as fl:
+							fl.write(self.item_pid)
+							fl.write("\n")	
 
-			elif len(self.holding_list)==1:
-				print("The number of holdins is 1")
-				
-				self.holding_id = self.holding_list[0]
-				print(self.holding)
-				self.get_items()
-				self.parsing_items_data()
-				if len(self.items_list)>1:
-					print("The number of items is ", len(self.items_list))
-					for ind in range(len(self.items_list)-1):
-						self.item_pid  = self.items_list[ind]
-						self.get_item()
-						self.parsing_item_data()
-						self.update_item()
-						self.delete_item()
-						print("Item ", self.item, " deleted")
-						with open('deleted.txt',"a") as fl:
-							fl.write(self.item)
-							fl.write("\n")
-				else:
-					print("Number of items is ", len(self.items_list))
 			else:
 				print("No holdings")
 					
 
 	
 
-	def item_routine(self):
+	def item_routine(self, mms_list=[], update = False):
 
+		"""Checking existing item and holding and creates where do not exists. Checks Alma bibliographic record for 890 field to identify correct enueration and chronology field and make a description
+		Raises:
+			Quit if duplicate holding or items
 
-
-		sb_mms = None
-		if self.key=="sb": 
-			sb_mms = "9918602951502836"
+		"""
+		
+		self.mms_list = mms_list
+		self.update = update
 		for pod_list  in  self.mms_list:
-			if pod_list and pod_list != [None, None, None]:
-				self.holding_list = []
-				print(pod_list)
+			if pod_list and pod_list[0] != None:
+				self.holding_data = None
+				self.item_data = None
+				self.items_data = None
+				self.bib_data = None
+				self.holdings_list = []
+				self.items_list = []
+				self.holdings_list = []
 				self.holding_id = pod_list[1]
 				self.item_pid  = pod_list[2]
-				self.mms = pod_list[0]
-				print(self.mms)
-				my_alma = Alma_tools(self.key)
-				my_alma.get_bib( self.mms)
-				self.bib_data= my_alma.xml_data
-				print(self.bib_data.encode("utf-8"))
-				self.parsing_bib_xml()
-				print(self.date)
-				print(self.enum)
-				my_alma.get_reps(self.mms)
-				print(my_alma.xml_data)
-				print("here0")
-				ie_grab = BeautifulSoup(my_alma.xml_data, "lxml")
-				print("here1")
-				try:
-					print("here3")
-					self.ie_num = ie_grab.find_all( 'originating_record_id' )[0]
-					if len(ie_grab.find_all( 'originating_record_id' ))>1:
-						print("Possible duplicated digital representation")
-					q = Episode.update(ie_num = self.ie_num).where(Episode.mis_mms == self.mms)
-					q.execute()
-					print("here4")
+				self.ie_num = pod_list[3]
 
-				except:
-					pass
-				if not self.ie_num:
-					print("here5")
-					print("There is no representation yet")
+				if len(pod_list)>4:
+					self.podcast_name = pod_list[4]
 				else:
-					if self.mms:
-						print("here6")
-						if sb_mms:
-							self.mms = str(sb_mms)
+					self.podcast_name = None
+				logger.info(self.podcast_name)
+				self.mms_id = pod_list[0]
+				logger.info(self.mms_id)
+				db_handler = DbHandler()
+				my_alma = AlmaTools(self.key)
+				my_alma.get_bib( self.mms_id)
+				self.bib_data= my_alma.xml_response_data
+				logger.info(self.bib_data)
+				self.parsing_bib_xml()
+				if "/" in self.podcast_bib_name:
+					self.podcast_name =  self.podcast_bib_name.split("/")[0].rstrip(" ")
+				if not self.podcast_name:
+					self.podcast_name = self.podcast_bib_name.replace("-","").replace(":","").replace("/","").replace('  ', " ")
+				if self.podcast_name == "Just being me no apology":
+					self.podcast_name ="Just me being me no apology"
+				if self.ie_num:
+					if self.mms_id:
 						with open(os.path.join(template_folder, "holding.xml")) as hold_data:
-							self.hold_data = hold_data.read()
-						my_alma.get_holdings(self.mms,{"limit":"100"})
-						self.holding_data = my_alma.xml_data
+							self.holding_data = hold_data.read()
+						my_alma.get_holdings(self.mms_id,{"limit":"100"})
+						self.holdings_data = my_alma.xml_response_data
 						self.parse_holding()
-						print("here7")
-						my_alma.get_bib(self.mms)
-						self.bib_data = my_alma.xml_data
-						self.parsing_bib_xml()
-						for spec_char in ["/",":","-" ]:
-							if spec_char in self.podcast_name and not self.podcast_name.startswith("Human") and not self.podcast_name.startswith("Back to the"):
-								self.podcast_name = self.podcast_name.split(spec_char)[0].rstrip(" ") 
 						self.serial_pol = podcasts_dict[self.podcast_name]["serial_pol"]
-						print(self.serial_pol)
-						print("here8")
-						print(self.holdings_list)
-						print("here9")
 						if self.holdings_list != []:
-							self.holding_id = self.holdings_list[0]
-						if not self.holding_id and self.mms:
-							print("here10")
-							print(self.mms)
-							if not self.update:
-								my_alma.create_holding(self.mms)
-								holding_grab = BeautifulSoup( my_alma.xml_data, 'lxml-xml' )
-								self.holding= holding_grab.find( 'holding' ).find( 'holding_id' ).string
-								db_handler = DbHAndler()
-								db_hangler.db_update_holding(self.mms, self.holding)
+							if len(self.holdings_list) >1:
+								logger.warning("Holding duplicates")
+								logger.warning(self.holdings_list)
+								self.dups_deleting_routine([[self.mms_id]])
+							else:
+								if not self.holding_id or self.holding_id != self.holdings_list[0]:
+									db_handler.db_update_holding(self.mms_id, self.holdings_list[0])
+									self.holding_id = self.holdings_list[0]
+						if not self.holding_id and self.mms_id:
+							logger.info('Creating holdings')
+							my_alma.create_holding(self.mms_id, self.holding_data)
+							holding_grab = BeautifulSoup( my_alma.xml_response_data, 'lxml-xml' )
+							self.holding_id= holding_grab.find( 'holding' ).find( 'holding_id' ).string
+							logger.info(self.holding_id)
+							db_handler.db_update_holding(self.mms_id, self.holding_id)
 
-						print("here11")
-						my_alma.get_items(self.mms, self.holding)
-						print("here12")
-						self.item_pid  = my_alma.xml_data
-						print(self.item)
-						print("here133")
-						print(self.items_list)
-						if self.items_list != [] and self.items_list:
-							self.item_pid  = self.items_list[0]
+						my_alma.get_items(self.mms_id, self.holding_id)
+						self.items_data = my_alma.xml_response_data
+						self.parsing_items_data()
+						if self.items_list != []:
+							if len(self.items_list) >1:
+								logger.warning("Item duplicates")
+								logger.warning(self.items_list)
+								self.dups_deleting_routine([[self.mms_id]])
+							else:
+								if not self.item_pid or self.item_pid != self.items_list[0]:
+									self.item_pid = self.items_list[0]
+									db_handler.db_update_item_id(self.mms_id, self.items_list[0])
+						if (not self.item_pid  and self.holding_id and self.mms_id) or (self.item_pid and self.update) :
 
-						if not self.item_pid  and self.holding_id and self.mms:
-								print("herr13")
 								polstring = "<po_line>{}</po_line>".format(self.serial_pol)
 								if  self.enum:
 									chron_j = ""
@@ -258,7 +324,6 @@ class Holdings_items():
 									description = "<description>no. {} ({})</description>)".format(self.enum, chron_i)
 									enum = self.enum
 								else:
-									
 									enum = ""
 									if self.date:
 										chron_j = dt.strftime(self.date,"%m")
@@ -268,52 +333,72 @@ class Holdings_items():
 										chron_j = ""
 										chron_k = ""
 										chron_i = dt.strftime(self.year,"%Y")
-									description = "<description>{} {} {}</description>)".format( chron_i, chron_j,chron_k)
-									chron_i_stat = "<chronology_i>{}</chronology_i>".format( chron_i )
-									chron_j_stat = "<chronology_j>{}</chronology_j>".format( chron_j )
-									chron_k_stat = "<chronology_k>{}</chronology_k>".format( chron_k )
-									enum_stat = "<enumeration_b>{}</enumeration_b>".format( enum )
-									time_substitute_statement = "<creation_date>{}</creation_date>".format(str(dt.now().strftime( '%Y-%m-%d')))
-									receiving_stat = "<arrival_date>{}</arrival_date>".format(str(dt.now().strftime( '%Y-%m-%d')))
-									with open(os.path.join(working_folder,"assets", "templates","item.xml"), "r") as data:
-										item_data = data.read()
-										item_data = item_data.replace("<creation_date></creation_date>", time_substitute_statement)
-										item_data = item_data.replace("<po_line></po_line>", polstring )
-										item_data = item_data.replace("<enumeration_b></enumeration_b>", enum_stat )
-										item_data = item_data.replace("<chronology_i></chronology_i>", chron_i_stat )
-										item_data = item_data.replace("<chronology_j></chronology_j>", chron_j_stat )
-										item_data = item_data.replace("<chronology_k></chronology_k>", chron_k_stat )
-										item_data = item_data.replace("<description></description>", description )
-										item_data = item_data.replace("<arrival_date></arrival_date>", receiving_stat )
-										self.item_data = item_data
-										#print(self.item_data.encode("utf-8"))
-										if not update:
-											my_alma.create_item(self.mms, self.holding)
-											item_grab = BeautifulSoup(my_alma.xml_data)
-											self.item_pid  = item_grab.find('item').find( 'item_data' ).find( 'pid' ).string 
-											db_hangler.db_update_item_id(self.mms, self.item)
-											self.mms_list.append(self.mms)
-										else:
-											print(self.item_data)
-											quit()
-											my_alma.update_item(self.mms, self.holding, self.item, self.item_date)
-						print("herr14")
+									description = "<description>{} {} {}</description>".format( chron_i, chron_j,chron_k)
+								chron_i_stat = "<chronology_i>{}</chronology_i>".format( chron_i )
+								chron_j_stat = "<chronology_j>{}</chronology_j>".format( chron_j )
+								chron_k_stat = "<chronology_k>{}</chronology_k>".format( chron_k )
+								enum_stat = "<enumeration_b>{}</enumeration_b>".format( enum )
+								time_substitute_statement = "<creation_date>{}</creation_date>".format(str(dt.now().strftime( '%Y-%m-%d')))
+								receiving_stat = "<arrival_date>{}</arrival_date>".format(str(dt.now().strftime( '%Y-%m-%d')))
+								with open(os.path.join(working_folder,"assets", "templates","item.xml"), "r") as data:
+									item_data = data.read()
+									item_data = item_data.replace("<creation_date></creation_date>", time_substitute_statement)
+									item_data = item_data.replace("<po_line></po_line>", polstring )
+									item_data = item_data.replace("<enumeration_b></enumeration_b>", enum_stat )
+									item_data = item_data.replace("<chronology_i></chronology_i>", chron_i_stat )
+									item_data = item_data.replace("<chronology_j></chronology_j>", chron_j_stat )
+									item_data = item_data.replace("<chronology_k></chronology_k>", chron_k_stat )
+									item_data = item_data.replace("<description></description>", description )
+									item_data = item_data.replace("<arrival_date></arrival_date>", receiving_stat )
+								self.item_data = item_data
+								if not self.update:
+									logger.info("Creating item")
+									my_alma.create_item(self.mms_id, self.holding_id,self.item_data)
+									logger.debug(my_alma.xml_response_data)
+									logger.debug(my_alma.status_code)
+									item_grab = BeautifulSoup(my_alma.xml_response_data, "lxml-xml")
+									self.item_pid  = item_grab.find('item').find( 'item_data' ).find( 'pid' ).string 
+									logger.info(self.item_pid + " - item created")
+									db_handler.db_update_item_id(self.mms_id, self.item_pid)
+									
+								else:
+									logger.info("Updating item")
+									logger.info(self.item_pid)
+									my_alma.get_item(self.mms_id, self.holding_id, self.item_pid)
+									self.item_data= self.parsing_item_data_replace_tags({"description":description, "chronology_i":chron_i_stat, "chronology_j":chron_j_stat, "chronology_k":chron_k_stat, "enumeration_b":enum_stat}, my_alma.xml_response_data)
+									my_alma.update_item(self.mms_id, self.holding_id, self.item_pid, self.item_data)
+									logger.debug(my_alma.xml_response_data)
+									logger.debug(my_alma.status_code)
+									logger.info(self.item_pid +" - item updated")
 
-						report_name = "report"+str(dt.now().strftime("_%d%m%Y_%H_%M"))+".txt"
+								report_name = "report"+str(dt.now().strftime("_%d%m%Y_%H_%M"))+".txt"
 
-						with open(os.path.join(report_folder, report_name),"a") as f:
-							f.write("{}|{}|{}|{}".format(self.mms, self. holding, self.item, self.ie_num))
-							f.write("\n")		
+								with open(os.path.join(report_folder, report_name),"a") as f:
+									f.write("{}|{}|{}|{}".format(self.mms_id, self.holding_id, self.item_pid, self.ie_num))
+									f.write("\n")		
 
 def main():
 
-	my_podcasts = DbHandler().db_reader(["mis_mms", "holdings", "item"], None, True)
-	# for el in my_alma:
-	# 	print(el)
-	mms_list = [[el["mis_mms"],el["holdings"],el["item"]] for el in my_podcasts]
+	"""Runs all the process starting with mms_list. If mms_list does_not exists it takes information from database. Creates episode_list and pass it to 
+	deleting duplicates and item routine function.
+	Deleting duplicates is optional and can be commented.
+	update should be set True if records are going to be updated and False if not. It is False by default""" 
 	update = True
-	my_item = Holdings_items("prod", mms_list, update)
-	my_item.item_routine()
+	episode_list = []
+	mms_list = []
+	for mms in mms_list:
+		episode_list.append([mms, None, None, True])
+	if len(mms_list)==0:
+		my_podcasts = DbHandler().db_reader(["podcast_name", "mis_mms", "holdings", "item","ie_num"], None, True)
+	if len(episode_list)==0:
+		episode_list = [[el["mis_mms"],el["holdings"],el["item"],el["ie_num"],el["podcast_name"]] for el in my_podcasts if "mis_mms" in el.keys()]
+		if mms_list == []:
+			mms_list = episode_list
+		
+	my_item = Holdings_items("prod")
+	my_item.mms_list = mms_list
+	#my_item.dups_deleting_routine(mms_list)
+	my_item.item_routine(mms_list)
 			
 
 

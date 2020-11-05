@@ -8,7 +8,10 @@ from time import sleep
 from datetime import datetime as dt
 from database_handler import DbHandler
 from alma_tools import AlmaTools
-from settings import  logging, creds, podcast_sprsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies
+try:
+	from settings_prod import  logging, creds, podcast_sprsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies, failed_ies
+except:
+	from settings import  logging, creds, podcast_sprsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies, failed_ies
 from podcasts1_create_record import RecordCreator
 from podcasts3_holdings_items import Holdings_items
 from podcasts4_update_fields import Manage_fields
@@ -27,30 +30,49 @@ gs = c.open_by_key(podcast_sprsh)
 #change if the name or id of the worksheet is different
 ws = gs.get_worksheet(0)
 
-
+logger = logging.getLogger(__name__)
 
 
 class Podcast_pipeline():
 
 	"""
-	Managing process of inserting represenation IE into db
+	This classs manages the entire podcast process 
 
+	Attributes
+	----------
+
+	episode_title : str
+		title of episode
+
+	alma_key : str
+		"prod" for production or "sb" for sandbox
+
+
+	Methods
+	-------
+	email_downloader(self)
+	get_ies_from_reports(self)
+	read_ies_file(self)
+	insert_ies(self)
+	file_cleaning(self)
+	finish_existing_records_and_delete_files(self, key)
+	load_spreadsheet(self)
+	update_database_from_spreadsheetand_delete_row(self)
+	podcast_routine(self)
 	"""
+
+		
 
 	def __init__(self, key):
 
 		self.alma_key = str(key)
-		self.titles_done=[]
+		self.podcast_name = None
 
 	def email_downloader(self):
 
 
 		'''
-		Outline of what the script does:
-
-		1. Connects to the outlook
-		2. Finds the correct sub folder named '45. Weekly Published' under 'Inbox' in my_email_box
-		3. Downloads all of the attatchements in all of the emails 
+		Connects to the outlook, finds the correct sub folder named '45. Weekly Published' under 'Inbox' in my_email_box and downloads all of the attatchements in all of the emails 
 
 		'''
 		outlookConnection = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
@@ -58,10 +80,9 @@ class Podcast_pipeline():
 		inbox = folder.Folders.Item("Inbox")
 		session = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 		message = inbox.Items
-		print(len(message))
+		logger.debug(len(message))
 		for ms in message:
 		    try:
-		        my_timestamp
 		        my_time = str(ms.ReceivedTime).split(".")[0].replace(" ","_").replace(':','_')
 		        if report_part_name in ms.subject:
 		            if ms.Attachments:
@@ -75,21 +96,26 @@ class Podcast_pipeline():
 			                            unique_name = "".join([filename,my_time,file_extension])
 			                            if not os.path.isfile(unique_name) and not os.path.isfile(unique_name.replace(ndha_report_folder, ndha_used_report_folder)):
 			                            	attachment.SaveAsFile(unique_name)
-			                            	logging.info("Saved the attatchemnt " + str(unique_name))
+			                            	logger.info("Saved the attatchemnt " + str(unique_name))
 		                        except Exception as e:
-		                            logging.debug(str(e))
+		                            logger.error(str(e))
 		    except Exception as e:
-		        logging.debug(str(e))        
+		        logger.error(str(e))        
 
 
 	def get_ies_from_reports(self):
 		
-		
+		"""Starts email.downloader and then goes to ndha_report_folder and looking across all the reports. (All the records, which have been processed through Rosetta go to the reports which have been emailed).Writes ie numbers with "finished" status  to "done_report_ies.txt" and 
+		and  to  "failed_report_ies.txt" otherwise. Moves all read files to other folder
+		Raises:
+			Exception - during reading report file and writing to files. Prints error.
+		"""
+
 		self.email_downloader()
 		report_list = os.listdir(ndha_report_folder)
 		my_dict = {}
 		for report in report_list:
-		#	print(report)
+			logger.debug(report)
 			move_flag = True
 			with open(os.path.join(ndha_report_folder, report),"r", encoding = 'utf-8') as csvfile:
 				reader = csv.reader(csvfile, delimiter = ",")
@@ -99,34 +125,45 @@ class Podcast_pipeline():
 					next(reader)
 					next(reader)
 				except Exception as e:
-					print(str(e))
-					print(report)
+					logger.error(str(e))
+					logger.error(report)
 					move_flag = False
 				try:
 					for row in reader:
 						if len(row)>3:
-							#print(row[1])
 							alma_mms_id = row[2]
 							ie_num = row[3].rstrip(" ")
-							if alma_mms_id != "" and ie_num != "":
+							status = row[8].rstrip(" ")
+							if alma_mms_id != "" and ie_num != "" and status =="FINISHED":
 								with open(done_ies, "a") as f:
 									f.write(ie_num)
 									f.write("\n")
+							if alma_mms_id != "" and ie_num != "" and status != "FINISHED":
+								logger.warning("Check the SIP "+alma_mms_id)
+								with open(failed_ies, "a") as f:
+									f.write(alma_mms_id + "|" + ie_num)
+									f.write("\n")
 				except Exception as e:
-					print(str(e))
+					logger.error(str(e))
 			if move_flag:
 				shutil.move(os.path.join(ndha_report_folder, report),os.path.join(ndha_used_report_folder, report))
 
 	def read_ies_file(self):
 
+		"""
+		Opens done_ies file from report_folder. 
+
+		Returnds:
+			ies_list(list) - list which contains ie numbers from NDHA report
+
+		"""
+
 		ies_list = []
 		with open(done_ies, "r") as f:
 			data = f.read()
 		for el in data.split("\n")[:-1]:
-			print(el)
 			if not el in ies_list:
 				ies_list.append(el)
-		print(ies_list)
 		return ies_list
 
 	def insert_ies(self):
@@ -136,8 +173,7 @@ class Podcast_pipeline():
 		mms_dict = {}
 		my_alma = AlmaTools("prod")
 		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num"],None,True)
-		print(mms_dict)
-		# rosetta_ies_list = self.read_ies_file()
+		rosetta_ies_list = self.read_ies_file()
 		for mm in mms_dict:
 			if mm != {}:
 				ies_list = []
@@ -148,26 +184,24 @@ class Podcast_pipeline():
 				episode_id = mm["episode_id"]
 				if mms and not ie_num:
 					my_alma.get_representations(mms)
-					print(my_alma.xml_response_data)
+					#logger.info(my_alma.xml_response_data)
 					rep_grab = bs(my_alma.xml_response_data, 'lxml-xml' )
 					reps = rep_grab.find( 'representations' ).find_all('id' )
 					ies = rep_grab.find_all( 'originating_record_id' )
-					print(ies)
 					if len(ies) != 0:
 						for ie in ies:
 							ies_list.append("IE"+ie.string.split("IE")[-1])
-							print("trying to get ie")
-							logging.info("IE for db: " + ies_list[0])
+							logger.info("IE for db: " + ies_list[0])
 							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
-							# if not ies_list[0] in rosetta_ies_list:
-							# 	logging.warning("Check if the SIP {} was processed well through Rosetta".format(mms))
-							# 	quit()
+							if not ies_list[0] in rosetta_ies_list:
+								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
+								quit()
 
 
 	def file_cleaning(self):
 
 		"""Deletes files which were replaced in file folders during multirun of downloading pricess and not in database"""
-		print("File cleaning...")
+		
 		#contains dictionaries of filepaths in db
 		file_dictionary = self.db_handler.db_reader(["filepath"],None,True)
 		#list of files to delete
@@ -180,64 +214,75 @@ class Podcast_pipeline():
 				if fl_path not in filepath_in_db_list:
 					file_list_to_delete.append(fl_path)
 		[os.remove(del_fl) for del_fl in file_list_to_delete]
-		logging.info("Files deleted during cleaning")
-		logging.info(file_list_to_delete)
+		logger.info("Files deleted during cleaning")
+		logger.info(file_list_to_delete)
 
 	def finish_existing_records_and_delete_files(self, key):
-		
-		"""Runs the process of 
 
-		print("Finish existing...")
+		"""
+		Managing process of cheking if digital representation available to run holdings and items creating module. Runs update fields module to update records with 942 field and delete duplicated fields. 
+		Writes podcast_name, episode_title, mis_mms, holdings, item, ie_num, filepath, updated status to report.
+		Deletes file from file folder, the sip from project sip folder and sip from rosetta_folder 
+
+		"""
+		episode_list = []
 		mms_list_for_items = []
 		existing_items_mms_list = []
 		mms_list_for_updating = []
 		new_mms_list_for_updating = []
-		item_dictionary = self.db_handler.db_reader(["podcast_name","mis_mms", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
-
+		item_dictionary = self.db_handler.db_reader(["podcast_name","mis_mms","holdings", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
+		logger.info(item_dictionary)
 		for itm in item_dictionary:
-			if itm != {}:
+			print(itm)
+			if itm != {} and len(itm) >1:
 				if itm["ie_num"]:
 					if itm["item"]:
 						existing_items_mms_list.append(itm["mis_mms"])
 					if not itm["item"]:
 						mms_list_for_items.append(itm["mis_mms"])
+						episode_list.append([itm["mis_mms"], itm["holdings"], itm["item"], itm["ie_num"], itm["podcast_name"]])
 					if not itm["updated"]:
-					#else:
 						mms_list_for_updating.append(itm["mis_mms"])
 
-		my_item = Holdings_items(key, mms_list_for_items, False)
-		my_item.item_routine()
+		my_item = Holdings_items(key)
+		my_item.item_routine(episode_list, False)
 		created_item_mms_list = my_item.mms_list
 		existing_items_mms_list= existing_items_mms_list + created_item_mms_list
 		for el in mms_list_for_updating:
 			if el in existing_items_mms_list:
 				new_mms_list_for_updating.append(el)
-		my_alma_record = Manage_fields(key, new_mms_list_for_updating)
-		my_alma_record.cleaning_routine()
+		my_alma_record = Manage_fields(key)
+		my_alma_record.cleaning_routine(new_mms_list_for_updating)
 		report_filename = "report_{}.txt".format(dt.now().strftime("%Y-%m-%d_%H"))
 		report_full_filename= os.path.join(report_folder,report_filename)	 		
 		report_dictionary = self.db_handler.db_reader(["podcast_name","episode_title","mis_mms","holdings","item","ie_num","filepath", "updated"],None,True)
-		print(report_dictionary)
 		for epis in report_dictionary:
 			if epis != {} and "item" in epis.keys():
 				if epis["item"] and epis["ie_num"]:
 					with io.open(report_full_filename, mode="a", encoding="utf-8") as f:
-						f.write(epis["podcast_name"] + "|" + epis["episode_title"]  + "|" + epis["mis_mms"]  + "|" + epis["holdings"] + "|" + epis["item"] + "|" + epis["ie_num"] + "|" +epis["updated"]   + "\n" )
+						f.write(epis["podcast_name"] + "|" + epis["episode_title"]  + "|" + epis["mis_mms"]  + "|" + str(epis["holdings"]) + "|" + str(epis["item"]) + "|" + str(epis["ie_num"]) + "|" +str(epis["updated"])   + "\n" )
 					try:
 						os.remove(epis["filepath"])
 					except FileNotFoundError as e:
-						print(str(e))
+						logger.error(str(e))
 					try:
 					 	shutil.rmtree(os.path.join(sip_folder , epis["mis_mms"] ))
 					except FileNotFoundError as e:
-					 	print(str(e))
+					 	logger.error(str(e))
 					try:
 					 	shutil.rmtree(os.path.join(rosetta_folder, epis["mis_mms"] ))
 					except FileNotFoundError as e:
-						 	print(str(e))
+						logger.error(str(e))
 
 
 	def load_spreadsheet(self):
+
+		"""Reload the google spreadsheet
+		Returns:
+			ws (obj) - google working sheet object
+
+		"""
+
 
 		store = file.Storage(client_secrets_file)
 		creds = store.get()
@@ -251,28 +296,30 @@ class Podcast_pipeline():
 
 	def update_database_from_spreadsheetand_delete_row(self):
 
-		logging.info("Updating spreadsheet")
+		"""Updates database with spreadsheet information and deletes done rows"""
+
+		logger.info("Updating spreadsheet")
 		ws = self.load_spreadsheet()
 		start_point = 0
-		print(ws.row_count)
+		logger.info(ws.row_count)
 		end_point = ws.row_count-1
 		my_row_numb = 1
 		for ind  in range(start_point, end_point):
-				logging.info(ind)
+				logger.info(ind)
 				my_row_numb = my_row_numb+1
-				logging.info("row number {}".format(my_row_numb))
+				logger.info("row number {}".format(my_row_numb))
 				try:
 					my_row = ws.row_values(my_row_numb)
 					sleep(1)
-					logging.info(my_row)
+					logger.info(my_row)
 
 				except Exception as e:
-					logging.warning(str(e))
-					logging.info("Waiting for 50 seconds")
+					logger.warning(str(e))
+					logger.info("Waiting for 50 seconds")
 					sleep(50)
 					ws = self.load_spreadsheet()
 					my_row = ws.row_values(my_row_numb)
-					logging.info(my_row)
+					logger.info(my_row)
 				
 				episode_title = my_row[3].lstrip(" ").rstrip(" ")
 				epis_link = my_row[5].lstrip(" ").rstrip(" ")
@@ -335,18 +382,18 @@ class Podcast_pipeline():
 					f710_third =f710_third.lstrip(" ").rstrip(" ")
 				tick = my_row[27]
 				if tick == "TRUE":
-					logging.info("{self.episode_title} is ready")
+					logger.info("{self.episode_title} is ready")
 					self.db_handler.update_from_spreadsheet(episode_title, description, f100, f600_first, f600_second, f600_third, f610_first, f610_second, f610_third, f650_first, f650_second, f650_third, f650_forth, f655_first, f700_first, f700_second, f700_third,  f710_first, f710_second, f710_third, tick)
-					logging.info("Updated in db")
+					logger.info("Updated in db")
 					sleep(1)							
 					try:
 						ws.delete_row(my_row_numb)
-						logging.info("Deleted from spreadsheet")
+						logger.info("Deleted from spreadsheet")
 						sleep(1)
 						my_row_numb = my_row_numb-1
 					except Exception as e:
-						logging.warning(str(e))
-						logging.info("Waiting for 50 seconds")
+						logger.warning(str(e))
+						logger.info("Waiting for 50 seconds")
 						sleep(50)
 						try:
 							ws = self.load_spreadsheet()
@@ -355,31 +402,43 @@ class Podcast_pipeline():
 
 							
 						except Exception as e:
-							logging.warning(str(e))
+							logger.warning(str(e))
 
 
 
 	def podcast_routine(self):
 
+		"""The main function which manages all the processes in Podcast pipline:
+			1. Copies db with current date in title
+			2. Deletes all the files which are not in db
+			3. Reading emails to identify NDHA report and reading the ie numbers of finished episodes which have digital representation to list
+			4. Inserting ie from Alma to db checking it also in NDHA report_folder
+			5. Finishing existing records and deleting files
+			6. Updating the last issue in db for each podcast (to start harvest from it)
+			7. Updating database from spreadsheet and deleting row
+			8. Creating records for previously harvested files
+			9. Creating sip packages
+			10. Harvesting new episodes"""
+
+
+
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		self.file_cleaning()
-		# self.get_ies_from_reports()
-		# print("here")
-		# lst = self.read_ies_file()
-		# print(lst)
-		# self.insert_ies()
+		#self.file_cleaning()
+		#self.get_ies_from_reports()
+		#lst = self.read_ies_file()
+		#self.insert_ies()
 		self.finish_existing_records_and_delete_files("prod")
 		self.db_handler.update_the_last_issue()
 		self.db_handler.delete_done_from_db()
-		#self.update_database_from_spreadsheetand_delete_row()
-		# Set "sb" if whould like records ins "sb"
-		# Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		# Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
-		#my_rec = RecordCreator(self.alma_key)
-		#my_rec.record_creating_routine()
-		#sip_routine()
-		#harvest()
+		self.update_database_from_spreadsheetand_delete_row()
+		###Set "sb" if whould like records ins "sb"
+		###Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
+		###Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
+		my_rec = RecordCreator(self.alma_key)
+		my_rec.record_creating_routine()
+		sip_routine()
+		harvest()
 		 		
 def main():
 

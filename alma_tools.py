@@ -1,12 +1,14 @@
 import requests
-from settings import sb_key, pr_key
-
+try:
+	from settings import sb_key, pr_key
+except:
+	from settings_prod import sb_key, pr_key
 
 ##################################################################################################
 class AlmaTools():
 	
 	""" 
-	This class contains methods for getting, updating and deleting Alma data via Alma's APIs.
+	This class contains methods for getting, updating, creating and deleting Alma data via Alma's APIs.
 
 	Attributes
 	----------
@@ -92,7 +94,6 @@ class AlmaTools():
 	def delete_bib(self, mms_id,options = {}):
 
 		parameters = {**{"apikey": self.alma_key}, **options}
-		print(parameters)
 		r = requests.delete(f"{self.base_api_url}{mms_id}", params=parameters)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
@@ -147,6 +148,24 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+	def create_holding(self, mms_id, xml_record_data, options={}):
+
+		"""
+		Creates item
+		Parameters:
+			mms_id(str) - Alma MMS ID
+			holding_id(str) Alma holding ID
+			xml_record_data - item xml
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.base_api_url}{mms_id}/holdings", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
 	def delete_holding(self, mms_id, holding_id):
 
 		"""
@@ -197,8 +216,26 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def update_item(self, mms_id, holding_id, item_pid, xml_record_data, options={}):
+	def create_item(self, mms_id, holding_id, xml_record_data, options={}):
 
+		"""
+		Creates item
+		Parameters:
+			mms_id(str) - Alma MMS ID
+			holding_id(str) Alma holding ID
+			xml_record_data - item xml
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def update_item(self, mms_id, holding_id, item_pid, xml_record_data, options={}):
+		
 		"""
 		Updates item with new item XML data
 

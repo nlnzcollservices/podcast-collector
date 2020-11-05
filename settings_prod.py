@@ -31,19 +31,20 @@ database_archived_folder = os.path.join(working_folder, "archived","db_copy")
 ndha_report_folder = os.path.join(report_folder, "NDHA_reports")
 ndha_used_report_folder = os.path.join(report_folder, "NDHA_used_reports")
 done_ies = os.path.join(report_folder,"done_report_ies.txt")
+failed_ies = os.path.join(report_folder,"failed_report_ies.txt")
 deleted_items_holdings = os.path.join(report_folder, "deleted_iems_holdings.txt")
 ########################Setting folder for git scripts######################
 
 # *-mainly used for Amy's downloader but might be used for other modules downloaded from git storage
-git_folder = r"C:\Users\granthrh\Documents\NDHA\NDHA\project\file-downloader"
+git_folder = r"H:\GIT\file-downloader"
 sys.path.insert(0, git_folder)
 
 ########################SETTING FOLDER FOR CREDENTIAL FILES#################
 
 # *-used for proxies, google credentials, alma APIs and DNZ APIs
-secrets_and_credentials_fold = r'H:\Secrets'
+secrets_and_credentials_fold = r'H:\secrets_and_credentials'
 sys.path.insert(0, secrets_and_credentials_fold)
-secret_file = os.path.join(secrets_and_credentials_fold, "shopping") 
+secret_file = os.path.join(secrets_and_credentials_fold, "secrets") 
 config = configparser.ConfigParser()
 config.read(secret_file)
 
@@ -72,12 +73,11 @@ sb_key= config.get("configuration", "sandbox")
 ##########################Getting proxies##############################################
 #* - optional might not be used and removed from requests
 
-# proxy_file = os.path.join(secrets_and_credentials_fold, "proxies.json")
-# with open(proxy_file, "r") as f_proxy:
-# 	proxies = json.load(f_proxy)
+proxy_file = os.path.join(secrets_and_credentials_fold, "proxies.json")
+with open(proxy_file, "r") as f_proxy:
+	proxies = json.load(f_proxy)
 
 ############################Logging#####################################################
-	
 #Logging levels:
 # DEBUG: Detailed information, for diagnosing problems. Value=10.
 # INFO: Confirm things are working as expected. Value=20.
@@ -99,7 +99,7 @@ end_xml = '</bib>'
 ###############################SIP settings###############################################
 ie_entity_type = 'AudioIE'
 ##################################e-mail settings########################################
-my_email_box = "Rhonda.grantham@dia.govt.nz"
+my_email_box = "Svetlana.Koroteeva@dia.govt.nz"
 report_part_name = "45. Weekly Published"
 #####################################SET UP Folders#######################################
 ## Run the current script to create full folder structure

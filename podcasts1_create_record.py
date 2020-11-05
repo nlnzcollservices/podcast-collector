@@ -3,35 +3,113 @@ import re
 from pymarc import parse_xml_to_array,record_to_xml, Field 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
-from settings import logging, template_folder,start_xml, end_xml, report_folder#, podcast_sprsh, 
+try:
+	from settings import logging, template_folder,start_xml, end_xml, report_folder
+except:
+	from settings_prod import logging, template_folder,start_xml, end_xml, report_folder
 from database_handler import DbHandler
 from alma_tools import AlmaTools
-
+logger = logging.getLogger(__name__)
 
 
 class RecordCreator():
 
-	"""
-	Creating bibliographical records in Alma sandbox or production depending. Can update existing records using Alma mms id.
+	""" This class creates or updates records in Alma Production or Sandbox depending on key based on database information
 
+
+	Attributes
+	----------
+
+	episode_title : str
+		title of episode
+	alma_key : str
+		"prod" for production or "sb" for sandbox
+	record : pymarc object
+		bibliographic record in pymarc 
+	template_path : str
+		path to xml template for particular podcast_name
+	epis_numb :  str
+		number of episode (None for most cases)
+	epis_seas : str
+		season of episode (None for most casts)
+		f600_first : str
+			content of field 600 1
+		f600_second : str
+			content of field 600 2
+		f600_third : str
+			content of field 600 3
+		f610_first : str
+			content of field 610 1
+		f610_second : str
+			content of field 610 2
+		f610_third : str
+			content of field 610 3
+		f650_first : str
+			content of field 650 1
+		f650_second : str
+			content of field 650 2
+		f650_third : str
+			content of field 650 3
+		f650_forth : str
+			content of field 650 4
+		f700_first : str
+			content of field 700 1
+		f700_second : str
+			content of field 700 2
+		f700_third  : str
+			contend of field 700  3
+
+
+	Methods
+	-------
+def __init__(self, key):
+
+	find_episode(self)	
+	parsing_added_fields(self, value)
+	construct_field(self, my_field)		
+	parsing_bib_xml(self)
+	record_creating_routine(self, update = False, list_of_podcasts = []):
 	"""
+	
 	def __init__(self, key):
 
-		""" Creating records in Alma Production or Sandbox depending on key
-		Arguments:
-		key(str) - could be "prod" for Prodiction or "sb" for Sandbox
-		self.key = key
-		Methods:
 
-		"""
 		self.alma_key = key
+		self.episode_title = None
+		record = None
+		self.mms_id = None
+		self.template_path = None
+		self.epis_numb = None
+		self.epis_seas = None
+		self.record = None
+		self.f600_first = None
+		self.f600_second = None
+		self.f600_third = None
+		self.f610_first = None
+		self.f610_second = None
+		self.f610_third = None
+		self.f650_first = None
+		self.f650_second = None
+		self.f650_third = None
+		self.f650_forth = None
+		self.f700_first = None
+		self.f700_second = None
+		self.f700_third = None
+
 
 	def find_episode(self):
+
+		"""
+		Finds episode in episode_title. Used for Crave and Can be removed as Crave will be removed from list of podcasts
+
+		Returns:
+			"episode" + number(str) - new episode_title
+		"""
 
 		flag = False
 		for el in self.episode_title.split(" "):
 			if flag:
-				number = el
+				number = str(el)
 				flag= False
 			if el == "episode":
 				flag = True
@@ -40,6 +118,17 @@ class RecordCreator():
 
 	
 	def parsing_added_fields(self, value):
+
+		"""
+		Parsing fields added from the spreadsheet to prepare for marc record.
+		Parameters:
+			value(str) - of particular field as it was in spreadsheet
+		Returns:
+			indicator1(str) - fiest indicator
+			indicator2(str) - second indicator
+			my_list(list)  - of unparsed subfieldswith their codes
+
+		"""
 
 		my_list = []
 		text = value.split("$")[1:]
@@ -59,7 +148,12 @@ class RecordCreator():
 
 	def construct_field(self, my_field):
 
+		"""
+		Makes and adds fields from spreadheet to record
 
+		Parameters:
+			my_field (str) - field how it was taken from google spreadsheet
+		"""
 		f_number = my_field[0]
 		subfields = []
 
@@ -73,18 +167,23 @@ class RecordCreator():
 			self.record.add_ordered_field(field)
 
 	def parsing_bib_xml(self):
+		"""
+		Parses template , modifies it and adds new fields. It is also parses episode title accouring to rules to form 245, 490  and 800 or 830 fields.
+
+		"""
+
 
 		#this  set is for correct indexing of 245 field
+
 		NON_FILING_WORDS = ( 'the', 'an', 'a', '"the', '"an', '"a' )
+
 		f245 = False 
 		f490v= False
 		f830v = False
-		# print(self.podcast_name)
-		# print(self.template_path)
 		self.record = parse_xml_to_array(self.template_path )[0]
 
 		##################################################Parsing rules##################################################################
-
+		#This part is very flexible. It is parsing titles to create correct 490 and 800 or 830 field#####################################
 		if self.podcast_name in ["Crave!"]:
 			if ":" in self.episode_title and (self.episode_title.split(":")[0][-1].isdigit() or self.episode_title.split(":")[0][-2].isdigit()):
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
@@ -93,7 +192,7 @@ class RecordCreator():
 				f245= "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].lstrip(" ").replace('Crave!',"").replace("Crave","").lstrip(" ")
 			else:
-				logging.info("Crave!!!Check  245 and 490!!!")
+				logger.info("Crave!!!Check  245 and 490!!!")
 				episode = self.find_episode()
 				f245 = self.episode_title.replace("Crave!", "").replace(episode, "").lstrip(" ").lstrip(":").lstrip("-").lstrip(' ')
 				f490v = episode
@@ -146,12 +245,18 @@ class RecordCreator():
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
 
 		if self.podcast_name in ["Love this podcast"]:
-			if "-" in self.episode_title:
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
-				f490v = self.episode_title.split("-")[0]
-			if "–" in self.episode_title:
-				f245 = "–".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
-				f490v = self.episode_title.split("–")[0]
+			if not self.episode_title.split(" ")[-1].startswith("(E"):
+				if "-" in self.episode_title:
+					f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
+					f490v = self.episode_title.split("-")[0]
+				if "–" in self.episode_title:
+					f245 = "–".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
+					f490v = self.episode_title.split("–")[0]
+			else:
+				if "(" in self.episode_title:
+					f245 = " ".join(self.episode_title.split(" ")[:-1])
+					f490v = self.episode_title.split(" ")[-1].strip("()")
+			f830v = str(f490v)
 		
 		if self.podcast_name == "Ciaran McMeeken":
 			if "//" in self.episode_title:
@@ -185,7 +290,7 @@ class RecordCreator():
 					try:
 						ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[0])[0]
 					except:
-						logging.info("no episode number")
+						logger.info("no episode number")
 				elif ": Episode"	 in self.episode_title:
 					ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[1])[0]
 				elif self.episode_title.startswith("Episode"):
@@ -234,7 +339,7 @@ class RecordCreator():
 
 		if f490v and not f830v:
 			f830v = f490v.lower()
-		
+		##########################################################################################################################################################################################################################################
 
 		# Field 008
 
@@ -387,7 +492,17 @@ class RecordCreator():
 
 	def record_creating_routine(self, update = False, list_of_podcasts = []):
 
+		"""
+		Manages process of creating if update set False or updating record for all the podcasts in db which have tick or tick and mms_id for updating.
+		Parameters:
+			update(bool) - set False by default to create record or True to update
+			list_of_podcasts(list) - to or update records for particular podcast
+		"""
 
+		if update:
+			logger.info("Updating alma record")
+		else:
+			logger.info("Creating Alma record")
 		my_db = DbHandler()
 		my_dict=my_db.db_reader(
 			["podcast_name", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","ie_num","tags","description",
@@ -396,16 +511,8 @@ class RecordCreator():
 			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
 			)
 		for epis  in my_dict:
-			print(epis)
-			print('here')
-			#logging.info(epis["podcast_name"])
 			if "tick" in epis.keys() and epis["tick"]:
-					print('here1')
-					print(epis["episode_title"])
-					self.mis_mms = epis["mis_mms"]
-					print('here2')
-					print(self.mis_mms)
-					print(epis["ie_num"])
+					self.mms_id = epis["mis_mms"]
 					self.template_path = os.path.join(template_folder, epis["template_name"])
 					self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
 					self.podcast_name = epis["podcast_name"]
@@ -441,50 +548,53 @@ class RecordCreator():
 					self.epis_numb = epis["epis_numb"]
 					self.epis_seas = epis["epis_seas"]
 					self.parsing_bib_xml()
-					logging.info(self.bib_data)
+					logger.debug(self.bib_data)
 					my_alma = AlmaTools(self.alma_key)
 					if not update:
-						if not self.mis_mms:		
+						if not self.mms_id:		
 							my_alma.create_bib(self.bib_data)
-							logging.info(my_alma.xml_response_data)
-							print(my_alma.status_code)
-
+							logger.debug(my_alma.xml_response_data)
+							logger.debut(my_alma.status_code)
 							if my_alma.status_code == 200:
 								bib_grab = BeautifulSoup( my_alma.xml_response_data, 'lxml-xml' )
 								try:
-									print('here3')
-									self.mis_mms = bib_grab.find( 'bib' ).find( 'mms_id' ).string
-									print('here4')
-									print(self.mis_mms)
-									statement = 'MMS_ID: '+self.mis_mms + " " +str(my_alma.xml_response_data)
-									print('here5')
-									logging.info(statement)
+									self.mms_id = bib_grab.find( 'bib' ).find( 'mms_id' ).string
+									statement = 'MMS_ID: '+self.mms_id + " " +str(my_alma.xml_response_data)
+									logger.debug(statement)
+									logger.info(self.mms_id+ " - record created for "+self.episode_title)
 									with open (os.path.join(report_folder, "mms.txt"),"a" ) as mms_file:
-										mms_file.write( self.mis_mms )
+										mms_file.write( self.mms_id )
 										mms_file.write("\n")
 								except Exception as e:
 									statement =  "Could not grab mms from {}. {}".format ( my_alma.xml_response_data, str(e)  ) 
-									logging.debug(statement)
+									logger.error(statement)
+						if self.mms_id:
+							my_db.db_update_mms (self.mms_id, self.episode_title)
 								
 					else:
-						if self.mis_mms:
-							print(f"Updating record {self.mis_mms}")
-							print(self.bib_data)
-							my_alma.update_bib(self.mis_mms, self.bib_data)
-							print(my_alma.status_code)
-							print(my_alma.xml_response_data)
-					if self.mis_mms:
-						my_db.db_update_mms (self.mis_mms, self.episode_title)
+						if self.mms_id:
+							logger.info("Updating record "+ self.mms_id)
+							my_alma.update_bib(self.mms_id, self.bib_data)
+							logger.debug(my_alma.status_code)
+							logger.debug(my_alma.xml_response_data)
+							if my_alma.status_code ==200:
+								logger.info("updated")
+							else:
+								logger.error(my_alma.xml_response_data)
+								quit()
 
-						print("here7")
-	
+						
 					
 	
 
 def main():
 
+	"""This function is example. Runs record creating process for for particular podcasts. Set True for updating. Not creating.
+	Change to sb if test rquered
+	"""
+
 	my_rec = RecordCreator("prod")
-	my_rec.record_creating_routine(False, ["Dirt Church Radio"])#,"Taxpayer talk", "The fold", "Love this podcast"])
+	my_rec.record_creating_routine(True, ["The good citizen"])#,"Taxpayer talk", "The fold", "Love this podcast"])
 	#my_rec.record_creating_routine(True, [])
 
 
