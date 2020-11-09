@@ -127,10 +127,10 @@ class Harvester():
 
 	def jhove_check(self, filepath):
 
-		"""Checks if the file well-formedand valid:
+		"""Checks if the file well-formed valid:
 		Arguments:
 			filepath(str) - file to the pass to check
-		Returnds:
+		Returns:
 			(bool) - True if file is good and False in other case"""
 
 		command = [r'jhove',filepath,'-t', 'text'] # the shell command
@@ -175,9 +175,9 @@ class Harvester():
 	def parsing_with_feedparser(self):
 
 		"""
-		Parsses feeds to extract metadata such as date, title, tags, description, season, number and download_link. 
+		Parses feeds to extract metadata such as date, title, tags, description, season, number and download_link. 
 		Calls downloader to download the file and manages the file name
-		Checks if the episode exists in db or file exist in db and creates new record for Episode  and File tables
+		Checks if the episode exists in db or file exist in db and creates new record for Episode and File tables
 		Checks if the episode title in the spreadsheet and adds the row if not
 		"""
 
@@ -382,7 +382,7 @@ class Harvester():
 							logger.debug(str(e))
 
 						##################################### Cleaning part###############################################################################################################
-						#cleands epiosode title and description
+						#cleans epiosode title and description
 						self.episode_title = self.episode_title.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
 						if self.spreadsheet_message !="":
 							self.episode_title == self.spreadsheet_message + self.episode_title
@@ -432,11 +432,11 @@ class Harvester():
 
 	def check_for_meaning(self, my_filename):
 
-		"""Checks filename for possible meaningfull words
+		"""Checks filename for possible meaningful words
 		Parameters:
 			my_filename (str) - filename to check
 		Returns:
-			word_meaning_flag(bool) - set True if meaningfull word found
+			word_meaning_flag(bool) - set True if meaningful word found
 		"""
 		word_meaning_flag = False
 		lst1  = []
@@ -484,7 +484,7 @@ class Harvester():
 
 def harvest():
 	"""
-	Checks if podcast name in db . Creates if not. Runs harvester
+	Checks if podcast name in db. Creates if not. Runs harvester
 	"""
 
 	flag_for_podc_table = False

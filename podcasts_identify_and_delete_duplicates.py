@@ -10,7 +10,7 @@ import io
 
 def main():
 
-		"""Finds all mms from mms.txt file in record folder. And deletes thouse which have the title in title_list"""
+		"""Finds all mms from mms.txt file in record folder. And deletes those which have the title in title_list"""
 		#title_list = ['1st birthday live show ft Andrew McDowall and Katie Wright', 'Jared Hazen', 'Gareth Thomas and the WUU2K Special', 'Rachel Grunwell', 'Hollie Woodhouse', 'Mathieu Dore', 'Josh Komen', 'Kathrine Switzer', 'Coree Woltering', 'Peter Maksimow', 'Andrew Thompson', 'Katie Wright, Riverhead Backyard Relaps', 'Chris Ord', 'Zach Miller', 'Elise Downing', 'Roger Robinson', 'Luke McCallum', 'Holly Page', 'Sam Manson', 'Gareth Morris', 'Adharanand Finn', 'Camille Herron', 'John Onate', 'Kelton Wright, Jeff Browning and Grant Guise', 'Tim Sutton', 'Weston Hill', 'Vajin Armstrong!', 'Anna Frost', 'Courtney Dauwalter', 'Dirt Church Christmas Special', 'Scott Worthington, The Revenant', 'Ruth Croft', 'Kepler Special', 'James Kuegler and Andrew McDowall LIVE', 'Marianne Elliott', 'Dylan Bowman', 'Nancy Jiang', 'Scotty Hawker', 'Lucy Bartholomew', ' Majell Backhausen', 'Crush the Cargill (Steve Tripp and Andrew Glennie)', 'Shaun Collins', 'Jeff Browning', 'Malcolm Law', 'Dr Tony Page', 'Dean Karnazes', 'Brad Dixon', 'Dawn Tuffery', 'Mel Aitken', 'Grant Guise', 'Fiona Hayvice', 'Paul Charteris', 'The Trailer']
 		title_list = []
 		my_alma = AlmaTools("prod")

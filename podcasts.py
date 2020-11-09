@@ -153,7 +153,7 @@ class Podcast_pipeline():
 		"""
 		Opens done_ies file from report_folder. 
 
-		Returnds:
+		Returns:
 			ies_list(list) - list which contains ie numbers from NDHA report
 
 		"""
@@ -168,7 +168,7 @@ class Podcast_pipeline():
 
 	def insert_ies(self):
 		
-		""" Requests mms_id list from db, passes them to Alma_Tools, parses list of representation xml to extract ies, inserts  tehm to podcasts.db """
+		""" Requests mms_id list from db, passes them to Alma_Tools, parses list of representation xml to extract ies, inserts  them to podcasts.db """
 		
 		mms_dict = {}
 		my_alma = AlmaTools("prod")
@@ -200,7 +200,7 @@ class Podcast_pipeline():
 
 	def file_cleaning(self):
 
-		"""Deletes files which were replaced in file folders during multirun of downloading pricess and not in database"""
+		"""Deletes files which were replaced in file folders during multirun of downloading process and not in database"""
 		
 		#contains dictionaries of filepaths in db
 		file_dictionary = self.db_handler.db_reader(["filepath"],None,True)
@@ -220,7 +220,7 @@ class Podcast_pipeline():
 	def finish_existing_records_and_delete_files(self, key):
 
 		"""
-		Managing process of cheking if digital representation available to run holdings and items creating module. Runs update fields module to update records with 942 field and delete duplicated fields. 
+		Managing process of checking if digital representation available to run holdings and items creating module. Runs update fields module to update records with 942 field and delete duplicated fields. 
 		Writes podcast_name, episode_title, mis_mms, holdings, item, ie_num, filepath, updated status to report.
 		Deletes file from file folder, the sip from project sip folder and sip from rosetta_folder 
 

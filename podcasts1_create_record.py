@@ -124,7 +124,7 @@ def __init__(self, key):
 		Parameters:
 			value(str) - of particular field as it was in spreadsheet
 		Returns:
-			indicator1(str) - fiest indicator
+			indicator1(str) - first indicator
 			indicator2(str) - second indicator
 			my_list(list)  - of unparsed subfieldswith their codes
 
@@ -149,7 +149,7 @@ def __init__(self, key):
 	def construct_field(self, my_field):
 
 		"""
-		Makes and adds fields from spreadheet to record
+		Makes and adds fields from spreadsheet to record
 
 		Parameters:
 			my_field (str) - field how it was taken from google spreadsheet
@@ -168,7 +168,7 @@ def __init__(self, key):
 
 	def parsing_bib_xml(self):
 		"""
-		Parses template , modifies it and adds new fields. It is also parses episode title accouring to rules to form 245, 490  and 800 or 830 fields.
+		Parses template , modifies it and adds new fields. It is also parses episode title according to rules for 245, 490  and 800 or 830 fields.
 
 		"""
 
@@ -589,8 +589,8 @@ def __init__(self, key):
 
 def main():
 
-	"""This function is example. Runs record creating process for for particular podcasts. Set True for updating. Not creating.
-	Change to sb if test rquered
+	"""This function is example. Runs record creating process for particular podcasts. Set True for updating. Not creating.
+	Change to sb if test required
 	"""
 
 	my_rec = RecordCreator("prod")
