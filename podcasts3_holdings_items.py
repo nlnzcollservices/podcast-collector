@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class Holdings_items():
 
 	""" 
-	This class contains methods for managing process of creating holding and item  records in Alma , update existing items and delete duplicates
+	This class contains methods for managing process of creating holding and item records in Alma, update existing items and delete duplicates
 
 	Attributes
 	----------
@@ -51,9 +51,9 @@ class Holdings_items():
 	podcast_bib_name:
 		name of podcast from bib record 490 field
 	enum : str
-		enumiration b
+		enumeration b
 	date : str
-		publishing date from bib revcord
+		publishing date from bib record
 	holdings_data : str
 		xml from holdings request
 	holding_data : str
@@ -107,7 +107,7 @@ class Holdings_items():
 	def parsing_bib_xml(self):
 
 		"""Parses bibliographic record and extracts podcast name from 490 field, 800 or 830 field to extract subfield b for description.
-		Extracts date if it is possible or eumrtation if there is no date.
+		Extracts date if it is possible or enumeration if there is no date.
 		"""
 
 		self.enum = None
@@ -155,7 +155,7 @@ class Holdings_items():
 
 		"""Replaces tags of item xml data to tags from tag dictionary
 		Arguments:
-			tag_dict(dict) -  tage names and new tag contant
+			tag_dict(dict) -  tag names and new tag contant
 			item_data(str) - item record xml
 
 		Returns:
@@ -184,9 +184,9 @@ class Holdings_items():
 	
 	def dups_deleting_routine(self, mms_list):
 
-		"""Deleting dupped items and holdings. Leaving the last holding and the last item in the last holding"""
+		"""Deleting duplicate items and holdings. Leaving the last holding and the last item in the last holding"""
 
-		logger.info("Cheking and deleting holding and item duplicates...")
+		logger.info("Checking and deleting holding and item duplicates...")
 		for mmsline in mms_list:
 			self.mms_id = str(mmsline[0])
 			logger.info(self.mms_id)
@@ -237,7 +237,7 @@ class Holdings_items():
 
 	def item_routine(self, mms_list=[], update = False):
 
-		"""Checking existing item and holding and creates where do not exists. Checks Alma bibliographic record for 890 field to identify correct enueration and chronology field and make a description
+		"""Checking existing item and holding and creates them when they do not exist. Checks Alma bibliographic record for 890 field to identify correct enumeration and chronology field to make a description
 		Raises:
 			Quit if duplicate holding or items
 
@@ -379,10 +379,10 @@ class Holdings_items():
 
 def main():
 
-	"""Runs all the process starting with mms_list. If mms_list does_not exists it takes information from database. Creates episode_list and pass it to 
+	"""Runs all the process starting with mms_list. If mms_list does_not exists it takes information from database. Creates episode_list and passes it to 
 	deleting duplicates and item routine function.
 	Deleting duplicates is optional and can be commented.
-	update should be set True if records are going to be updated and False if not. It is False by default""" 
+	Update should be set True if records are going to be updated and False if not. It is False by default""" 
 	update = True
 	episode_list = []
 	mms_list = []

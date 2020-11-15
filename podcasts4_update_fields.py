@@ -68,7 +68,7 @@ class Manage_fields():
 	def removing_dup_fields_add_942(self, field_num):
 
 		"""
-		Using pymarc object for finding and removing particular dupped field
+		Using pymarc object for finding and removing particular duplicate field
 		Parameters:
 			field_num(str) - number of field
 
@@ -163,7 +163,7 @@ def main():
 	# if os.path.exists(workook_path):
 
 	# 	wb = load_workbook(workook_path)
-	# 	#Enter name of the working sheet bellow
+	# 	#Enter name of the working sheet below
 	# 	ws= wb.get_sheet_by_name("results")
 	# 	#if now headers min_row =1
 	# 	for row in ws.iter_rows(min_row=2):

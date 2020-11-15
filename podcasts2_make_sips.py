@@ -35,13 +35,13 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 
 	Parameters:
 		podcast_name(str) - podcast_name
-		ar_policy(str) - access right policy code.Set 100 in settings. (100 for open source, 200 for limited access, 400 for "dark archive")
+		ar_policy(str) - access right policy code. Set 100 in settings. (100 for open source, 200 for limited access, 400 for "dark archive")
 		serial_mms(str) - Alma mms id of serial_record
 		mis_mms(str) -Alma mms id for episode record
 		episode_title(str) - episode title
 		filepath(str) - filepath
 	Returns:
-		output_dir(str) - path to sips that belong to one podcast name appeard ase serial mms id in project folder
+		output_dir(str) - path to sips that belong to one podcast name appear as serial mms id in project folder
 		filename(str) - filename
 	"""
 
@@ -87,9 +87,9 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 
 def sip_checker(output_dir,   mis_mms, filename, filesize, podcast_name):
 
-	"""Checks if met.xml files (mis_mms_id + .xml) is empty, or filesize is 0 byte, or filesize is not equal of original fileSizeBytes
+	"""Checks if met.xml files (mis_mms_id + .xml) is empty, or filesize is 0 byte, or filesize is not equal to original fileSizeBytes
 	Parameters:
-		output_dir(str) - path to sips that belong to one podcast name appeard ase serial mms id in project folder
+		output_dir(str) - path to sips that belong to one podcast name appear as serial mms id in project folder
 		mis_mms (str) - Alma mms id of episode record
 		filesize (str) - original filesize
 		podcast_name (str) - name of podcast
@@ -114,7 +114,7 @@ def sip_checker(output_dir,   mis_mms, filename, filesize, podcast_name):
 def copy_sip(output_dir, destination, mis_mms, filename):
 
 	"""
-	Copying entire sip dirrectory form project folder to destination
+	Copying entire sip directory form project folder to destination
 	Parameters:
 		output_dir(str) - folders which contains sips in project sip folder
 		destination(str) - rosetta production or sb folder
@@ -136,9 +136,9 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 	"""
 	Manages the process of creating SIPs if record already created in Alma and has mms id. Updates db with sip equals True. Runs sip_checker. Copying SIPs to sb or production folder depending on Parameters.
 	Parameters:
-		podcast_list (list) - contains name of podcasts to create SIPs for. If set [] gous across all the podcasts.
+		podcast_list (list) - contains name of podcasts to create SIPs for. If set [] gos across all the podcasts.
 		copy_to_rosetta_prod_folder - True by default and the SIP will be copied to production folder, otherwise the parameter should set False
-		copy_to_sb_folder - False by defaul and the SIP will not be copied to sandbox folder, otherwise the parameter should set True
+		copy_to_sb_folder - False by default and the SIP will not be copied to sandbox folder, otherwise the parameter should be set True
 		update_sip_in_db - True by default and db will be updated with sip = True, otherwise should be set False
 
 	"""
@@ -210,8 +210,8 @@ def main():
 
 	"""This runs the sip_routine"""
 	#Example
-	#[] - send empty list to run over all the podcast names or feel it with podcast names to process.
-	#copy_to_rosetta_prod_folder = False - for not copuing there. By defaule it is True	
+	#[] - send empty list to run over all the podcast names or fill it with podcast names to process.
+	#copy_to_rosetta_prod_folder = False - for not copying there. By default it is True	
 	#copy_to_sb = True - for copying ready SIPs to sb folder. It is False by default
 	#update in db = set False not to update
 	#The following command make sips for all the podcast names, copy them to sb folder, does not update db with sip = True)
