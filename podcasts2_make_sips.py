@@ -148,7 +148,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 	"""
 	Manages the process of creating SIPs if record already created in Alma and has mms id. Updates db with sip equals True. Runs sip_checker. Copying SIPs to sb or production folder depending on Parameters.
 	Parameters:
-		podcast_list (list) - contains name of podcasts to create SIPs for. If set [] gos across all the podcasts.
+		podcast_list (list) - contains name of podcasts to create SIPs for. If set [] goes across all the podcasts.
 		copy_to_rosetta_prod_folder - True by default and the SIP will be copied to production folder, otherwise the parameter should set False
 		copy_to_sb_folder - False by default and the SIP will not be copied to sandbox folder, otherwise the parameter should be set True
 		update_sip_in_db - True by default and db will be updated with sip = True, otherwise should be set False
