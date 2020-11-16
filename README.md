@@ -40,7 +40,10 @@ A list of technologies used within the project:
 ***
 Clone the repository from GitHub. 
 ```
-$ git clone git clone https://github.com/nlnzcollservices/podcasts
+$ git clone git clone 
+```
+https://github.com/nlnzcollservices/podcasts
+```
 Enter the scripts directory
 ```
 $ cd podcasts/scripts
