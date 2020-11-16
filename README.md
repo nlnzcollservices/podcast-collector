@@ -38,33 +38,54 @@ A list of technologies used within the project:
 
 ## Installation
 ***
+
+Make sure that you installed all the modules and tools specified in the previous section. 
+
+Exiftool and Jhove should be able to be called from command line.(If not make sure that the foldeers with these tools is in your path. Use sysdm.cpl for Windows)  
+
+You have your own client_secrets.json file as result of the process of enabling requests to the Google Sheets API. (Quickstart link is above in technology section)
+
 Clone the repository from GitHub. 
 ```
-$ git clone git clone 
-```
-https://github.com/nlnzcollservices/podcasts
+$ git clone https://github.com/nlnzcollservices/podcasts
 ```
 Enter the scripts directory
 ```
 $ cd podcasts/scripts
+```
 Open settings.py for editing (for cmd)
 ```
 $ notepad settings.py
-Change all the full paths on yours
 ```
+Change all the full paths on yours
+
 Folders where Exlibris Rosetta takes the SIPs from production and sandbox in setting path section
 ```
 rosetta_folder = r"your\production\Rosetta\path"
 rosetta_sb_folder = r"your\sandbox\Rosetta\path"
+```
 Folder with Downloader in git section
 ```
 git_folder = r"your_git_path\file-downloader"
+```
 Folder with secrets in credentials section
 ```
 secrets_and_credentials_fold = r'path\to\your\secret\folder'
+```
+Save it. Close.
+```
+Move modified with your keys for Alma and Google Sheets secret file to  "path\to\your\secret\folder"
+```
+$ cd ..
+$ move secrets "path\to\your\secret\folder"
 
+```
+Make sure that your client_secrets.json file is also in the same folder
 
-$ npm start
+Fingers crossed and run it.
+```
+$ cd scripts
+$ python podcasts.py
 
 ## Collaboration
 ***
