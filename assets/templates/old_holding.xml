@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<holding>
+	<holding_id></holding_id>
+	<record>
+		<leader>00693nx##a22002054n#4500</leader>
+		<controlfield tag="008">170824s        nz      o     000 0 eng  </controlfield>
+		<datafield tag= "852" ind1="8" ind2=" ">
+			<subfield code="b">ATL</subfield>
+			<subfield code="c">ATL.DA</subfield>
+		</datafield>
+	</record>
+</holding>

@@ -1,0 +1,20 @@
+<item>
+  <item_data>
+    <pid></pid>
+    <creation_date></creation_date>
+    <physical_material_type desc="Digital File">KEYS</physical_material_type>
+    <policy>HERITAGE</policy>
+    <po_line></po_line>
+    <arrival_date></arrival_date>
+    <enumeration_a></enumeration_a>
+    <enumeration_b></enumeration_b>
+    <chronology_i></chronology_i>
+    <chronology_j></chronology_j>
+    <chronology_k></chronology_k>
+    <description></description>
+    <library desc="Alexander Turnbull Library">ATL</library>
+    <location desc="Alexander Turnbull Library">ATL.DA</location>
+    <requested>false</requested>
+  </item_data>
+</item>
+
