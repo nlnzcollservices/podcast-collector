@@ -13,7 +13,8 @@ This script is aimed to harvest podcasts' episodes based on rss feed, collect me
 ## Technologies
 ***
 A list of technologies used within the project:
-* Python 3.7.2 (tags/v3.7.2:9a3ffc0492, Dec 23 2018, 23:09:28) [MSC v.1916 64 bit (AMD64)] on win32
+* [Python 3.7.2] (tags/v3.7.2:9a3ffc0492, Dec 23 2018, 23:09:28) [MSC v.1916 64 bit (AMD64)] on win32
+* [Google Spreadsheets APIs] (https://developers.google.com/sheets/api/quickstart/python) : Version 
 * [JHOVE](https://jhove.openpreservation.org/getting-started/) : Vesion Rel. 1.24.1
 * [Exiftool] (https://exiftool.org/index.html) : Version 12.10
 * [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
@@ -37,35 +38,41 @@ A list of technologies used within the project:
 
 ## Installation
 ***
-A little intro about the installation. 
+Clone the repository from GitHub. 
 ```
-$ git clone https://example.com
-$ cd ../path/to/the/file
-$ npm install
+$ git clone git clone https://github.com/nlnzcollservices/podcasts
+Enter the scripts directory
+```
+$ cd podcasts/scripts
+Open settings.py for editing (for cmd)
+```
+$ notepad settings.py
+Change all the full paths on yours
+```
+Folders where Exlibris Rosetta takes the SIPs from production and sandbox in setting path section
+```
+rosetta_folder = r"your\production\Rosetta\path"
+rosetta_sb_folder = r"your\sandbox\Rosetta\path"
+Folder with Downloader in git section
+```
+git_folder = r"your_git_path\file-downloader"
+Folder with secrets in credentials section
+```
+secrets_and_credentials_fold = r'path\to\your\secret\folder'
+
+
 $ npm start
+
 ## Collaboration
 ***
-Provide instructions on how to collaborate with your project.
-> Maybe you want to write a quote in this part. 
-> Should it encompass several lines?
-> This is how you do it.
-A “>” at the start of the line will change the text into a quote.
+Ideas how to collaborate.
+> quote. 
+
 
 ## FAQs
 ***
 A list of frequently asked questions
-1. **This is a question in bold**
-Answer to the first question with _italic words_. 
-2. __Second question in bold__ 
-To answer this question, we use an unordered list:
-* First point
-* Second Point
-* Third point
-3. **Third question in bold**
-Answer to the third question with *italic words*.
-4. **Fourth question in bold**
-| Headline 1 in the tablehead | Headline 2 in the tablehead | Headline 3 in the tablehead |
-|:--------------|:-------------:|--------------:|
-| text-align left | text-align center | text-align right |
+1. **First question**
+_Answer_ 
 
 
