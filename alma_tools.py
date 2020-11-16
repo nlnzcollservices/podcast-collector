@@ -75,6 +75,34 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+	def get_ecollection(self, mms_id, ecollection_id, options = {}):
+
+		"""
+		Retrieves an electronic collection record in xml 
+		Argumets:
+			collection_id(str) - id of the collection
+		"""
+
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/e-collections/{ecollection_id}", params=parameters)
+		print(r.text)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_porfolio(self, mms_id, portfolio_id, options = {}):
+
+		"""
+		Retrieves a portfolio record in xml 
+		Argumets:
+			mms_id(str) - id of the bibliographic record
+			portfolio_id(str) - id of the portfolio
+		"""
+
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
 	def create_bib(self, xml_record_data, options = {}):
 
 		"""
@@ -290,7 +318,7 @@ def main():
 
 	mms_id = "9918975967302836"
 
-	my_api = AlmaTools(sb_key)
+	my_api = AlmaTools("prod")
 
 	#######################################
 	# my_api.get_bib(mms_id, {"limit":"100"})
@@ -304,7 +332,11 @@ def main():
 	#######################################
 	# my_api.get_representations(mms_id)
 	# print(my_api.xml_response_data.encode("utf-8"))
-
-
+	###############################################
+	# my_api.get_porfolio("9919012972402836","53354322810002836")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
+	#########################################
+	my_api.get_ecollection("9918748064302836","61325625670002836")
 if __name__ == '__main__':
 	main()

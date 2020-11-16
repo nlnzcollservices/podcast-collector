@@ -63,7 +63,6 @@ class Harvester():
 		self.download_flag = False
 		self.flag_for_podc_table = True
 		self.episode_title = None
-		self.episode_sprsh_check = None
 		self.url = None
 		self.rss_filename = None
 		self.description = None
@@ -109,6 +108,7 @@ class Harvester():
 			(bool) - True if title exists or False if the title does not exist in the spreadsheet.
 
 		"""
+
 		logger.info("Checking {} in the spreadsheet".format(self.episode_title))
 		rng = "D2:D{}".format(ws.row_count)	
 		try:
@@ -194,6 +194,7 @@ class Harvester():
 			self.tags = None
 			self.description = None
 			self.time_flag= False
+			self.download_flag = False
 			self.tags_list = ""	
 			self.link_dict = {}	
 			self.episode_download_link = None
@@ -226,7 +227,7 @@ class Harvester():
 			#compares the date with the date with the last issue and takes a bigger timestamp - all issues after the last issue
 
 				max_time =  float(self.last_issue)
-				if float(int(self.episode_date)) > max_time:
+				if float(int(self.episode_date)) > max_time :#and float(int(self.episode_date)) != 1604640482:
 					logger.debug("A new episode")
 					self.time_flag = True		
 			except Exception as e:
@@ -244,6 +245,7 @@ class Harvester():
 			#finds episode link and episode download links 
 					try:
 						link_dict = d["entries"][ind]["links"]
+
 						for el in link_dict:
 							if not "length" in el.keys():
 								# print("no length in links - taking episode link")
@@ -282,7 +284,6 @@ class Harvester():
 								self.description = d["entries"][ind]["content"][0]["value"]
 						except KeyError:
 							logger.error("could not get description by summary details")
-							quit()
 						except Exception as e:
 							logger.error(str(e))
 
@@ -413,7 +414,7 @@ class Harvester():
 
 							file_data = {"episode" : episode, "filepath" : downloader.filepath, "md5sum" : downloader.md5, "md5_from_file" : downloader.md5_original, "filesize" : downloader.filesize, "size_original" : downloader.size_original, "file_type" : downloader.filetype_extension}
 							my_podcast.table_creator("File", file_data)
-						
+						print(self.episode_sprsh_check())
 						if not self.episode_sprsh_check():
 							 	connection_count = 0
 							 	while not connection_count >= 5:

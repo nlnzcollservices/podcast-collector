@@ -233,7 +233,7 @@ class Podcast_pipeline():
 		item_dictionary = self.db_handler.db_reader(["podcast_name","mis_mms","holdings", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
 		logger.info(item_dictionary)
 		for itm in item_dictionary:
-			print(itm)
+			#print(itm)
 			if itm != {} and len(itm) >1:
 				if itm["ie_num"]:
 					if itm["item"]:
@@ -424,17 +424,17 @@ class Podcast_pipeline():
 
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		#self.file_cleaning()
-		#self.get_ies_from_reports()
-		#lst = self.read_ies_file()
-		#self.insert_ies()
+		self.file_cleaning()
+		self.get_ies_from_reports()
+		lst = self.read_ies_file()
+		self.insert_ies()
 		self.finish_existing_records_and_delete_files("prod")
 		self.db_handler.update_the_last_issue()
 		self.db_handler.delete_done_from_db()
 		self.update_database_from_spreadsheetand_delete_row()
-		###Set "sb" if whould like records ins "sb"
-		###Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		###Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
+		##Set "sSb" if whould like records ins "sb"
+		##Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
+		##Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
 		my_rec = RecordCreator(self.alma_key)
 		my_rec.record_creating_routine()
 		sip_routine()

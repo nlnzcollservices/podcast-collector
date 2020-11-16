@@ -150,8 +150,8 @@ class DbHandler():
             max_date = pod.last_issue
             for epis in episodes:
                 logger.debug(epis.episode_title)
-                if epis.date > max_date:
-                    max_date = epis.date
+                if int(epis.date) > max_date:
+                    max_date = int(epis.date)
             logger.debug(max_date)
             if pod.last_issue != max_date:
                 q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)

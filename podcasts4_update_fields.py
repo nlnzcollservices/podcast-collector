@@ -38,8 +38,10 @@ class Manage_fields():
 		Alma mms id of bibliographic record
 	mms_id_list : str
 		list which contains mms ids.
-	flag : bool
+	duplicate_flag : bool
 		flag set False but default and become true if the field is duplicated
+	update_flag: bool
+		flag set False by default and becomve True if 942 added and record has to be updated
 
 	Methods
 	-------
@@ -75,7 +77,9 @@ class Manage_fields():
 		"""
 		
 		fields = self.record.get_fields(field_num)
-
+		print(len(fields))
+		print(field_num)
+		print(self.record)
 		if len(fields) != 0:
 			field_dict = {}
 			for ind in range(len(fields)):
@@ -83,9 +87,9 @@ class Manage_fields():
 					field_dict[fields[ind].value()] = [fields[ind]]
 				else:
 					field_dict[fields[ind].value()] += [fields[ind]]
-					self.flag = True
+					self.duplicate_flag = True
 
-			if self.flag:
+			if self.duplicate_flag:
 				logger.info(field_num - "duplicated")
 				self.record.remove_fields(field_num)
 				for el in field_dict.keys():
@@ -99,7 +103,7 @@ class Manage_fields():
 				f942 = Field(tag = '942', indicators = ["",""], subfields = ['a', 'nznb {}'.format(date_942)])
 				self.record.add_ordered_field(f942)
 				logger.info("record updated with 942")
-				flag = True
+				self.update_flag = True
 						
 
 
@@ -135,15 +139,18 @@ class Manage_fields():
 		self.mms_id = None
 		self.bib_data = None
 		for mms in self.mms_id_list:
-				self.flag = False
+				self.duplicate_flag = False
+				self.update_flag = False
 				self.mms_id = mms
 				logger.info(self.mms_id)
 				my_rec = AlmaTools(self.key)
 				my_rec.get_bib(self.mms_id)
 				self.bib_data = my_rec.xml_response_data
 				self.parsing_bib_xml()
-				if self.flag:
+				print(self.update_flag)
+				if self.update_flag:
 					my_rec.update_bib(self.mms_id, self.bib_data)
+					print(my_rec.status_code)
 					logger.info(self.mms_id + " - updated")
 					my_db =DbHandler()
 					my_db.db_update_updated(self.mms_id)
