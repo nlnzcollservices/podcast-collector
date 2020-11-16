@@ -11,6 +11,8 @@ def make_dir(path):
     if not os.path.isdir(path):
         os.mkdir(path)
 def main():
+
+    """This script is purposed to make xml template from txt file, which comes as result of downloading template from Alma using Alma Enhancer."""
     #insert path to text templates bellow
     templates_folder = os.path.join(working_folder, "assets",  "text_templates")
     print(templates_folder)

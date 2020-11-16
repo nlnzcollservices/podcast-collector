@@ -1,7 +1,9 @@
 import peewee
 import os
-from settings import script_folder, working_folder, database_fullname
-
+try:
+    from settings import script_folder, working_folder, database_fullname
+except:
+    from settings_prod import script_folder, working_folder, database_fullname
 
 database = peewee.SqliteDatabase(database_fullname)
 

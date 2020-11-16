@@ -554,7 +554,7 @@ def __init__(self, key):
 						if not self.mms_id:		
 							my_alma.create_bib(self.bib_data)
 							logger.debug(my_alma.xml_response_data)
-							logger.debut(my_alma.status_code)
+							logger.debug(my_alma.status_code)
 							if my_alma.status_code == 200:
 								bib_grab = BeautifulSoup( my_alma.xml_response_data, 'lxml-xml' )
 								try:

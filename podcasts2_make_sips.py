@@ -44,16 +44,26 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 		output_dir(str) - path to sips that belong to one podcast name appeard ase serial mms id in project folder
 		filename(str) - filename
 	"""
+	print(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title, filepath)
 
-	filename = os.path.basename(filepath)
+	print(mis_mms)
+	filename= os.path.basename(filepath)
+	print(filename)
 	ie_dmd_dict = [{'dc:title': episode_title}]
+	print(ie_dmd_dict)
 	general_ie_chars = [{'IEEntityType': ie_entity_type}]
+	print(general_ie_chars)
 	object_identifier=[{'objectIdentifierType': 'ALMAMMS','objectIdentifierValue': mis_mms}]
+	print(object_identifier)
 	access_rights_policy = [{'policyId': ar_policy}]
+	print(access_rights_policy)
 	sip_title = str(serial_mms)
+	print(sip_title)
 	output_dir = os.path.join(sip_folder, sip_title)
+	print(output_dir)
 	#simple_file_name = os.path.basename(full_filename)
 	file_original_path = f'{mis_mms}/{filename}'
+	print(file_original_path)
 	my_json = {}
 	my_json['physical_path'] = filepath
 	my_json["fileOriginalName"]= filename
@@ -65,9 +75,11 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 	my_json["label"] = podcast_name + ": " + episode_title
 	pres_master_json = json.dumps(my_json)
 	json_object = json.loads(pres_master_json )
-	json_object['fileOriginalPath'] = json_object['fileOriginalPath'][0]
-	json_object['MD5'] = json_object['MD5'][0]
+	json_object['fileOriginalPath'] = json_object['fileOriginalPath']
+	json_object['MD5'] = json_object['MD5']
 	pres_master_json = json.dumps([json_object])
+	print(pres_master_json)
+	
 	build_sip_from_json(
 	ie_dmd_dict=ie_dmd_dict,
 	pres_master_json=pres_master_json,
@@ -155,6 +167,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 			podcast_name =  episode["podcast_name"]
 			serial_mms = episode["serial_mms"]
 			mis_mms = episode["mis_mms"]
+			print(mis_mms)
 			episode_title = episode["episode_title"]
 			publish_link_to_record = episode["publish_link_to_record"]
 			tick = episode["tick"]
@@ -164,6 +177,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 			if tick and mis_mms and filepath and not sip:
 				logger.info(mis_mms)
 				file_count +=1
+				print(mis_mms)
 				output_dir, filename = generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title, filepath)
 				logger.info("SIP created in " + output_dir)
 				my_check = sip_checker(output_dir, mis_mms, filename, filesize, podcast_name)
