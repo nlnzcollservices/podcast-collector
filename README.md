@@ -8,8 +8,8 @@
 ## General Info
 ***
 This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
-### Screenshot
-![Image text](/documentation/podcasts.png)
+### Pipeline
+![Podcasts](/documentation/Podcasts.png)
 ## Technologies
 ***
 A list of technologies used within the project:
