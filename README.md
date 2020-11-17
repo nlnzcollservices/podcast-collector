@@ -13,7 +13,7 @@ This script is aimed to harvest podcasts' episodes based on rss feed, collect me
 ## Technologies
 ***
 A list of technologies used within the project:
-* [Python] (https://www.python.org/downloads/release/python-370/): Version  3.7.2
+* [Python](https://www.python.org/downloads/release/python-370/): Version  3.7.2 
 * [Google Spreadsheets APIs](https://developers.google.com/sheets/api/quickstart/python): Version current
 * [JHOVE](https://jhove.openpreservation.org/getting-started/): Vesion Rel. 1.24.1
 * [Exiftool](https://exiftool.org/): Version 12.10
