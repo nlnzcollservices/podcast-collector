@@ -18,7 +18,7 @@ A list of technologies used within the project:
 * [JHOVE](https://jhove.openpreservation.org/getting-started/): Vesion Rel. 1.24.1
 * [Exiftool](https://exiftool.org/): Version 12.10
 * [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
-* [Downloader](https://github.com/nlnzcollservices/file-downloader): donloader_light_modified
+* [Downloader](https://github.com/nlnzcollservices/file-downloader): Version downloader_light_modified
 * [Rosetta sip factory](https://github.com/NLNZDigitalPreservation/rosetta_sip_factory): Version 0.1.9
 * [beautifulsoup4](https://https://www.crummy.com/software/BeautifulSoup/bs4/doc/): Version 4.9.1
 * [configparser](https://docs.python.org/3/library/configparser.html): Version 5.0.0
