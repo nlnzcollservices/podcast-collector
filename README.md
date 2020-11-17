@@ -82,9 +82,15 @@ $ move secrets "path\to\your\secret\folder"
 ```
 Make sure that your client_secrets.json file is also in the same folder
 
-Fingers crossed and run it.
+Run podcasts_models.py to create db.
+
 ```
 $ cd scripts
+$ python podcasts_models.py
+
+```
+Fingers crossed and run it.
+```
 $ python podcasts.py
 ```
 ## Collaboration
