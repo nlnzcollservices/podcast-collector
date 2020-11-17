@@ -13,23 +13,21 @@ This script is aimed to harvest podcasts' episodes based on rss feed, collect me
 ## Technologies
 ***
 A list of technologies used within the project:
-* [Python 3.7.2] (tags/v3.7.2:9a3ffc0492): Version  Dec 23 2018
+* [Python] (https://www.python.org/downloads/release/python-370/): Version  3.7.2
 * [Google Spreadsheets APIs](https://developers.google.com/sheets/api/quickstart/python): Version current
-* [JHOVE](https://jhove.openpreservation.org/getting-started/) : Vesion Rel. 1.24.1
-* [Exiftool] (https://exiftool.org/): Version 12.10
+* [JHOVE](https://jhove.openpreservation.org/getting-started/): Vesion Rel. 1.24.1
+* [Exiftool](https://exiftool.org/): Version 12.10
 * [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
 * [Downloader](https://github.com/nlnzcollservices/file-downloader): donloader_light_modified
 * [Rosetta sip factory](https://github.com/NLNZDigitalPreservation/rosetta_sip_factory): Version 0.1.9
 * [beautifulsoup4](https://https://www.crummy.com/software/BeautifulSoup/bs4/doc/): Version 4.9.1
-* [bs4] (https://www.crummy.com/software/BeautifulSoup/bs4/doc/): Version 0.0.1
 * [configparser](https://docs.python.org/3/library/configparser.html): Version 5.0.0
 * [dateparser](https://pypi.org/project/dateparser/): Version 0.7.6
 * [feedparser](https://pypi.org/project/feedparser/): Version 5.2.1
 * [gspread](https://gspread.readthedocs.io/en/latest/): Version 3.6.0
 * [httplib2](https://pypi.org/project/httplib2/): Version 0.18.1
 * [lxml](https://pypi.org/project/lxml/): Version 4.5.2
-* [nltk](https://example.com): Version 3.5
-* [https://pypi.org/project/nltk/](https://example.com): Version 4.1.3
+* [nltk](https://pypi.org/project/nltk/): Version 3.5
 * [openpyxl](https://pypi.org/project/openpyxl/): Version 3.0.4
 * [peewee](http://docs.peewee-orm.com/en/latest/): Version 3.13.3
 * [pymarc](https://pypi.org/project/pymarc/): Version 4.0.0
