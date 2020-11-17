@@ -39,9 +39,9 @@ A list of technologies used within the project:
 
 Make sure that you installed all the modules and tools specified in the previous section. 
 
-Exiftool and Jhove should be able to be called from command line.(If not make sure that the foldeers with these tools is in your path. Use sysdm.cpl for Windows)  
+Exiftool and Jhove should be able to be called from command line. (If not make sure that the folders with these tools is in your path. Use sysdm.cpl for Windows)  
 
-You have your own client_secrets.json file as result of the process of enabling requests to the Google Sheets API. (Quickstart link is above in technology section)
+To enable requests to the Google Sheets API, you should get your own credentials stored in a client_secrets.json file. (See--Quickstart link in technology section above)
 
 Clone the repository from GitHub. 
 ```
@@ -55,9 +55,9 @@ Open settings.py for editing (for cmd)
 ```
 $ notepad settings.py
 ```
-Change all the full paths on yours
+Change all the full paths to yours
 
-Folders where Exlibris Rosetta takes the SIPs from production and sandbox in setting path section
+Folders where Exlibris Rosetta takes the SIPs from production and sandbox in the setting paths section
 ```
 rosetta_folder = r"your\production\Rosetta\path"
 rosetta_sb_folder = r"your\sandbox\Rosetta\path"
@@ -70,7 +70,7 @@ Folder with secrets in credentials section
 ```
 secrets_and_credentials_fold = r'path\to\your\secret\folder'
 ```
-Save it, close and run. (It will create project folders tree).
+Save it, close and run. (It will create a project folder tree)
 ```
 $ python settings.py
 ```
@@ -89,20 +89,9 @@ $ cd scripts
 $ python podcasts_models.py
 
 ```
-Fingers crossed and run it.
+Cross fingers and run!
 ```
 $ python podcasts.py
 ```
-## Collaboration
-***
-Ideas how to collaborate.
-> quote. 
-
-
-## FAQs
-***
-A list of frequently asked questions
-1. **First question**
-_Answer_ 
 
 
