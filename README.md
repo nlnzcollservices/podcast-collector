@@ -70,7 +70,10 @@ Folder with secrets in credentials section
 ```
 secrets_and_credentials_fold = r'path\to\your\secret\folder'
 ```
-Save it. Close.
+Save it, close and run. (It will create project folders tree).
+```
+$ python settings.py
+```
 Move modified with your keys for Alma and Google Sheets secret file to  "path\to\your\secret\folder"
 ```
 $ cd ..
