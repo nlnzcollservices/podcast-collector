@@ -73,7 +73,6 @@ Folder with secrets in credentials section
 secrets_and_credentials_fold = r'path\to\your\secret\folder'
 ```
 Save it. Close.
-```
 Move modified with your keys for Alma and Google Sheets secret file to  "path\to\your\secret\folder"
 ```
 $ cd ..
