@@ -16,6 +16,86 @@ logger = logging.getLogger(__name__)
 
 class DbHandler():
 
+        """
+        This class manages database operations.
+
+        Attributes
+        ----------
+
+        my_id (str) - id in db table
+        self.req_list (list) - list of fields required
+        self.returning (bool) - used in reading_db method, set True by defaul meaning that returns back list of dictionaries from db
+        self.podcast_name (str) - podcast name
+        self.serial_mms (str) - serial mms
+        self.serial_pol (str) - serial_pol
+        self.rss_link (str) - rss link
+        self.location (str) - podcast link
+        self.access_policy (str) - access policy normally set 100 for open source
+        self.publish_link_to_record (bool) - gives a chance to hide link to the episodes of particular podcast. Set True by default.
+        self.automated_flag (bool) - could process podcast without writing to spreadsheet. Set False by default.
+        self.last_issue (int) - timestamp  from the date of the last issue harvested
+        self.episode_title (str) - episode_title
+        self.subtitle (str) - eposode subtitle
+        self.description (str) - episode description
+        self.date (int) - timestamp for episode published date 
+        self.episode_link(str) - link to episode
+        self.tags(str) - tags if exist
+        self.date_harvested(int) - timestamp for date when podcast was harvested
+        self.harvest_link (str) - link to download mp3 
+        self.f100 (str) - metadata for 100 field from spreadsheet
+        self.f600_first (str) - metadata for 600 field from spreadsheet
+        self.f600_second (str) - metadata for 600 field from spreadsheet
+        self.f600_third (str) - metadata for 600 field from spreadsheet
+        self.f610_first (str) - metadata for 610 field from spreadsheet
+        self.f610_second (str) - metadata for 610 field from spreadsheet
+        self.f610_third (str) - metadata for 610 field from spreadsheet
+        self.f650_first (str) - metadata for 650 field from spreadsheet
+        self.f650_second (str) - metadata for 650 field from spreadsheet
+        self.f650_third (str) - metadata for 650 field from spreadsheet
+        self.f650_forth (str) - metadata for 650 field from spreadsheet
+        self.f655(str) - metadata for 655 field from spreadsheet
+        self.f700_first (str) - metadata for 700 field from spreadsheet
+        self.f700_second (str) - metadata for 700 field from spreadsheet
+        self.f700_third (str) - metadata for 700 field from spreadsheet
+        self.f710_first (str) - metadata for 710 field from spreadsheet
+        self.f710_second (str) - metadata for 710 field from spreadsheet
+        self.f710_third (str) - metadata for 710 field from spreadsheet
+        self.tick (bool) - could be set False if metadata was not updated with cataloguing information manually entered to the spreadsheet or True after updating
+        self.mis_mms (str) - mono in series mms id
+        self.mis_pol (str) - PO_line
+        self.holdings (str) - holding id
+        self.item (str) - item pid
+        self.receive (bool) - set True after item is received
+        self.ie_num (str) - ie number after injesting to Rosetta
+        self.filepath (str) - path to downloaded file
+        self.md5sum (str) - fixity
+        self.md5from_(str) - original fixity if exists
+        self.file_type (str) - file type (extension)
+        self.full_dict (dict) - contains full information from db for particular episode
+        self.returning_dict (dict) - contains information from db with required fields only
+        self.returning_list (list) - contains dictionaries wwith required information about episodes
+
+
+        Methods
+        -------
+        delete_done_from_db(self)
+        get_podcast_id(self, podcast_name)
+        table_creator(self, table, my_data)
+        update_from_spreadsheet(self, episode_title, description, f100, f600_first, f600_second, f600_third, f610_first, f610_second, f610_third, f650_first, f650_second, f650_third, f650_forth, f655_first, f700_first, f700_second, f700_third,  f710_first, f710_second, f710_third, tick)
+        update_the_last_issue(self)
+        insert_the_last_issue(self, podcast_name, last_issue)
+        ticked_titles(self)
+        db_update_ie(self, ie_num, episode_id)
+        db_update_holding(self, mms_id, holding_id)
+        db_update_updated(self, mms_id)
+        db_update_item_id(self, mms_id, item_pid)
+        db_update_mms(self, mms_id, episode_title)
+        db_update_sip(self, episode_title)
+        db_reader(self, req_list, podcast_names=None, returning=True)
+
+        """
+
+
     def __init__(self):
 
         self.my_id = None
