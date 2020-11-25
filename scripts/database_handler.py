@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class DbHandler():
 
-        """
+    """
         This class manages database operations.
 
         Attributes
@@ -93,7 +93,7 @@ class DbHandler():
         db_update_sip(self, episode_title)
         db_reader(self, req_list, podcast_names=None, returning=True)
 
-        """
+    """
 
 
     def __init__(self):
@@ -167,7 +167,6 @@ class DbHandler():
                 q.execute()
                 q = Episode.delete().where(Episode.id == epis.id)
                 q.execute()
-
 
     def get_podcast_id(self, podcast_name):
 

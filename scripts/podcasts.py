@@ -207,11 +207,11 @@ class Podcast_pipeline():
 		#list of files to delete
 		file_list_to_delete = []
 		#list of all filepaths in db
-		filepath_in_db_list = [el["filepath"] for el in file_dictionary if el !={}]
+		filepath_in_db_list = ["\\".join(el["filepath"].split("\\")[-2:]) for el in file_dictionary if el !={}]
 		for root, dirs, files in os.walk(file_folder):
 			for name in files:
 				fl_path = os.path.join(root, name)
-				if fl_path not in filepath_in_db_list:
+				if "\\".join(fl_path.split("\\")[-2:]) not in filepath_in_db_list:
 					file_list_to_delete.append(fl_path)
 		[os.remove(del_fl) for del_fl in file_list_to_delete]
 		logger.info("Files deleted during cleaning")
@@ -424,7 +424,7 @@ class Podcast_pipeline():
 
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		self.file_cleaning()
+		#self.file_cleaning()
 		self.get_ies_from_reports()
 		lst = self.read_ies_file()
 		self.insert_ies()
