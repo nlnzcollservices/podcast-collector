@@ -13,12 +13,12 @@ Before starting the process of adding a new podcast make sure that the new podca
 ## Methods of obtaining a template from ExLibris Alma
 ***
 There are 3 ways to download a template:
-### Alma Enhancer and Tampermonkey FireFox add-on.
+#### Alma Enhancer and Tampermonkey FireFox add-on.
 File download MARK as XML option 
 Save the template in “assets”, “text templates” folder 
 Run   text_to_xml.py script from the script folder
 Check and copy the template to “assets”, “templates” folder
-### Alma 
+#### Alma 
 Create a record from a template
 Add 245 field
 Save the record
@@ -26,7 +26,7 @@ Create a set from the records
 Run a job to import a set
 Separate the templates and save them by their own names in “assets”, “templates” folder
 Delete all the records.
-### Possible half python, half Alma  way.
+#### Possible half python, half Alma  way.
 Create a record
 Add 245 field
 Save the record
