@@ -1,8 +1,8 @@
 #How_to_add_a_new_podcast
 ## Table of Contents
 1. [Preparation](#preparation)
-2. [Methods of obtaining a template from ExLibris Alma](#methods)
-3. [Add inforamtion to podcast dictionary](#podcast-dictionary-population)
+2. [Methods of obtaining a template from ExLibris Alma](#methods-of-obtaining-a-template-from-ExLibris Alma)
+3. [Add inforamtion to podcast dictionary](#add-inforamtion-to-podcast-dictionary)
 4. [Collaboration](#collaboration)
 5. [FAQs](#faqs)
 ## Methods of obtaining a template from ExLibris Alma
