@@ -2,9 +2,9 @@
 ## Table of Contents
 1. [Preparation](#preparation)
 2. [Methods of obtaining a template from ExLibris Alma](#methods-of-obtaining-a-template-from-exLibris-alma)
-3. [Add inforamtion to podcast dictionary](#add-inforamtion-to-podcast-dictionary)
-4. [Collaboration](#collaboration)
-5. [FAQs](#faqs)
+3. [Adding inforamtion to podcast dictionary](#adding-inforamtion-to-podcast-dictionary)
+4. [Making necessary changes to Alma record creating rools](#making-necessary-changes-to-alma-record-creating-rools)
+5. [Possible rules for harvester and troubleshoting](#possible-rules-for-harvester-and-troubleshoting)
 ## Methods of obtaining a template from ExLibris Alma
 ***
 There are 3 ways to download a template:
@@ -32,7 +32,7 @@ Save them as template in “assets”, “templates” folder
 Delete the records by mms vie delete API.
 
 This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
-### Add inforamtion to podcast dictionary
+### Adding inforamtion to podcast dictionary
 ***
 Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in the following format
 '''
@@ -42,9 +42,9 @@ publish_link_to_record  should be turned False  if it should be concealed from p
 automated_flag should be turned True if there is no cataloguing corrections required.
 access policy should be turned 200 for restricted access.
 
-## Make necessary changes in Alma record creating rools
+## Making necessary changes to Alma record creating rools
 ***
-Open podcasts1_create.py
+Open podcasts1_create_record.py
 Think how the title will be parsed depending if it contains episode number , season or other information not wishable for 245 marc field and add the podcast name to
 existing rules or create your own.
 Example:
@@ -58,7 +58,7 @@ Example:
 The above script is taking all episode titles for podcast with the name "Podcast analytics" which is sometimes originally in the following format
 "S3 E23: The Last Dance Ep1 NO SPOILERS!". The above script takes all the part after the colon for 245 field and first part for 490 and 830 (or 810 depends which one in the template) field.
 
-## Possible rules for harvester and troubleshoting.
+## Possible rules for harvester and troubleshoting
 ***
 After running the podcast.py script there are could be some errors or things to adjust in podcsats0_harvester.py script. 
 A few rules are added here as well.
