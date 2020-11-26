@@ -37,7 +37,7 @@ Save them as template in “assets”, “templates” folder
 Delete the records by mms vie delete API.
 
 This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
-### Adding inforamtion to podcast dictionary
+## Adding inforamtion to podcast dictionary
 ***
 Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in the following format
 ```
