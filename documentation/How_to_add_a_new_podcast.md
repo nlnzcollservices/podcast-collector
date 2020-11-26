@@ -20,28 +20,27 @@ Alma Enhancer is internal script so if you are  not in the Library use other met
 Otherwise install Tampermonkey FireFox add-on.
 Add Alma Enchancer script from Alma Enhancement Scripts folder to Tampermonkey(create new script and copy content of the files from the folder)
 Use file download MARK as XML option.
-Save the template in “assets”, “text templates” folder 
-Run   **text_to_xml.py** script from the script folder
-Check and copy the template to “assets”, “templates” folder
+Save the template in “assets”, “text templates” folder. 
+Run   **text_to_xml.py** script from the script folder.
+Check and copy the template to “assets”/“templates” folder.
 #### Alma 
 Create a record from a template
-Add 245 field
-Save the record
-Create a set from the records
+Add 245 field.
+Save the record.
+Create a set from the records.
 Run a job to import a set
-Separate the templates and save them by their own names in “assets”, “templates” folder
+Separate the templates and save them by their own names in “assets”/“templates” folder.
 Delete all the records.
 #### Possible half python, half Alma  way.
 Create a record
 Add 245 field
 Save the record
 Keep the mms id.
-Use python script:
+Use python:
 Get the records by mms via get API.
-Save them as template in “assets”, “templates” folder
+Save them as template in “assets”/“templates” folder.
 Delete the records by mms via delete API or manually from GUI.
 
-This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
 ## Adding inforamtion to podcast dictionary
 ***
 Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in the following format
