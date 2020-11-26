@@ -11,7 +11,7 @@
 ## Preparation
 ***
 This podcast pipeline is manly based on information obrained from rss feeds. So existance of rss link is important. Though it is possible to use the script for podcasts without rss link, it require some manual data entry to google spreadsheet for each episode. And running additional script.
-Before starting the process of adding a new podcast make sure that the new podcast already has a serial record, serial pol and template in Alma.
+Before starting the process of adding a new podcast make sure that the new podcast already has a serial record, purchase order attached to it and template in Alma.
 ## Methods of obtaining a template from ExLibris Alma
 ***
 There are 3 ways to download a template:
