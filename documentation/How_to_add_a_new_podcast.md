@@ -1,4 +1,6 @@
-#How to adda a new podcast guide
+
+#How to add a new podcast guide
+
 ## Table of Contents
 1. [Preparation](#preparation)
 2. [Methods of obtaining a template from ExLibris Alma](#methods-of-obtaining-a-template-from-exLibris-alma)
