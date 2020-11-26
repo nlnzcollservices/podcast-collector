@@ -10,15 +10,18 @@
 
 ## Preparation
 ***
-This podcast pipeline is manly based on information obrained from rss feeds. So existance of rss link is important. Though it is possible to use the script for podcasts without rss link, it require some manual data entry to google spreadsheet for each episode. And running additional script.
+This podcast pipeline is based on information obrained from rss feeds. So existance of rss link is important. Though it is possible to use the script for podcasts without rss link, it require some manual data entry to google spreadsheet for each episode amd running an additional script afterwords each time.
 Before starting the process of adding a new podcast make sure that the new podcast already has a serial record, purchase order attached to it and template in Alma.
 ## Methods of obtaining a template from ExLibris Alma
 ***
-There are 3 ways to download a template:
-#### Alma Enhancer and Tampermonkey FireFox add-on.
-File download MARK as XML option 
+There are 3 (or more) ways to download a template:
+#### Alma Enhancer and Tampermonkey FireFox add-on. 
+Alma Enhancer is internal script so if you are  not in the Library use other methods.
+Otherwise install Tampermonkey FireFox add-on.
+Add Alma Enchancer script from Alma Enhancement Scripts folder to Tampermonkey(create new script and copy content of the files from the folder)
+Use file download MARK as XML option.
 Save the template in “assets”, “text templates” folder 
-Run   text_to_xml.py script from the script folder
+Run   **text_to_xml.py** script from the script folder
 Check and copy the template to “assets”, “templates” folder
 #### Alma 
 Create a record from a template
@@ -36,7 +39,7 @@ Keep the mms id.
 Use python script:
 Get the records by mms via get API.
 Save them as template in “assets”, “templates” folder
-Delete the records by mms vie delete API.
+Delete the records by mms via delete API or manually from GUI.
 
 This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
 ## Adding inforamtion to podcast dictionary
