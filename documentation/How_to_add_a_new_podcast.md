@@ -66,7 +66,7 @@ The above script is taking all episode titles for podcast with the name "Advance
 ## Possible rules for harvester and troubleshooting
 ***
 After running the podcast.py script there are could be some errors or things to adjust in **podcsats0_harvester.py** script. 
-A few rules are added here as well.
+A few rules can be and sometimes have to be added here as well.
 Example:
 ```
 					if self.podcast_name in ["Top writers radio show", "Dont give up your day job"]:
