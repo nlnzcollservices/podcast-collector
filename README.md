@@ -3,7 +3,7 @@
 1. [General Info](#general-info)
 2. [Technologies](#technologies)
 3. [Installation](#installation)
-4. [Collaboration](#collaboration)
+4. [Collaboration and integration](#collaboration-and-itegration)
 5. [FAQs](#faqs)
 ## General Info
 ***
@@ -93,5 +93,11 @@ Cross fingers and run!
 ```
 $ python podcasts.py
 ```
+##Collaboration and integration
+
+There is also possible to attach other scripts to the existing pipline. For backlogs or for those podcasts which do not have rss feed.
+There should be scraper script which populates existing __podcsat.db__ and also inserts rows to the existing google spreadsheet.
+
+
 
 
