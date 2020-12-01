@@ -2,7 +2,7 @@
 
 As the script is based on  strict order of cells in row where which piece of information is set, not on column names, there is a special order for columns (starting from 0 as it is corresponds to Indices).
 
-**Machine writable and readable
+**Machine writable and readable**
 
 0. A Podcast name
 1. B Serial MMS
@@ -39,7 +39,7 @@ As the script is based on  strict order of cells in row where which piece of inf
 
 28. Tick
 
-**Could be filled by cataloguin team for their use. Not machine readable)**
+**Could be filled by cataloguin team for their use. Not machine readable**
 
 29. Cataloguing notices
 
