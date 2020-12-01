@@ -100,7 +100,7 @@ It could be useful for backlogs or for those podcasts which do not have rss feed
 For this purpose should be written anoter python website harvester which should compulsory done the next actions:
 - manages to download files to existing "files" folder structure;
 - populates existing __podcsat.db__ ;
-- also inserts rows to the existing google spreadsheet. 
+- inserts rows to the existing google spreadsheet. 
 
 
 
