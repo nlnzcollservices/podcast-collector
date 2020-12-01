@@ -75,4 +75,4 @@ Example:
 		if self.podcast_name in ["Top writers radio show", "Dont give up your day job"]:
 			self.episode_link = ""
 ```
-The above scipt is setting episode_links for these to podcsats as empty sting "". As it does not exist in rss feed
+__The above scipt is setting episode_links for these to podcsats as empty sting "". As it does not exist in rss feed__
