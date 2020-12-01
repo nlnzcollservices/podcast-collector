@@ -13,7 +13,9 @@ As the script is based on  strict order of cells in row where which piece of inf
 6. G Episode date
 7. H Tags
 8. I Episode download link
-**Fields to be filled in by cataloguing team. Machine readable
+
+**Fields to be filled in by cataloguing team. Machine readable**
+
 9. J 100
 10. K 600
 11. L 600
@@ -32,12 +34,20 @@ As the script is based on  strict order of cells in row where which piece of inf
 25. Y 710
 26. Z 710
 27. AA 710
+
 **If done True, orherwise False. Machine readable**
+
 28. Tick
+
 **Could be filled by cataloguin team for their use. Not machine readable)**
+
 29. Cataloguing notices
+
 **Not implemented yet**
+
 30. Automatic notice
+
 **For manually entered podcasts only. Machine readable**
+
 31. Season number
 32. Filepath								
