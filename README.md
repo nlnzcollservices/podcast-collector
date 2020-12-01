@@ -93,7 +93,7 @@ Cross fingers and run!
 ```
 $ python podcasts.py
 ```
-##Collaboration and integration
+## Collaboration and integration
 
 There is also possible to attach other scripts to the existing pipline. For backlogs or for those podcasts which do not have rss feed.
 There should be scraper script which populates existing __podcsat.db__ and also inserts rows to the existing google spreadsheet.
