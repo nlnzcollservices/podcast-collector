@@ -101,12 +101,12 @@ For this purpose should be written anoter python website harvester which should 
 - manages to download files to existing "files" folder structure;
 - populates existing __podcsat.db__ (use  DbHandler.table_creator(talbe_name, {table_data}) method) in database_handler.py);
 - inserts rows to the existing google spreadsheet. See example from __podcasts0_harvester.py__ bellow.
-```c = gspread.authorize(creds)
-  gs = c.open_by_key(podcast_sprsh)
-  #change if the name or id of the worksheet is different
-  ws = gs.get_worksheet(0)
-  ...
-  ws.append_row([podcast_name, serial_mms, "",episode_title, description, episode_link, episode_date in'%B %d %Y'format, tags, episode_download_link])
+```
+c = gspread.authorize(creds)
+gs = c.open_by_key(podcast_sprsh)
+ws = gs.get_worksheet(0)
+...
+ws.append_row([podcast_name, serial_mms, "",episode_title, description, episode_link, episode_date in'%B %d %Y'format, tags, episode_download_link])
  ```
 		
 
