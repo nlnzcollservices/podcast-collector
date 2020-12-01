@@ -37,17 +37,17 @@ As the script is based on  strict order of cells in row where which piece of inf
 
 **If done True, orherwise False. Machine readable**
 
-28. Tick
+28. AB Tick
 
 **Could be filled by cataloguin team for their use. Not machine readable**
 
-29. Cataloguing notices
+29. AC Cataloguing notices
 
 **Not implemented yet**
 
-30. Automatic notice
+30. AD Automatic notice
 
 **For manually entered podcasts only. Machine readable**
 
-31. Season number
-32. Filepath								
+31. AE Season number
+32. AF Filepath								
