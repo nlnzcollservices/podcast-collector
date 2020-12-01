@@ -95,8 +95,14 @@ $ python podcasts.py
 ```
 ## Collaboration and integration
 
-There is also possible to attach other scripts to the existing pipline. For backlogs or for those podcasts which do not have rss feed.
-There should be scraper script which populates existing __podcsat.db__ and also inserts rows to the existing google spreadsheet.
+There is also possible to attach other scripts to the existing pipline. 
+It could be useful for backlogs or for those podcasts which do not have rss feed.
+For this purpose should be written anoter python website harvester which should compulsory done the next actions:
+- manages to download files to existing "file" folders structure;
+- populates existing __podcsat.db__ ;
+- also inserts rows to the existing google spreadsheet. 
+
+
 
 
 
