@@ -64,7 +64,7 @@ Example:
 			f830v = str(f490v)
 ```
 The above script is taking all episode titles for podcast with the name "Advanced analytics" which is sometimes originally in the following format
-"S3 E23: The Last Dance Ep1 NO SPOILERS!". The above script takes all the part after the colon for 245 field and first part for 490 and 830 (or 810 depends which one in the template) field.
+_"S3 E23: The Last Dance Ep1 NO SPOILERS!"_. The above script takes all the part after the colon for 245 field and first part for 490 and 830 (or 810 depends which one in the template) field.
 
 ## Possible rules for harvester and troubleshooting
 ***
