@@ -99,7 +99,7 @@ It is also possible to attach other scripts to the existing pipline.
 It could be useful for backlogs or for those podcasts which do not have rss feeds.
 For this purpose should be written anoter python website harvester which should do the next actions:
 - manages to download files to existing "files" folder structure;
-- populates existing __podcsat.db__ (use  DbHandler.table_creator(talbe_name, {table_data}) method) in database_handler.py);
+- populates existing __podcsat.db__ (use  _DbHandler.table_creator(talbe_name, {table_data})_ method in database_handler.py);
 - inserts rows to the existing google spreadsheet. See example from __podcasts0_harvester.py__ bellow.
 ```
 c = gspread.authorize(creds)
