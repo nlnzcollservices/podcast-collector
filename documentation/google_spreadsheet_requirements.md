@@ -1,7 +1,9 @@
 # Requirements for data structure in Google spreadsheet 
 
 As the script is based on  strict order of cells in row where which piece of information is set, not on column names, there is a special order for columns (starting from 0 as it is corresponds to Indices).
+
 [//]: # (Machine writable and readable)
+
 0. A Podcast name
 1. B Serial MMS
 2. C RSS link
