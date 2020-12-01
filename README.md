@@ -3,7 +3,7 @@
 1. [General Info](#general-info)
 2. [Technologies](#technologies)
 3. [Installation](#installation)
-4. [Collaboration and integration](#collaboration-and-itegration)
+4. [Collaboration and integration](#collaboration-and-integration)
 5. [FAQs](#faqs)
 ## General Info
 ***
