@@ -49,5 +49,6 @@ As the script is based on  strict order of cells in row where which piece of inf
 
 **For manually entered podcasts only. Machine readable**
 
-31. AE Season number
-32. AF Filepath								
+31. AE Episode number
+32. AF Season number
+33. AG Filepath	
