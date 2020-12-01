@@ -1,18 +1,18 @@
 # Requirements for data structure in Google spreadsheet 
 
 As the script is based on  strict order of cells in row where which piece of information is set, not on column names, there is a special order for columns (starting from 0 as it is corresponds to Indices).
-  [comment]: # (Machine writable and readable)
-  0. A Podcast name
-	1. B Serial MMS
-  2. C RSS link
-  3. D Episode title
-  4. E Episode description
-  5. F Episode link
-  6. G Episode date
-  7. Tags
-  8. Episode download link
-  [comment]: # (Fields to be filled in by cataloguing team. Machine readable)
-  9. 100
+[//]: # (Machine writable and readable)
+0. A Podcast name
+1. B Serial MMS
+2. C RSS link
+3. D Episode title
+4. E Episode description
+5. F Episode link
+6. G Episode date
+7. Tags
+8. Episode download link
+[comment]: # (Fields to be filled in by cataloguing team. Machine readable)
+9. 100
   10. 600
   11. 600
   12. 600
