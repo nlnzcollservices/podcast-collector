@@ -13,11 +13,31 @@
 ## 2. Introduction
 The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, if required, creating bibliograhic record in Exlibris Alma and managing files to be preserved with Exlibris Rosetta.
 
-### Overview, Problem Description, Summary, or Abstract
-
-The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIP and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide.
+### a. Overview, Problem Description, Summary, or Abstract
 
     Summary of the problem (from the perspective of the user), the context, suggested solution, and the stakeholders. 
+
+The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIPs and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide. The system should be stable and successfully run from any step after interruption. 
+
+The script contains several code blocks and database. Each block is responsible for one of the steps in the pipelinse
+ 
+ - harvesting episodes
+ - creating record
+ - creating and submitting SIP
+ - finishin record
+ - cleaning files, db and spreadsheet
+ 
+ and special operations 
+ 
+ - database
+ - Alma APIs
+ - general settings
+
+There are the flags which mark the end of each step, and script will not run the next one, until previous is finished, which allow to run and rerun script as many times as required.
+
+The script is using Downloader module, Google spreadsheet and APIs, JHOVe and Exiftool.
+
+
 
 b. Glossary  or Terminology
 
