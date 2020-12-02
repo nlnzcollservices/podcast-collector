@@ -11,13 +11,13 @@
     Epic, ticket, issue, or task tracker reference link ?
 
 ## 2. Introduction
-The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, if required, creating bibliograhic record in Exlibris Alma and managing files to be preserved with Exlibris Rosetta.
+The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, creating bibliograhic records in Exlibris Alma and managing audio files to be preserved with Exlibris Rosetta.
 
 ### a. Overview, Problem Description, Summary, or Abstract
 
     Summary of the problem (from the perspective of the user), the context, suggested solution, and the stakeholders. 
 
-The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIPs and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide. The system should be stable and successfully run from any step after interruption. 
+The aim of the script is a systematic automative collecting of podcast episodes and managing audio file preservation in the library system. It contineously tracks new episodes published in rss feed, collects audio files and episodes' metadata and places them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, creatse full bibliographic records, checks files, creates SIPs and places them in a special folder for futher preservation, finishes aquisition part by creating items and updates the existing record with additional field to allow them be published worldwide. It is stable againsed and can be run from any step after interruption. 
 
 The script contains several code blocks and database. Each block is responsible for one of the steps in the pipelinse
  
@@ -35,15 +35,13 @@ The script contains several code blocks and database. Each block is responsible 
 
 There are the flags which mark the end of each step, and script will not run the next one, until previous is finished, which allow to run and rerun script as many times as required.
 
-The script is using Downloader module, Google spreadsheet and APIs, JHOVe and Exiftool.
+The script is using Downloader module, Google spreadsheet and APIs, JHOVe and Exiftool. Could be combined with Macro Express  and batch script to run automatucally on schedule.
 
-
-
-b. Glossary  or Terminology
+## b. Glossary  or Terminology
 
     New terms you come across as you research your design or terms you may suspect your readers/stakeholders not to know.  
 
-c. Context or Background
+### c. Context or Background
 
     Reasons why the problem is worth solving
     Origin of the problem
@@ -52,32 +50,44 @@ c. Context or Background
     How the product relates to team goals, OKRs
     How the solution fits into the overall product roadmap and strategy
     How the solution fits into the technical strategy
+The purpuse of script to reduce manual work as much as possible in context of increasing amount of digital materials.  The podcast episodes previously were preserved manually one by one. So the script helps to safe time. 
 
-d. Goals or Product and Technical Requirements
+### d. Goals or Product and Technical Requirements
 
     Product requirements in the form of user stories 
     Technical requirements
 
- e. Non-Goals or Out of Scope
+### e. Non-Goals or Out of Scope
 
     Product and technical requirements that will be disregarded
 
-f. Future Goals
+### f. Future Goals
 
     Product and technical requirements slated for a future time
 
-g. Assumptions
+Increase amount of collecting podcast titles. And attach scrapers for podcast without feed.
+
+
+### g. Assumptions
 
     Conditions and resources that need to be present and accessible for the solution to work as described. 
+    
+For stable and continuess work podcast should have rss feeds, the same title, the same format of title, otherwise additional adjustment required.
 
 ## 3. Solutions
 
-a. Current or Existing Solution / Design
+### a. Current or Existing Solution / Design
 
     Current solution description
     Pros and cons of the current solution
+Pros:
+Stable, rerunable, interruptable, includes all the stages of creating library record with digital source.
 
-b. Suggested or Proposed Solution / Design 
+Cons:
+
+Depending on cataloguing impact, Google account and APIs, Alma APIs
+
+### b. Suggested or Proposed Solution / Design 
 
     External components that the solution will interact with and that it will alter
     Dependencies of the current solution
@@ -115,7 +125,9 @@ c. Test Plan
 
     Explanations of how the tests will make sure user requirements are met
     Unit tests
+Will make a test for checking bib record.
     Integrations tests
+Will make Test for writing to spreadsheet, Test for get API
     QA
 
 d. Monitoring and Alerting Plan 
