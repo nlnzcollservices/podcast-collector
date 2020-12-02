@@ -11,7 +11,6 @@
     Epic, ticket, issue, or task tracker reference link ?
 
 2. Introduction
- 
 The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, if required, creating bibliograhic record in Exlibris Alma and managing files to be preserved with Exlibris Rosetta.
 
 a. Overview, Problem Description, Summary, or Abstract
