@@ -15,7 +15,7 @@ The following script is bulky collecting podcast episodes, interracting with goo
 
 ### Overview, Problem Description, Summary, or Abstract
 
-    The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIP and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide.
+The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIP and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide.
 
     Summary of the problem (from the perspective of the user), the context, suggested solution, and the stakeholders. 
 
@@ -50,7 +50,7 @@ g. Assumptions
 
     Conditions and resources that need to be present and accessible for the solution to work as described. 
 
-3. Solutions
+## 3. Solutions
 
 a. Current or Existing Solution / Design
 
