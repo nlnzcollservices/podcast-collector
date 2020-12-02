@@ -1,6 +1,6 @@
 # Technical description
 
-1. Front matter
+## 1. Front matter
 
     Title **Podcasts**
     Author(s)?
@@ -10,10 +10,10 @@
     Last updated **2020**
     Epic, ticket, issue, or task tracker reference link ?
 
-2. Introduction
+## 2. Introduction
 The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, if required, creating bibliograhic record in Exlibris Alma and managing files to be preserved with Exlibris Rosetta.
 
-a. Overview, Problem Description, Summary, or Abstract
+### Overview, Problem Description, Summary, or Abstract
 
     The aim of the script is a systematic automative collecting of podcast episodes and managing their preservation in the library system. It should contineously track new episodes published in rss feed, collect audio files and episodes' metadata and place them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, create full bibliographic records, check files, create SIP and place them in a special folder for futher preservation, finish aquisition part by creating items and update the existing record with additional field to allow them be published worldwide.
 
