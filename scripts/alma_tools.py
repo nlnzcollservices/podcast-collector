@@ -103,7 +103,7 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def delete_portfolio(self, mms_id, portfolio_id, oprions = {}):
+	def delete_portfolio(self, mms_id, portfolio_id, options = {}):
 
 		"""
 		Deletes portfolio
