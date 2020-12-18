@@ -103,6 +103,24 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+	def delete_portfolio(self, mms_id, portfolio_id, oprions = {}):
+
+		"""
+		Deletes portfolio
+		Argumets:
+			mms_id(str) - id of the bibliographic record
+			portfolio_id(str) - id of the portfolio
+		Returns:
+			None
+		"""
+		
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.delete (f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+
+
 	def create_bib(self, xml_record_data, options = {}):
 
 		"""
