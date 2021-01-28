@@ -505,7 +505,7 @@ def __init__(self, key):
 			logger.info("Creating Alma record")
 		my_db = DbHandler()
 		my_dict=my_db.db_reader(
-			["podcast_name", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","ie_num","tags","description",
+			["podcast_name", "podcast_id", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","ie_num","tags","description",
 			"date","episode_link","harvest_link","date_harvested","f100","f600_first","f600_second","f600_third","f610_first",
 			"f610_second","f610_third","f650_first","f650_second","f650_third","f650_forth","f655","f700_first","f700_second",
 			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
@@ -516,6 +516,7 @@ def __init__(self, key):
 					self.template_path = os.path.join(template_folder, epis["template_name"])
 					self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
 					self.podcast_name = epis["podcast_name"]
+					self.podcast_id = epis["podcast_id"]
 					self.serial_mms = epis["serial_mms"]
 					self.rss_link = epis["rss_link"]
 					self.location = epis["location"]
@@ -569,7 +570,7 @@ def __init__(self, key):
 									statement =  "Could not grab mms from {}. {}".format ( my_alma.xml_response_data, str(e)  ) 
 									logger.error(statement)
 						if self.mms_id:
-							my_db.db_update_mms (self.mms_id, self.episode_title)
+							my_db.db_update_mms (self.mms_id, self.episode_title, self.podcast_id)
 								
 					else:
 						if self.mms_id:

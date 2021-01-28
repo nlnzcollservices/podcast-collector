@@ -289,10 +289,10 @@ class DbHandler():
         q = Episode.update(item = item_pid ).where(Episode.mis_mms == mms_id)
         q.execute()
 
-    def db_update_mms(self, mms_id, episode_title):
+    def db_update_mms(self, mms_id, episode_title, podcast_id):
 
         """ Updating Alma mms id in db"""
-        q = Episode.update(mis_mms = mms_id ).where(Episode.episode_title == episode_title)
+        q = Episode.update(mis_mms = mms_id ).where(Episode.episode_title == episode_title, Episode.podcast = podcast_id)
         q.execute()
 
     def db_update_sip(self, episode_title):
