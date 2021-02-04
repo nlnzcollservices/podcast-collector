@@ -194,6 +194,8 @@ class Podcast_pipeline():
 							logger.info("IE for db: " + ies_list[0])
 							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
 							if not ies_list[0] in rosetta_ies_list:
+								print(ies_list[0])
+								print(mms)
 								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
 								quit()
 
@@ -255,7 +257,7 @@ class Podcast_pipeline():
 		my_alma_record.cleaning_routine(new_mms_list_for_updating)
 		report_filename = "report_{}.txt".format(dt.now().strftime("%Y-%m-%d_%H"))
 		report_full_filename= os.path.join(report_folder,report_filename)	 		
-		report_dictionary = self.db_handler.db_reader(["podcast_name","episode_title","mis_mms","holdings","item","ie_num","filepath", "updated"],None,True)
+		report_dictionary = self.db_handler.db_reader(["podcast_name","serial_mms","episode_title","mis_mms","holdings","item","ie_num","filepath", "updated"],None,True)
 		for epis in report_dictionary:
 			if epis != {} and "item" in epis.keys():
 				if epis["item"] and epis["ie_num"]:
@@ -266,13 +268,26 @@ class Podcast_pipeline():
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(sip_folder , epis["mis_mms"] ))
+					 	shutil.rmtree(os.path.join(sip_folder , epis["serial_mms"],"content","streems", epis["mis_mms"] ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(rosetta_folder, epis["mis_mms"] ))
+					 	os.remove(os.path.join(sip_folder , epis["serial_mms"],"content",epis["mis_mms"]+".xml" ))
+					except FileNotFoundError as e:
+					 	logger.error(str(e))
+					try:
+					 	shutil.rmtree(os.path.join(rosetta_folder,epis["serial_mms"],"content","streems", epis["mis_mms"] ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
+					try:
+					 	os.remove(os.path.join(rosetta_folder,epis["serial_mms"],"content", epis["mis_mms"]+".xml" ))
+					except FileNotFoundError as e:
+						logger.error(str(e))
+					try:
+						os.remove(os.path.join(rosetta_folder,epis["serial_mms"],"done"))
+					except FileNotFoundError as e:
+						logger.error(str(e))
+				
 
 
 	def load_spreadsheet(self):
@@ -311,7 +326,7 @@ class Podcast_pipeline():
 				try:
 					my_row = ws.row_values(my_row_numb)
 					sleep(1)
-					logger.info(my_row)
+					logger.info(my_row[0,1,3])
 
 				except Exception as e:
 					logger.warning(str(e))
@@ -432,9 +447,9 @@ class Podcast_pipeline():
 		self.db_handler.update_the_last_issue()
 		self.db_handler.delete_done_from_db()
 		self.update_database_from_spreadsheetand_delete_row()
-		##Set "sSb" if whould like records ins "sb"
-		##Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		##Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
+		#Set "sSb" if whould like records ins "sb"
+		#Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
+		#Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
 		my_rec = RecordCreator(self.alma_key)
 		my_rec.record_creating_routine()
 		sip_routine()

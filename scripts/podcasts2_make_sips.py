@@ -120,10 +120,13 @@ def copy_sip(output_dir, destination, mis_mms, filename):
 		destination(str) - rosetta production or sb folder
 		filename(str) - name of file
 	"""
-
+	content_folder = os.path.join(destination,"content")
+	print(content_folder)
 	if not os.path.isdir(destination):
 		os.makedirs(os.path.join(destination, "content", "streams"))
-	shutil.copyfile(os.path.join(output_dir, "content", mis_mms+".xml"), os.path.join(destination, "content", "dc.xml"))
+	elif not os.path.isdir(content_folder):
+		os.makedirs(os.path.join(destination, "content", "streams"))
+	shutil.copyfile(os.path.join(output_dir, "content", "dc.xml"), os.path.join(destination, "content", "dc.xml"))
 	shutil.copyfile(os.path.join(output_dir, "content", mis_mms+".xml"), os.path.join(destination, "content", mis_mms+".xml"))
 	if not os.path.isdir(os.path.join(destination, "content", "streams", mis_mms)):
 		os.makedirs(os.path.join(destination, "content", "streams", mis_mms))
@@ -155,12 +158,17 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 			podcast_name =  episode["podcast_name"]
 			serial_mms = episode["serial_mms"]
 			mis_mms = episode["mis_mms"]
-			print(mis_mms)
+			logger.debug(mis_mms)
 			episode_title = episode["episode_title"]
 			publish_link_to_record = episode["publish_link_to_record"]
 			tick = episode["tick"]
 			sip = episode["sip"]
 			filepath = episode["filepath"]
+			logger.debug(episode["podcast_name"])
+			logger.debug(episode["episode_title"])
+			logger.debug(episode["filepath"])
+			logger.debug("!!!")
+
 			filesize = episode["filesize"]
 			if tick and mis_mms and filepath and not sip:
 				logger.info(mis_mms)

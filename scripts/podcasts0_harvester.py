@@ -490,7 +490,6 @@ def harvest():
 
 	flag_for_podc_table = False
 	for podcast_name in podcasts_dict:
-		logger.info(podcast_name)
 		my_podcast = DbHandler()
 		name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
 		if name_dict != []:
