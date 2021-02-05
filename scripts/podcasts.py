@@ -326,7 +326,7 @@ class Podcast_pipeline():
 				try:
 					my_row = ws.row_values(my_row_numb)
 					sleep(1)
-					logger.info(my_row[0,1,3])
+					logger.info([my_row[0],my_row[1],my_row[3]])
 
 				except Exception as e:
 					logger.warning(str(e))
