@@ -24,6 +24,8 @@ class AlmaTools():
 		dictionary which contains any API request parameters additional to the necessary API key. Example: "{"limit":"100"}"
 	status_code : int
 		status code for the Alma request
+	xml_response_data:
+		response in xml format
 
 	Methods
 	-------
