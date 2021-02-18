@@ -157,39 +157,118 @@ class Manage_fields():
 				else:
 					logger.info("Already has 942 field")
 
+	def get_mms_list_from_alma_set_xlsx_result(self, path_to_xlsx):
+		"""Reads 'result.xlsx' file and extracts mms id list from it
+		Parameters:
+			path_to_xlsx (str) - path to spreadsheet exported from Alma set
+		Returns:
+			mms_list (list) - contains list of mms ids.
+		"""
+		mms_list = []
+		wb = load_workbook(path_to_xlsx)
+		ws= wb.get_sheet_by_name("results")
+		for row in ws.iter_rows(min_row=2):
+			mms_list.append(row[26].value)
+		return(mms_list)
 
+
+
+	def custom_update_routine(self, mms_id_list, text_to_change, new_text):
+		"""Manages process of custom updating. Replaces one text with another in alma record
+		Parameters:
+			mms_id_list(list) - list of mms ids to change
+			text_to_change (str) - text in the record you would like to replace.Be carefull, use only the text pattern which is unique on particular record!
+			new_text (str) - text which will be inserted instead of 'text_to_change'
+		Returns:
+			None
+
+		"""
+
+		self.mms_id_list = mms_id_list
+		logger.info("Updating record. Changing '{}' to '{}'".format(text_to_change, new_text))
+		sb_mms = None
+		if self.key=="sb":
+			sb_mms = "9918602951502836"
+		self.text_to_change = text_to_change
+		self.new_text = new_text
+		self.bib_data = None
+		for mms in self.mms_id_list:
+				if sb_mms:
+					logger.info("Sandbox only")
+					self.mms = str(sb_mms)
+				self.mms_id = mms
+				logger.info(self.mms_id)
+				my_rec = AlmaTools(self.key)
+				my_rec.get_bib(self.mms_id)
+				self.bib_data = my_rec.xml_response_data
+				print(self.bib_data)
+				if not new_text in self.bib_data:
+					self.bib_data = str(self.bib_data).replace(text_to_change, new_text)
+					print(self.bib_data)
+					my_rec.update_bib(self.mms_id, self.bib_data)
+					if sb_mms:
+						quit()
+					if my_rec.status_code == 200:
+						logger.info("{} - updated with '{}'".format(self.mms_id, new_text))
+					else:
+						logger.info(my_rec.status_code)
+						logger.info(my_rec.xml_response_data)					
+				else:
+					logger.info("The text exists in the record {}. Was not changed.".format(self.mms_id))
 
 
 
 def main():
 
 
+
+
 	mms_list = []
+	#change "prod" on "sb" if you require a Sand Box
+	my_rec = Manage_fields("prod") 
 
-	# workook_path = r"D:\\dup_942.xlsx"
-	# if os.path.exists(workook_path):
+	#put your mms ids inside the [] or use  get_mms_list_from_alma_set_xlsx_result
+	
+	########################################Example from other types of spreadsheet######################################
+	## Example how to use different spreadsheets
 
-	# 	wb = load_workbook(workook_path)
-	# 	#Enter name of the working sheet below
-	# 	ws= wb.get_sheet_by_name("results")
-	# 	#if now headers min_row =1
-	# 	for row in ws.iter_rows(min_row=2):
+	## workook_path = r"D:\\dup_942.xlsx"
+	## if os.path.exists(workook_path):
 
-	# 	#depending on where mms id is row[3] should be changed to number of column started from 0.
-	# 		mms = row[21].value
-	# 		mms_list.append(row[21].value)
+	## 	wb = load_workbook(workook_path)
+	## 	#Enter name of the working sheet below
+	## 	ws= wb.get_sheet_by_name("results")
+	## 	#if now headers min_row =1
+	## 	for row in ws.iter_rows(min_row=2):
+
+	## 	#depending on where mms id is row[3] should be changed to number of column started from 0.
+	## 		mms = row[21].value
+	## 		mms_list.append(row[21].value)
+
+	############################Custom update ###############################
+	#Only works if you need to replace one text patter with another. Pattern should be unique
+	#use export results from alma itemized set. select option export all fields. So your mms id column should be 'AA'
+	#insert your path here if different
+	# path_to_xlsx =  r"Y:\ndha\pre-deposit_prod\LD_Proj\podcasts\assets\results.xlsx"
+	# mms_list = my_rec.get_mms_list_from_alma_set_xlsx_result(path_to_xlsx)
+	# print(mms_list)
+	# my_rec.custom_update_routine(mms_list, "[CIRCUIT Artist Film and Video Aotearoa New Zealand (Organisation)]", "[CIRCUIT Artist Film and Video Aotearoa New Zealand]")
+
+	# quit()
+
+	##############################Getting all mms list from DB ###############################
+	if mms_list == []:
+		db_handler = DbHandler()
+		my_episodes = db_handler.db_reader(["podcast_name", "mis_mms", "holdings", "item","ie_num"], None, True)
+		for episode in my_episodes:
+			if "mis_mms" in episode.keys():
+				if episode["item"]:
+					mms_list.append(episode["mis_mms"])
 
 
 	
-	db_handler = DbHandler()
-	my_episodes = db_handler.db_reader(["podcast_name", "mis_mms", "holdings", "item","ie_num"], None, True)
-	for episode in my_episodes:
-		if "mis_mms" in episode.keys():
-			if episode["item"]:
-				mms_list.append(episode["mis_mms"])
 
-
-	my_rec = Manage_fields("prod")
+	############################Normal cleaning routine#######################
 	my_rec.cleaning_routine(mms_list)
 		
 
