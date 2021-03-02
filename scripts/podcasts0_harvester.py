@@ -20,6 +20,10 @@ try:
 except:
 	from settings_prod import  file_folder, report_folder, podcast_sprsh, logging,creds
 logger = logging.getLogger(__name__)
+try:
+	from library_loudhailer import library_loudhailer_routine
+except:
+	logger.error("place the library_loundhailer sceipt in the same folder")
 #######################################Creating google spreadsheet object#################################################
 
 
@@ -40,6 +44,7 @@ class Harvester():
 	    podcast_name(str) - name of podcast from podcasts_dict. Should be the same as in serial_record
 	    podcast_data(dict) - dictionary which contains information about particular podcast
 	    podcast_id(int) - id of podcast in db
+	    podcast_url(str) - link to podcast web page
 
 
 	 	Methods
@@ -53,13 +58,14 @@ class Harvester():
 		check_for_meaning(self, my_filename)
 	"""
 
-	def __init__(self, podcast_id, podcast_name, podcast_data, last_issue):
+	def __init__(self, podcast_id, podcast_name, podcast_data, last_issue, podcast_url):
 		
 
 		self.podcast_id = podcast_id
 		self.podcast_name = podcast_name
 		self.podcast_data = podcast_data
 		self.last_issue = last_issue
+		self.podcast_url = podcast_url
 		self.download_flag = False
 		self.flag_for_podc_table = True
 		self.episode_title = None
@@ -261,8 +267,8 @@ class Harvester():
 			######################################################################Some rools for links for different podcasts##########################################################################################
 					if self.podcast_name in ["Taxpayer talk"] and not self.episode_link:
 						self.episode_link = self.episode_download_link.split(".mp3")[0]
-					if self.podcast_name in ["Top writers radio show", "Dont give up your day job"]:
-						self.episode_link = ""
+					if self.podcast_name in ["Top writers radio show", "Dont give up your day job","Motherness"]:
+						self.episode_link = self.url
 			############################################################################################################################################################################################################
 					try:	
 							tags_list = ""
@@ -490,20 +496,29 @@ def harvest():
 
 	flag_for_podc_table = False
 	for podcast_name in podcasts_dict:
-		my_podcast = DbHandler()
-		name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
-		if name_dict != []:
-			flag_for_podc_table = True
-			last_issue = name_dict[0]["last_issue"]
-			podcast_id = name_dict[0]["podcast_id"]
-		if not flag_for_podc_table:
-			my_podcast.table_creator("Podcast",{"podcast_name":podcast_name,"serial_mms":podcasts_dict[podcast_name]["serial_mms"], "serial_pol":podcasts_dict[podcast_name]["serial_pol"],"rss_filename":podcasts_dict[podcast_name]["rss_filename"],"publish_link_ro_record":podcasts_dict[podcast_name]["publish_link_ro_record"],"automated_flag":podcasts_dict[podcast_name]["automated_flag"],"access_policy":podcasts_dict[podcast_name]["access_policy"], "template_name":podcasts_dict[podcast_name]["template_name"]})
-			logger.info("Podcast table for {} created. ID - {}".format(podcast_name, my_podcast.my_id))
-			podcast_id = my_podcast.my_id
-			last_issue = 0
+		flag_for_podc_table = False
+		if podcast_name in ["Library loudhailer"]:
+			try:
+				library_loudhailer_routine()
+			except:
+				logger.error("Something wrong with library_loundhailer script")
+		else:
+			my_podcast = DbHandler()
+			name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
+			if name_dict != []:
+				flag_for_podc_table = True
+				last_issue = name_dict[0]["last_issue"]
+				podcast_id = name_dict[0]["podcast_id"]
+			if not flag_for_podc_table:
+				my_podcast.table_creator("Podcast",{"podcast_name":podcast_name,"serial_mms":podcasts_dict[podcast_name]["serial_mms"], "serial_pol":podcasts_dict[podcast_name]["serial_pol"],"rss_filename":podcasts_dict[podcast_name]["rss_filename"],"publish_link_ro_record":podcasts_dict[podcast_name]["publish_link_ro_record"],"automated_flag":podcasts_dict[podcast_name]["automated_flag"],"access_policy":podcasts_dict[podcast_name]["access_policy"], "location":podcasts_dict[podcast_name]["url"], "template_name":podcasts_dict[podcast_name]["template_name"]})
+				logger.info("Podcast table for {} created. ID - {}".format(podcast_name, my_podcast.my_id))
+				podcast_id = my_podcast.my_id
+				last_issue = 0
 
-		my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue)
-		my_episode.harvester()
+			my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"])
+			my_episode.harvester()
+	
+
 
 def main():
 	harvest()

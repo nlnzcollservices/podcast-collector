@@ -9,6 +9,7 @@ except:
 	from settings_prod import logging, template_folder,start_xml, end_xml, report_folder
 from database_handler import DbHandler
 from alma_tools import AlmaTools
+import dateparser
 logger = logging.getLogger(__name__)
 
 
@@ -221,7 +222,7 @@ def __init__(self, key):
 			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
 			f830v = f490v.lower().replace(", ", " ")
 
-		if self.podcast_name in ["A Neesh audience","The lip","Stupid Questions for Scientists","Back to the disc-player podcast","DOC sounds of science podcast",  "All Blacks", "Never Repeats podcast", "The Rubbish trip", "Back to the disc-player podcast", "Snacks and chats"]:
+		if self.podcast_name in ["A Neesh audience","The lip","Stupid Questions for Scientists","Back to the disc-player podcast","DOC sounds of science podcast",  "All Blacks", "Never Repeats podcast", "The Rubbish trip", "Back to the disc-player podcast", "Snacks and chats","Classic NBL podcast"]:
 			if ":" in self.episode_title: 
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
@@ -277,6 +278,17 @@ def __init__(self, key):
 				f245 = self.episode_title.split("-")[-1].lstrip(" ")
 				f490v = self.episode_title.split("-")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
 
+		if self.podcast_name in ["HP business class"]:
+			epis_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
+			if ":" in epis_title:
+				f245 = ":".join(epis_title.split(":")[1:]).lstrip(" ")
+				f490v = epis_title.split(":")[0].rstrip(' ')
+			else:
+				f245 =str(epis_title)
+		if self.podcast_name in ["Girls on top"]:
+			epis_title = self.episode_title.lstrip('Girls on top').lstrip(' ').lstrip(':').lstrip('-').lstrip(' ')
+			f245 = "-".join(epis_title.split("-")[1:]).lstrip(" ")
+			f490v = epis_title.split("-")[0].rstrip(' ')
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
 			print(self.episode_title)
 			if  ":" in self.episode_title and ("NZ Tech Podcast" in self.episode_title or "Episode" in self.episode_title) and not "Running time" in self.episode_title:
@@ -327,6 +339,9 @@ def __init__(self, key):
 					else:
 						f490v ="Episode " +  self.epis_numb
 
+		if self.podcast_name == "Property Academy":
+			f245 = "|".join(self.episode_title.split(" | ")[:-1])
+			f490v = self.episode_title.split("|")[-1]
 		if self.podcast_name == "Chris and Sam podcast":
 			f245 = self.episode_title.split(" | ")[0]
 			if  " | EP" in self.episode_title:
@@ -406,10 +421,17 @@ def __init__(self, key):
 
 		#Field 490
 
+		try:
+			my_date = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
+		except ValueError:
+			my_date = dateparser.parse(self.date).strftime('%B %d, %Y')
 		if f490v:
 			self.record["490"]["v"] = f490v
 		else:
-			self.record["490"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
+			try:
+				self.record["490"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
+			except ValueError:
+				self.record["490"]["v"]= my_date
 
 		#Field 520
 		self.description = self.description#.replace#("&nbsp;"," ")
@@ -443,18 +465,18 @@ def __init__(self, key):
 			if f830v:
 				self.record["830"]["v"] = f830v + "."
 			else:
-				self.record["830"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y') + "."
+				self.record["830"]["v"] = my_date + "."
 		elif self.record["800"]:
 			if f830v:
 				self.record["800"]["v"] = f830v + "."
 			else:
-				self.record["800"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y') + "."
+				self.record["800"]["v"] = my_date + "."
 
 		elif self.record["810"]:
 			if f830v:
 				self.record["810"]["v"] = f830v + "."
 			else:
-				self.record["810"]["v"] = dt.fromtimestamp(int(date)).strftime('%B %d, %Y') + "."
+				self.record["810"]["v"] = my_date + "."
 
 		#Field 856
 
@@ -514,7 +536,12 @@ def __init__(self, key):
 			if "tick" in epis.keys() and epis["tick"]:
 					self.mms_id = epis["mis_mms"]
 					self.template_path = os.path.join(template_folder, epis["template_name"])
-					self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
+					try:
+						self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
+					except ValueError:
+						self.year = dateparser.parse(epis["date"]).strftime("%Y")
+						print(self.year)
+						print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 					self.podcast_name = epis["podcast_name"]
 					self.podcast_id = epis["podcast_id"]
 					self.serial_mms = epis["serial_mms"]

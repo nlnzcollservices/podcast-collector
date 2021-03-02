@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from time import mktime
 import datetime as DT
 from datetime import time
+import dateparser
 from bs4 import BeautifulSoup as bs
 from podcast_dict import podcasts_dict
 try:
@@ -179,7 +180,7 @@ class DbHandler():
         logger.info("create table {}".format(table))
         logger.info(my_data)
         if table == "Podcast":
-            my_id = Podcast.create(podcast_name=my_data["podcast_name"], serial_mms = my_data["serial_mms"], rss_link = my_data["rss_filename"], serial_pol = my_data["serial_pol"], access_policy = my_data["access_policy"], automated_flag = my_data["automated_flag"], publish_link_ro_record = my_data["publish_link_ro_record"], last_issue = 0)
+            my_id = Podcast.create(podcast_name=my_data["podcast_name"], serial_mms = my_data["serial_mms"], rss_link = my_data["rss_filename"], serial_pol = my_data["serial_pol"], access_policy = my_data["access_policy"], automated_flag = my_data["automated_flag"], publish_link_ro_record = my_data["publish_link_ro_record"], last_issue = 0, template_name = my_data["template_name"],location = my_data["location"])
         if table == "Episode":
             my_id =Episode.create(podcast=my_data["podcast"], episode_title=my_data["episode_title"],description=my_data["description"], date_harvested = my_data["date_harvested"],date=my_data["date"], harvest_link = my_data["harvest_link"], episode_link = my_data["episode_link"])            
         if table == "File":
@@ -229,8 +230,14 @@ class DbHandler():
             max_date = pod.last_issue
             for epis in episodes:
                 logger.debug(epis.episode_title)
-                if int(epis.date) > max_date:
-                    max_date = int(epis.date)
+                try:
+                    if int(epis.date) > max_date:
+                        max_date = int(epis.date)
+                except ValueError:
+                    epis.date = mktime(dateparser.parse(epis.date).timetuple())
+                    if int(epis.date) > max_date:
+                        max_date = int(epis.date)
+
             logger.debug(max_date)
             if pod.last_issue != max_date:
                 q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)

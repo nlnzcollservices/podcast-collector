@@ -336,10 +336,13 @@ def main():
 
 	"""Example of usage"""
 
-	mms_id = "9918975967302836"
+	#mms_id = "9918975967302836"
 
 	my_api = AlmaTools("prod")
-
+	# mis_mms_list = ['9919046572802836','9919046573002836']
+	# for mms in mis_mms_list:
+	# 		my_api.delete_bib(mms)
+	# 		print(my_api.xml_response_data.encode("utf-8"))
 	#######################################
 	# my_api.get_bib(mms_id, {"limit":"100"})
 	# print(my_api.xml_response_data.encode("utf-8"))
@@ -357,6 +360,6 @@ def main():
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	#########################################
-	my_api.get_ecollection("9918748064302836","61325625670002836")
+	# my_api.get_ecollection("9918748064302836","61325625670002836")
 if __name__ == '__main__':
 	main()
