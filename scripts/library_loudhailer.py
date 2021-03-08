@@ -11,12 +11,12 @@ except:
 
 from read_episode_from_googlesheet_to_db import ReadFromSpreadsheet
 from database_handler import DbHandler
-from podcasts_dict import podcasts_dict
+from podcast_dict import podcasts_dict
 logger = logging.getLogger(__name__)
 
 def library_loudhailer_routine():
-
-	logger.info("Scrping Library loudhailer")
+	logger = logging.getLogger(__name__)
+	logger.info("Scraping Library loudhailer")
 	c = gspread.authorize(creds)
 	gs = c.open_by_key(podcast_sprsh)
 	#change if the name or id of the worksheet is different

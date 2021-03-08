@@ -268,25 +268,33 @@ class Podcast_pipeline():
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(sip_folder , epis["serial_mms"],"content","streems", epis["mis_mms"] ))
+					 	shutil.rmtree(os.path.join(sip_folder, epis["serial_mms"],"content","streams", epis["mis_mms"] ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	os.remove(os.path.join(sip_folder , epis["serial_mms"],"content",epis["mis_mms"]+".xml" ))
+					 	os.remove(os.path.join(sip_folder, epis["serial_mms"],"content",epis["mis_mms"]+".xml" ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(rosetta_folder,epis["serial_mms"],"content","streems", epis["mis_mms"] ))
+					 	os.remove(os.path.join(sip_folder, epis["serial_mms"],"content","dc.xml" ))
+					except FileNotFoundError as e:
+					 	logger.error(str(e))
+					try:
+					 	shutil.rmtree(os.path.join(rosetta_folder, epis["serial_mms"],"content","streams", epis["mis_mms"] ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	os.remove(os.path.join(rosetta_folder,epis["serial_mms"],"content", epis["mis_mms"]+".xml" ))
+					 	os.remove(os.path.join(rosetta_folder, epis["serial_mms"],"content", epis["mis_mms"]+".xml" ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
+					 	os.remove(os.path.join(rosetta_folder,epis["serial_mms"],"content", "dc.xml" ))
+					except FileNotFoundError as e:
+						logger.error(str(e))
+					if os.path.isfile(os.path.join(rosetta_folder,epis["serial_mms"],"done")):
 						os.remove(os.path.join(rosetta_folder,epis["serial_mms"],"done"))
-					except FileNotFoundError as e:
-						logger.error(str(e))
+
+
 				
 
 
@@ -439,20 +447,20 @@ class Podcast_pipeline():
 
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		# #self.file_cleaning()
-		# self.get_ies_from_reports()
-		# lst = self.read_ies_file()
-		# self.insert_ies()
-		# self.finish_existing_records_and_delete_files("prod")
-		#self.db_handler.update_the_last_issue()
-		# #self.db_handler.delete_done_from_db()
-		# self.update_database_from_spreadsheetand_delete_row()
-		# #Set "sSb" if whould like records ins "sb"s
-		# #Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		# #Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
-		# my_rec = RecordCreator(self.alma_key)
-		# my_rec.record_creating_routine()
-		#sip_routine()
+		self.file_cleaning()
+		self.get_ies_from_reports()
+		lst = self.read_ies_file()
+		self.insert_ies()
+		self.finish_existing_records_and_delete_files("prod")
+		self.db_handler.update_the_last_issue()
+		self.db_handler.delete_done_from_db()
+		self.update_database_from_spreadsheetand_delete_row()
+		# Set "sb" if whould like records in "sb"
+		# Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
+		# Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
+		my_rec = RecordCreator(self.alma_key)
+		my_rec.record_creating_routine()
+		sip_routine()
 		harvest()
 		 		
 def main():

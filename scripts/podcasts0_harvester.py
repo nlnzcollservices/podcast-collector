@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import feedparser
 import podcastparser
 import subprocess
@@ -21,9 +22,11 @@ except:
 	from settings_prod import  file_folder, report_folder, podcast_sprsh, logging,creds
 logger = logging.getLogger(__name__)
 try:
-	from library_loudhailer import library_loudhailer_routine
-except:
-	logger.error("place the library_loundhailer sceipt in the same folder")
+	import library_loudhailer
+
+except Exception as e:
+	print(str(e))
+	logger.error("check if library_loundhailer script to the same folder")
 #######################################Creating google spreadsheet object#################################################
 
 
@@ -54,6 +57,7 @@ class Harvester():
 		episode_sprsh_check(self)
 		jhove_check(self, filepath)
 		find_description_with_podcastparser(self)
+		find_download_link_with_podcastparser(self)
 		parsing_with_feedparser(self)
 		check_for_meaning(self, my_filename)
 	"""
@@ -69,7 +73,6 @@ class Harvester():
 		self.download_flag = False
 		self.flag_for_podc_table = True
 		self.episode_title = None
-		self.url = None
 		self.rss_filename = None
 		self.description = None
 		self.description2 = None
@@ -157,7 +160,7 @@ class Harvester():
 		"""
 		
 		try:
-			parsed = podcastparser.parse( self.url, urlopen(self.rss_filename))
+			parsed = podcastparser.parse( self.podcast_url, urlopen(self.rss_filename))
 			#for lists of lists all the episode metadata
 			for el in parsed:
 				main_list = []
@@ -176,8 +179,16 @@ class Harvester():
 			logger.info(type(e))
 			self.description = None
 	
-
-
+	def find_download_link_with_podcastparser(self):
+		"""finds mp3 link with podcastparser"""
+		
+		parsed = podcastparser.parse( self.podcast_url, urlopen(self.rss_filename))
+		#print(len(parsed["episodes"]))
+		for el in parsed["episodes"]:
+			if el["enclosures"]!=[]:
+				if el["title"]== self.episode_title:
+					self.episode_download_link=enclosure["url"]
+																					
 	def parsing_with_feedparser(self):
 
 		"""
@@ -238,7 +249,7 @@ class Harvester():
 					self.time_flag = True		
 			except Exception as e:
 				logger.error("CANNOT PARSE DATE" + str(e))
-			self.episode_title  = d["entries"][ind]["title"]	
+			self.episode_title  = d["entries"][ind]["title"].rstrip(" ")	
 			if self.time_flag:
 				logger.info(self.episode_title)
 				try:
@@ -261,14 +272,25 @@ class Harvester():
 							else:
 								if el["type"] == "audio/mpeg" or el["type"] == "audio/x-m4a" or el["type"] == "":
 									self.episode_download_link = el["href"]
-						logger.info("episode download link "+self.episode_download_link)
+						if not self.episode_download_link:
+							try:
+								self.find_download_link_with_podcastparser()
+							except Exception as e:
+								logger.error("Podcastparser could not find episode link")
+								logger.error(str(e))
+						if self.episode_download_link:
+							logger.info("episode download link "+self.episode_download_link)
 					except Exception as e:
 						logger.error(str(e))
+
+	
+
+
 			######################################################################Some rools for links for different podcasts##########################################################################################
 					if self.podcast_name in ["Taxpayer talk"] and not self.episode_link:
 						self.episode_link = self.episode_download_link.split(".mp3")[0]
 					if self.podcast_name in ["Top writers radio show", "Dont give up your day job","Motherness"]:
-						self.episode_link = self.url
+						self.episode_link = self.podcast_url
 			############################################################################################################################################################################################################
 					try:	
 							tags_list = ""
@@ -482,9 +504,6 @@ class Harvester():
 		self.flag_for_podc_table = True
 		self.rss_filename = self.podcast_data["rss_filename"]
 		url = self.podcast_data["url"]
-		logger.info("*"*50)
-		logger.info(self.podcast_name)
-		logger.info("*"*50)
 		self.parsing_with_feedparser()
 
 	
@@ -497,11 +516,14 @@ def harvest():
 	flag_for_podc_table = False
 	for podcast_name in podcasts_dict:
 		flag_for_podc_table = False
+		logger.info("*"*50)
+		logger.info(podcast_name)
+		logger.info("*"*50)
 		if podcast_name in ["Library loudhailer"]:
 			try:
-				library_loudhailer_routine()
-			except:
-				logger.error("Something wrong with library_loundhailer script")
+				library_loudhailer.library_loudhailer_routine()
+			except Exception as e:
+				logger.error(str(e))
 		else:
 			my_podcast = DbHandler()
 			name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
