@@ -63,30 +63,30 @@ for pod in podcasts:
 	#if "NBL" in pod.podcast_name:#The Best Sequ
 #1604745343 -c
 # 1611153244
-	#if pod.podcast_name == "Selfie reflective":
-	if "the rag" in pod.podcast_name:
+	if pod.podcast_name == "Animal matters":
+	
 			print("#"*50)
 			print(pod.id)
 			print(pod.podcast_name)
-			print(pod.location)
-			print(pod.serial_pol)
-			print(pod.last_issue)
+			# print(pod.location)
+			# print(pod.serial_pol)
+			# print(pod.last_issue)
 				# print(pod.location)
-				# print(pod.serial_mms)
+			print(pod.serial_mms)
 				# print(pod.serial_pol)
 			# print(podcasts_dict[pod.podcast_name]["template_name"])
 
 			# q=Podcast.update(last_issue = 1604745343).where(Podcast.id ==pod.id)
 			# q.execute()
 			# try:
-			# 	q= Podcast.update(location= podcasts_dict[pod.podcast_name]["url"]).where(Podcast.id ==pod.id )
-			# 	q.execute()
+			# q= Podcast.update(template_name= "mis_Podcast_Library_loudhailer.xml").where(Podcast.id ==pod.id )
+			# q.execute()
 			# except KeyError:
 			# 	pass
 			#print(pod.last_issue)
-			print(dt.fromtimestamp(int(pod.last_issue)).strftime('%B %d %Y'))
-			print(pod.rss_link)
-			# print(pod.template_name)
+			# print(dt.fromtimestamp(int(pod.last_issue)).strftime('%B %d %Y'))
+			# print(pod.rss_link)
+			print(pod.template_name)
 
 
 # 		#if pod.podcast_name in ["CIRCUIT cast"]:
@@ -95,10 +95,11 @@ for pod in podcasts:
 			
 # 				#!!!!!!!!!!Do not remove. Should be deleted from Alma!!!!!Love podcast and Dirt Church ['9919046572802836','9919046573002836']:
 # 				# 	print(pod.podcast_name)
+				#if ep.mis_mms == "9919051872402836":
 
-# 				#if ep.episode_title "Gaytravaganza" in ep.episode_title:
-# 					# q = Episode.update(mis_mms = '9919046572702836').where(Episode.id == ep.id)
-# 					# q.execute()
+				#if "The Covid-19 challenge" in ep.episode_title:
+					# q = Episode.update(sip = False).where(Episode.id == ep.id)
+					# q.execute()
 # 			# 		print(count)
 # 				#if ep.id in list(range(4817,4913)):
 # # 				#if ep.id in [4198]:
@@ -107,12 +108,17 @@ for pod in podcasts:
 # # # 				#if ep.mis_mms and ep.sip == False:
 # # # 				#if ep.mis_mms in mis_mms_list:
 # 			#		print("!!!!!!!!!!!!!!!!!!!!!!!!")
+					# print(pod.podcast_name)
 					print(ep.episode_title)
-					print(ep.ie_num)
-					print(ep.sip)
-					print(ep.item)
+					# # print(ep.ie_num)
+					# # print(ep.sip)
+					# # print(ep.item)
+					# # print(ep.harvest_link)
+					# print(ep.tick)
+					# q = Episode.update(mis_mms=None).where(Episode.id == ep.id)
+					# q.execute()
 
-# 					print(ep.mis_mms)
+					print(ep.mis_mms)
 # # 					print(ep.id)
 # 					#print(ep.mis_mms)
 # # 					print(ep.sip)
@@ -123,13 +129,14 @@ for pod in podcasts:
 
 
 
-# 					files = File.select().where(File.episode == ep.id)
-# 					for fl in files:
-# 						# if fl.filepath == r"Y:\ndha\pre-deposit_prod\LD_Proj\podcasts\files\The worst idea of all time\media-kl7g4rtt-twioat_s5e21_-_emmanuelle_in_space_7_v2.mp3":
-# # 						# 	q = File.update(filesize=os.path.getsize(fl.filepath)).where(File.id ==fl.id)
-# # 						# 	q.execute()
-# # 							print(fl.filesize)
-# 							print(fl.filepath)
+					files = File.select().where(File.episode == ep.id)
+					for fl in files:
+					 	#if "david_hill_NZSAlive.mp3" in fl.filepath:
+							# q = File.update(filesize=os.path.getsize(fl.filepath)).where(File.id ==fl.id)
+							# q.execute()
+
+					# 		print(fl.filesize)
+							print(fl.filepath)
 # # 							print(os.path.getsize(fl.filepath))
 # # 					# 		print(fl.md5sum)
 # 					# 		print(fl.episode)

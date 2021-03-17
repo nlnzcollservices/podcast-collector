@@ -172,7 +172,7 @@ def __init__(self, key):
 		Parses template , modifies it and adds new fields. It is also parses episode title according to rules for 245, 490  and 800 or 830 fields.
 
 		"""
-
+		self.record = None
 
 		#this  set is for correct indexing of 245 field
 
@@ -181,7 +181,13 @@ def __init__(self, key):
 		f245 = False 
 		f490v= False
 		f830v = False
-		self.record = parse_xml_to_array(self.template_path )[0]
+
+		try:
+			self.record = parse_xml_to_array(self.template_path )[0]
+		except Exception as e:
+			logger.error(self.template_path)
+			logger.error(str(e))
+			quit()
 
 		##################################################Parsing rules##################################################################
 		#This part is very flexible. It is parsing titles to create correct 490 and 800 or 830 field#####################################
@@ -340,8 +346,13 @@ def __init__(self, key):
 						f490v ="Episode " +  self.epis_numb
 
 		if self.podcast_name == "Property Academy":
-			f245 = "|".join(self.episode_title.split(" | ")[:-1])
-			f490v = self.episode_title.split("|")[-1]
+			if "⎮" in self.episode_title:
+				devider = "⎮"
+			else:
+				devider = "|"
+			f245 = "|".join(self.episode_title.split(devider)[:-1])
+			f490v = self.episode_title.split(devider)[-1]
+
 		if self.podcast_name == "Chris and Sam podcast":
 			f245 = self.episode_title.split(" | ")[0]
 			if  " | EP" in self.episode_title:

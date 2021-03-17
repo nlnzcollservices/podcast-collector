@@ -93,7 +93,7 @@ podcasts_dict = {
 "Locals only":{"rss_filename":"https://www.spreaker.com/show/2759435/episodes/feed","url":"https://www.spreaker.com/show/locals-only", "serial_mms":"9919015065502836", "serial_pol" :"POL-138668 ",  "publish_link_ro_record":True, "automated_flag":False,"access_policy" : "100", "template_name":"mis_Podcast_Locals_only.xml"},
 "Mums in cars":{"rss_filename":"https://www.spreaker.com/show/4220002/episodes/feed","url":"https://www.spreaker.com/show/mums-in-cars", "serial_mms":"9919015065602836", "serial_pol" :"POL-138670",  "publish_link_ro_record":True, "automated_flag":False,"access_policy" : "100", "template_name":"mis_Podcast_Mums_in_cars.xml"},
 "Artists in conversation":{"rss_filename":"http://feeds.soundcloud.com/users/soundcloud:users:37819863/sounds.rss","url":"https://www.circuit.org.nz/podcast", "serial_mms":"9918988457702836", "serial_pol" :"POL-135040 ",  "publish_link_ro_record":True, "automated_flag":False,"access_policy" : "100", "template_name":"mis_Podcast_Artists_in_conversation.xml"},
-"Tick tick":{"rss_filename":"","url":"https://www.stuff.co.nz/national/politics/tick-tick-podcast", "serial_mms":"9918991865802836", "serial_pol" :"POL-129369",  "publish_link_ro_record":True, "automated_flag":False,"access_policy" : "100", "template_name":"mis_Podcast_Tick_tick.xml"}
+#"Tick tick":{"rss_filename":"","url":"https://www.stuff.co.nz/national/politics/tick-tick-podcast", "serial_mms":"9918991865802836", "serial_pol" :"POL-129369",  "publish_link_ro_record":True, "automated_flag":False,"access_policy" : "100", "template_name":"mis_Podcast_Tick_tick.xml"}
 
  }
 
