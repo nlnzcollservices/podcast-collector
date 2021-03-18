@@ -379,11 +379,11 @@ class Harvester():
 						if downloader.download_status:
 							if downloader.filename_from_headers or downloader.filename_from_url:
 								if downloader.filename_from_headers or downloader.filename_from_url:
-									if downloader.filename_from_headers and downloader.filename_from_headers != "media.mp3":									
+									if downloader.filename_from_headers and downloader.filename_from_headers != "media.mp3" and len(downloader.filename_from_headers)<70:									
 										if self.check_for_meaning(downloader.filename_from_headers):
 											downloader.change_filename(rename_from_headers = True)
 											logger.info("filename from headers " + downloader.filename_from_headers)
-									elif downloader.filename_from_url and downloader.filename_from_url != "media.mp3":
+									elif downloader.filename_from_url and downloader.filename_from_url != "media.mp3" and len(downloader.filename_from_url)<70:
 										logger.info("file name from url "+downloader.filename_from_url)
 										if self.check_for_meaning(downloader.filename_from_url):
 											downloader.change_filename(rename_from_url = True)
