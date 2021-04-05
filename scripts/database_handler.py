@@ -452,7 +452,7 @@ class DbHandler():
                             self.full_dict["filesize"] = self.filesize
                             self.returning_dict = {}
                             for el in self.req_list:
-                                self.returning_dict[el] = self.full_dict[el]  
+                                self.returning_dict[el] = self.full_dict[el] 
                             if not self.returning_dict in self.returning_list:
                                 self.returning_list += [self.returning_dict]
                         if self.returning_dict == {}:
@@ -469,7 +469,7 @@ class DbHandler():
                         if not self.returning_dict in self.returning_list:
                             self.returning_list += [self.returning_dict]
                     self.full_dict = {}
-
+        
         if not self.returning:
 
             for el in self.returning_list:

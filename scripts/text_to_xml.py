@@ -86,7 +86,9 @@ def main():
                             #new_xml+="\n"
         new_xml +='</record></collection>'
         print(new_xml)
-        full_new_template_name = os.path.join(new_templates_folder, fl.split("cases_")[-1].replace(" ", "_") + ".xml")
+        full_new_template_name = os.path.join(new_templates_folder, fl.split("cases_")[-1].replace(" ", "_"))
+        if not full_new_template_name.endswith(".xml"):
+            full_new_template_name = full_new_template_name + ".xml"
         with open(full_new_template_name, "w") as templatefile:
             templatefile.write(new_xml)
         

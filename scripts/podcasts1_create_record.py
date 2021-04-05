@@ -222,7 +222,17 @@ def __init__(self, key):
 				f245 = self.episode_title.split(":")[-1].lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 				f830v = str(f490v)
-
+		if self.podcast_name in ["Kiwi country"]:
+			f245 = self.episode_title.lstrip("Kiwi Country ").lstrip("Kiwi Country with Georgia").lstrip("Kiwi country")
+			if ":" in self.episode_title and "-" in self.episode_title:
+				f245 = self.episode_title.split("-")[-1]
+				f490v = self.episode_title.split(":")[1].split("-")[0]
+			elif "-" in self.episode_title:
+				f245 = self.episode_title.split("-")[-1]
+				f490v = self.episode_title.split("-")[0]
+			elif ":" in self.episode_title:
+				f245 = self.episode_title.split(":")[-1]
+				f490v = "Episode " +self.episode_title.split(":")[0]
 		if self.podcast_name in ["Taringa","The creative spear", "You're gonna' die in bed"]:
 			f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
 			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
