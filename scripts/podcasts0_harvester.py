@@ -200,7 +200,7 @@ class Harvester():
 
 		self.episode_download_link = None
 		
-
+		my_flag = False
 		d = feedparser.parse(self.podcast_data["rss_filename"])
 		logger.debug(d)
 		for ind in range(len(d["entries"])):
@@ -249,15 +249,21 @@ class Harvester():
 					self.time_flag = True		
 			except Exception as e:
 				logger.error("CANNOT PARSE DATE" + str(e))
-			self.episode_title  = d["entries"][ind]["title"].rstrip(" ")	
+			self.episode_title  = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',d["entries"][ind]["title"]).rstrip(" ")	
 			if self.time_flag:
 				logger.info(self.episode_title)
 				try:
 					self.episode_link = d["entries"][ind]["link"]
 				except:
 					pass
-				logger.info(self.episode_link)			
-				if self.episode_title:# in ["Living the designer's life, while the world watches • Charli Prangley, Design & YouTube superstar", "Creating a feast for the eyes, heart and mind • Natasha Lampard, Co-founder, Webstock","Storytelling with holographic maps • Chris Hay, founder of Locales","Master class in launching a startup • Sonya Williams, co-founder of Sharesies"]:
+				logger.info(self.episode_link)
+				if self.podcast_name:# in ["Stag roar"]:
+					if self.episode_title:# in  ["Ep11- Dom Vettise"]:
+						my_flag = True
+				else:
+					my_flag = True
+				if my_flag:
+
 					logger.debug(d["entries"][ind]["links"])
 			#finds episode link and episode download links 
 					try:
@@ -289,7 +295,7 @@ class Harvester():
 			######################################################################Some rools for links for different podcasts##########################################################################################
 					if self.podcast_name in ["Taxpayer talk"] and not self.episode_link:
 						self.episode_link = self.episode_download_link.split(".mp3")[0]
-					if self.podcast_name in ["Top writers radio show", "Dont give up your day job","Motherness"]:
+					if self.podcast_name in ["Paige's space","Kiwi birth tales","Kelli from the Tron","Top writers radio show", "Dont give up your day job","Motherness"]:
 						self.episode_link = self.podcast_url
 			############################################################################################################################################################################################################
 					try:	
@@ -377,13 +383,14 @@ class Harvester():
 
 
 						if downloader.download_status:
+
 							if downloader.filename_from_headers or downloader.filename_from_url:
 								if downloader.filename_from_headers or downloader.filename_from_url:
-									if downloader.filename_from_headers and downloader.filename_from_headers != "media.mp3" and len(downloader.filename_from_headers)<70:									
+									if downloader.filename_from_headers and downloader.filename_from_headers != "media.mp3" and len(downloader.filename_from_headers)<70 and not "%" in downloader.filename_from_headers:									
 										if self.check_for_meaning(downloader.filename_from_headers):
 											downloader.change_filename(rename_from_headers = True)
 											logger.info("filename from headers " + downloader.filename_from_headers)
-									elif downloader.filename_from_url and downloader.filename_from_url != "media.mp3" and len(downloader.filename_from_url)<70:
+									elif downloader.filename_from_url and downloader.filename_from_url != "media.mp3" and len(downloader.filename_from_url)<70 and not "%" in downloader.filename_from_url:
 										logger.info("file name from url "+downloader.filename_from_url)
 										if self.check_for_meaning(downloader.filename_from_url):
 											downloader.change_filename(rename_from_url = True)
@@ -391,73 +398,75 @@ class Harvester():
 									if downloader.exists:
 										downloader.filepath = downloader.new_filepath
 										downloader.filename = downloader.new_filename
-							
-							my_podcast = DbHandler()
-							episode_dict = my_podcast.db_reader(["episode_title"],[self.podcast_name],True)
+							if not downloader.message:
+								my_podcast = DbHandler()
+								episode_dict = my_podcast.db_reader(["episode_title"],[self.podcast_name],True)
 
-							#checks if episode title in db
-							for epsd in episode_dict:
-								if not epsd == {}:
-									if epsd["episode_title"] == self.episode_title:
-										logger.info(f"the episode {self.episode_title} is in db")
-										self.flag_for_epis_table = True
+								#checks if episode title in db
+								for epsd in episode_dict:
+									if not epsd == {}:
+										if epsd["episode_title"] == self.episode_title:
+											logger.info(f"the episode {self.episode_title} is in db")
+											self.flag_for_epis_table = True
 
-							#checks if filepath in db
-							try:
-								file_dict = my_podcast.db_reader(["filepath"], [self.podcast_name], True)
-								for flpth in file_dict:
-									if not flpth =={}:
-										if flpth["filepath"] == downloader.filepath:
-											self.flag_for_file = True
-											logger.info(f"the file {downloader.filepath} exists")
-							except KeyError as e:
-								logger.debug(str(e))
+								#checks if filepath in db
+								try:
+									file_dict = my_podcast.db_reader(["filepath"], [self.podcast_name], True)
+									for flpth in file_dict:
+										if not flpth =={}:
+											if flpth["filepath"] == downloader.filepath:
+												self.flag_for_file = True
+												logger.info(f"the file {downloader.filepath} exists")
+								except KeyError as e:
+									logger.debug(str(e))
 
-							##################################### Cleaning part###############################################################################################################
-							#cleans epiosode title and description
-							self.episode_title = self.episode_title.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
-							if self.spreadsheet_message !="":
-								self.episode_title == self.spreadsheet_message + self.episode_title
-							if not self.description:
-								self.description = ""
-							self.description = bs(self.description,"lxml").text
-							self.description = self.description.replace(r"\n", " ").replace(r"\'s", 's')
-							self.description = self.description.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
-							if not self.description:
-								self.description == ""
-							logger.debug(self.episode_link)
-							self.episode_link = self.episode_link.rstrip(" ")	
-							if not self.flag_for_epis_table:
-								logger.info("this episode is not in db")
+								##################################### Cleaning part###############################################################################################################
+								#cleans epiosode title and description
+								self.episode_title = self.episode_title.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
+								if self.spreadsheet_message !="":
+									self.episode_title == self.spreadsheet_message + self.episode_title
+								if not self.description:
+									self.description = ""
+								self.description = bs(self.description,"lxml").text
+								self.description = self.description.replace(r"\n", " ").replace(r"\'s", 's')
+								self.description = self.description.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
+								#this line removes emoji
+								self.description = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',self.description)
+								logger.debug(self.episode_link)
+								self.episode_link = self.episode_link.rstrip(" ")	
+								if not self.flag_for_epis_table:
+									logger.info("this episode is not in db")
 
-								episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas}
-								my_podcast.table_creator("Episode", episode_data)
-								episode = my_podcast.my_id.id
+									episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas}
+									my_podcast.table_creator("Episode", episode_data)
+									episode = my_podcast.my_id.id
+									
+								if not self.flag_for_file:
+									if self.flag_for_epis_table:
+										id_dict = my_podcast.db_reader(["episode_id","episode_title"],[self.podcast_name],True)
+										for el in id_dict:
+											if el["episode_title"] == self.episode_title:
+												episode =  el["episode_id"]
+			
+									logger.info("this file is not in db")
+
+									file_data = {"episode" : episode, "filepath" : downloader.filepath, "md5sum" : downloader.md5, "md5_from_file" : downloader.md5_original, "filesize" : downloader.filesize, "size_original" : downloader.size_original, "file_type" : downloader.filetype_extension}
+									my_podcast.table_creator("File", file_data)
+								print(self.episode_sprsh_check())
+								if not self.episode_sprsh_check():
+									 	connection_count = 0
+									 	while not connection_count >= 5:
+									 		connection_count +=1
+									 		try:
+									 			ws.append_row([self.podcast_name, podcasts_dict[self.podcast_name]["serial_mms"], podcasts_dict[self.podcast_name]["rss_filename"], self.episode_title, self.description, self.episode_link, dt.fromtimestamp(int(self.episode_date)).strftime('%B %d %Y'), self.tags_list, self.episode_download_link])
+									 			logger.info("a new row appended")
+									 			break
+									 		except gspread.exceptions.APIError as e:
+									 			logger.error(str(e))
+									 			sleep(10)
+						else:
+							quit()
 								
-							if not self.flag_for_file:
-								if self.flag_for_epis_table:
-									id_dict = my_podcast.db_reader(["episode_id","episode_title"],[self.podcast_name],True)
-									for el in id_dict:
-										if el["episode_title"] == self.episode_title:
-											episode =  el["episode_id"]
-		
-								logger.info("this file is not in db")
-
-								file_data = {"episode" : episode, "filepath" : downloader.filepath, "md5sum" : downloader.md5, "md5_from_file" : downloader.md5_original, "filesize" : downloader.filesize, "size_original" : downloader.size_original, "file_type" : downloader.filetype_extension}
-								my_podcast.table_creator("File", file_data)
-							print(self.episode_sprsh_check())
-							if not self.episode_sprsh_check():
-								 	connection_count = 0
-								 	while not connection_count >= 5:
-								 		connection_count +=1
-								 		try:
-								 			ws.append_row([self.podcast_name, podcasts_dict[self.podcast_name]["serial_mms"], podcasts_dict[self.podcast_name]["rss_filename"], self.episode_title, self.description, self.episode_link, dt.fromtimestamp(int(self.episode_date)).strftime('%B %d %Y'), self.tags_list, self.episode_download_link])
-								 			logger.info("a new row appended")
-								 			break
-								 		except gspread.exceptions.APIError as e:
-								 			logger.error(str(e))
-								 			sleep(10)
-							
 							
 
 

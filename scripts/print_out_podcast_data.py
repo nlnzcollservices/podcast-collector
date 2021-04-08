@@ -1,6 +1,6 @@
 import peewee
 import requests
-
+import re
 from podcast_models import Podcast, Episode, File
 from datetime import datetime as dt
 from time import mktime
@@ -11,25 +11,26 @@ from podcast_dict import podcasts_dict
 import os
 my_files = []
 
-# time  = mktime(dt.strptime("Jan 02 1971", "%b %d %Y").timetuple())
+# time  = mktime(dt.strptime("Nov 06 2019", "%b %d %Y").timetuple())
 
-# q = Podcast.update(last_issue= 1593604800).where(Podcast.podcast_name == "Taringa")
+# q = Podcast.update(last_issue= time).where(Podcast.podcast_name == "Hauraki drive")
 # q.execute()
 
-
+# q = Podcast.update(rss_link= "https://www.spreaker.com/show/2825204/episodes/feed").where(Podcast.podcast_name == "Bhuja podcast")
+# q.execute()
 # # # q = File.delete().where(File.filepath == r"Y:\NDHA\pre-deposit_prod\LD_Proj\podcasts\files\Business is boring\media-keuo4y6f-bib_zincovery_jonathan_ring_090920.mp3")
 # # # q.execute()
-# q = Episode.delete().where(Episode.episode_title == "David Hill, 2019 Janet Frame Memorial Lecture")
+# q = Episode.delete().where(Episode.podcast == 110)
 # q.execute()
 # # #q = File.update(filepath = "D:\\Documents\\2019_Projects\\Pawaii\\podscasts_regular\\files\\Crave!\\crave080.mp3").where(File.id == 166)
 # #q.execute()
 
-# q = Podcast.update(rss_link = "https://rss.acast.com/the-real-pod").where(Podcast.id == 12)
+# q = Podcast.update(rss_link = "https://www.spreaker.com/show/4359300/episodes/feed").where(Podcast.podcast_name == "Bosses in lockdown")
 # q.execute()
 
 
 
-# q = Podcast.update(serial_pol = "POL-119744").where(Podcast.podcast_name == "Gone by lunchtime")
+# q = Podcast.update(serial_pol = "POL-129320").where(Podcast.serial_pol == "POL-129320 ")
 # q.execute()
 
 #q = Podcast.update(podcast_name = "True crime New Zealand").where(Podcast.podcast_name == "True crime New Zealand : a NZ crime podcast")
@@ -51,6 +52,7 @@ my_files = []
 # print(mms_list)
 
 
+	# os.rename(os.path.join(dire,el), "".join(os.path.join(dire,el).split("track_G799B1_static1_squarespace_com_static_5b958f42e2ccd190d7d93e8a_t_")))
 count =0
 podcasts = Podcast.select()#.where(Podcast.podcast_name == "Access Granted NZ")
 for pod in podcasts:
@@ -63,20 +65,22 @@ for pod in podcasts:
 	#if "NBL" in pod.podcast_name:#The Best Sequ
 #1604745343 -c
 # 1611153244
-	if pod.podcast_name == "Animal matters":
+	#if pod.podcast_name in ["Going viral"]:
+	if pod.id == 117:
 	
 			print("#"*50)
 			print(pod.id)
 			print(pod.podcast_name)
-			# print(pod.location)
+			print(pod.rss_link)
+			# # print(pod.location)
+			# # print(pod.serial_pol)
+			# # print(pod.last_issue)
+			# 	# print(pod.location)
+			# print(pod.serial_mms)
 			# print(pod.serial_pol)
-			# print(pod.last_issue)
-				# print(pod.location)
-			print(pod.serial_mms)
-				# print(pod.serial_pol)
 			# print(podcasts_dict[pod.podcast_name]["template_name"])
 
-			# q=Podcast.update(last_issue = 1604745343).where(Podcast.id ==pod.id)
+			# q=Podcast.update(last_issue = 1615827600).where(Podcast.id ==pod.id)
 			# q.execute()
 			# try:
 			# q= Podcast.update(template_name= "mis_Podcast_Library_loudhailer.xml").where(Podcast.id ==pod.id )
@@ -85,22 +89,39 @@ for pod in podcasts:
 			# 	pass
 			#print(pod.last_issue)
 			# print(dt.fromtimestamp(int(pod.last_issue)).strftime('%B %d %Y'))
-			# print(pod.rss_link)
-			print(pod.template_name)
+# 			print(pod.rss_link)
+# # 			print(pod.template_name)
 
 
-# 		#if pod.podcast_name in ["CIRCUIT cast"]:
+# # # 		#if pod.podcast_name in ["CIRCUIT cast"]:
 			episodes = Episode.select().where(Episode.podcast==pod.id)
 			for ep in episodes:
-			
+					print(ep.episode_title)
+					# new_title = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',ep.episode_title)
+					# new_title = new_title.rstrip(" ")
+					# # q= Episode.update(episode_title = new_title).where(Episode.id == ep.id)
+					# q.execute()
+					print(ep.description)
+					# new_description = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',ep.description)
+					# new_description = new_description.rstrip("")
+					# q= Episode.update(description = new_description).where(Episode.id == ep.id)
+					# q.execute()
+				# 	print(ep.episode_link)
+				# 	print(ep.harvest_link)
+				# # if ep.date<  mktime(dt.strptime("Apr 06 2020", "%b %d %Y").timetuple()):
+				# 	print(dt.fromtimestamp(int(ep.date)).strftime('%B %d %Y'))
+					# print(ep.harvest_link)
+					# print(ep.episode_link)
+				#if ep.id == 7258:
 # 				#!!!!!!!!!!Do not remove. Should be deleted from Alma!!!!!Love podcast and Dirt Church ['9919046572802836','9919046573002836']:
 # 				# 	print(pod.podcast_name)
-				#if ep.mis_mms == "9919051872402836":
+				# if "Bosses in Lockdown:" in ep.episode_title:
 
-				#if "The Covid-19 challenge" in ep.episode_title:
-					# q = Episode.update(sip = False).where(Episode.id == ep.id)
+				# if "The importance of diversity and inclusion" in ep.episode_title:
+					# q = Episode.update(podcast = 110).where(Episode.id == ep.id)
 					# q.execute()
-# 			# 		print(count)
+		# # 		
+					#print(count)
 # 				#if ep.id in list(range(4817,4913)):
 # # 				#if ep.id in [4198]:
 # 				#if ep.sip:# and ep.mis_mms in mms_list:
@@ -109,16 +130,18 @@ for pod in podcasts:
 # # # 				#if ep.mis_mms in mis_mms_list:
 # 			#		print("!!!!!!!!!!!!!!!!!!!!!!!!")
 					# print(pod.podcast_name)
-					print(ep.episode_title)
-					# # print(ep.ie_num)
-					# # print(ep.sip)
-					# # print(ep.item)
-					# # print(ep.harvest_link)
+					
+
+					# print(ep.date)
+					# # # print(ep.ie_num)
+					# # # print(ep.sip)
+					# # # print(ep.item)
+
 					# print(ep.tick)
-					# q = Episode.update(mis_mms=None).where(Episode.id == ep.id)
+					# q = Episode.update(sip=False).where(Episode.id == ep.id)
 					# q.execute()
 
-					print(ep.mis_mms)
+					#print(ep.mis_mms)
 # # 					print(ep.id)
 # 					#print(ep.mis_mms)
 # # 					print(ep.sip)
@@ -131,13 +154,22 @@ for pod in podcasts:
 
 					files = File.select().where(File.episode == ep.id)
 					for fl in files:
-					 	#if "david_hill_NZSAlive.mp3" in fl.filepath:
+						#if "files\Bhuja podcast" in fl.filepath:
+							# q = Episode.update(podcast = 102).where(Episode.id == ep.id)
+							# q.execute()
 							# q = File.update(filesize=os.path.getsize(fl.filepath)).where(File.id ==fl.id)
 							# q.execute()
-
-					# 		print(fl.filesize)
+							# q= File.update(filepath=r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\New Zealand Initiative\OH_Magic_Talk_ETS_1_Feb2_021.mp3").where(File.id == fl.id)
+							# q.execute()
+							# q= File.update(filepath=r"Y:\ndha\pre-deposit_prod\LD_Proj\podcasts\files\Kiwi yarns\TIM_LIGHTBOURNE_SECOND_EDIT.mp3").where(File.id == fl.id)
+							# q.execute()
+							# print(fl.filesize)
 							print(fl.filepath)
-# # 							print(os.path.getsize(fl.filepath))
+							# # new_filename = "".join(fl.filepath.split("track_G799B1_static1_squarespace_com_static_5b958f42e2ccd190d7d93e8a_t_"))
+							# # q= File.update(filepath=new_filename).where(File.id == fl.id)
+							# # q.execute()	
+							# print(fl.filepath)
+							# print(os.path.getsize(fl.filepath))
 # # 					# 		print(fl.md5sum)
 # 					# 		print(fl.episode)
 

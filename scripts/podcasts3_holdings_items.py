@@ -177,7 +177,7 @@ class Holdings_items():
 			items_list = item_grab.find("items").find_all("item")
 			for item_line in items_list:
 				self.items_list.append(item_line.attrs["link"].split("/")[-1])
-			logger.info(self.items_list)
+			logger.debug(self.items_list)
 		except Exception as e:
 			logger.exception(str(e))
 

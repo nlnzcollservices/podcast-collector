@@ -222,6 +222,13 @@ def __init__(self, key):
 				f245 = self.episode_title.split(":")[-1].lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 				f830v = str(f490v)
+		if self.podcast_name  in ["Kiwi birth tales"]:
+			if ":" in self.episode_title:
+				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(":")[0].rstrip(" ")
+			elif "-" in self.episode_title:
+				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+				f490v = self.episode_title.split("-")[0].rstrip(" ")	
 		if self.podcast_name in ["Kiwi country"]:
 			f245 = self.episode_title.lstrip("Kiwi Country ").lstrip("Kiwi Country with Georgia").lstrip("Kiwi country")
 			if ":" in self.episode_title and "-" in self.episode_title:
@@ -286,7 +293,7 @@ def __init__(self, key):
 					f490v = " ".join(self.episode_title.split(" ")[:2]).rstrip(":")
 					f830v = f490v.lower()
 
-		if self.podcast_name in ["The Angus Dunn Podcast Episode 5: Vika Coates, Adoption Advocate"]:
+		if self.podcast_name in ["The Angus Dunn Podcast"]:
 			if ":" in self.episode_title:
 				f245 = self.episode_title.split(":")[-1].lstrip(" ")
 				f490v = self.episode_title.split(":")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
@@ -295,16 +302,57 @@ def __init__(self, key):
 				f490v = self.episode_title.split("-")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
 
 		if self.podcast_name in ["HP business class"]:
-			epis_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
-			if ":" in epis_title:
-				f245 = ":".join(epis_title.split(":")[1:]).lstrip(" ")
-				f490v = epis_title.split(":")[0].rstrip(' ')
+			self.episode_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
+			if ":" in self.episode_title:
+				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(":")[0].rstrip(' ')
 			else:
-				f245 =str(epis_title)
+				f245 =str(self.episode_title)
+
+		if self.podcast_name in ["Bhuja podcast"]:
+			#self.episode_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
+			if ":" in self.episode_title:
+				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(":")[0].rstrip(' ')
+			elif '.' in self.episode_title:
+				f245 = ".".join(self.episode_title.split(".")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(".")[0].rstrip(' ')
+			elif '-' in self.episode_title:
+				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+				f490v = self.episode_title.split("-")[0].rstrip(' ')
+			else:
+				f245 =str(self.episode_title)
+		if self.podcast_name in ["Mud & blood"]:
+			if ":" in self.episode_title:
+				if self.episode_title.split(":")[0].isdigit():
+					f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+					f490v = self.episode_title.split(":")[0].rstrip(' ')
+
+		if self.podcast_name in ["Few good men","Stag roar"]:
+			if ":" in self.episode_title:
+				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(":")[0].rstrip(' ')
+			elif '-' in self.episode_title:
+				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+				f490v = self.episode_title.split("-")[0].rstrip(' ')
+
+		if self.podcast_name in ["Bosses Rebuilding"]:
+			if "Bosses Rebuilding:" in self.episode_title:
+				f245 = self.episode_title.split("Rebuilding:")[-1]
+
+		if "Bosses in Lockdown" in self.episode_title:
+				f245 = self.episode_title.split("in Lockdown:")[-1]
+
+		if self.podcast_name in ["Dr. Tennant's verbal highs"]:
+			if ":" in self.episode_title:
+				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+				f490v = self.episode_title.split(":")[0].rstrip(' ')
+
 		if self.podcast_name in ["Girls on top"]:
-			epis_title = self.episode_title.lstrip('Girls on top').lstrip(' ').lstrip(':').lstrip('-').lstrip(' ')
-			f245 = "-".join(epis_title.split("-")[1:]).lstrip(" ")
-			f490v = epis_title.split("-")[0].rstrip(' ')
+			self.episode_title = self.episode_title.lstrip('Girls on top').lstrip(' ').lstrip(':').lstrip('-').lstrip(' ')
+			f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+			f490v = self.episode_title.split("-")[0].rstrip(' ')
+			
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
 			print(self.episode_title)
 			if  ":" in self.episode_title and ("NZ Tech Podcast" in self.episode_title or "Episode" in self.episode_title) and not "Running time" in self.episode_title:
@@ -357,11 +405,11 @@ def __init__(self, key):
 
 		if self.podcast_name == "Property Academy":
 			if "⎮" in self.episode_title:
-				devider = "⎮"
+				divider = "⎮"
 			else:
-				devider = "|"
-			f245 = "|".join(self.episode_title.split(devider)[:-1])
-			f490v = self.episode_title.split(devider)[-1]
+				divider = "|"
+			f245 = "|".join(self.episode_title.split(divider)[:-1])
+			f490v = self.episode_title.split(divider)[-1]
 
 		if self.podcast_name == "Chris and Sam podcast":
 			f245 = self.episode_title.split(" | ")[0]
@@ -374,7 +422,9 @@ def __init__(self, key):
 
 
 		if f490v and not f830v:
-			f830v = f490v.lower()
+			f830v = f490v.lower() 
+			if not f830v.endswith("."):
+				f830v = f830v+"."
 		##########################################################################################################################################################################################################################################
 
 		# Field 008
