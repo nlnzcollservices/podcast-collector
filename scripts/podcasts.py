@@ -459,15 +459,15 @@ class Podcast_pipeline():
 		# self.finish_existing_records_and_delete_files("prod")
 		# self.db_handler.update_the_last_issue()
 		# self.db_handler.delete_done_from_db()
-		# self.update_database_from_spreadsheetand_delete_row()
+		#self.update_database_from_spreadsheetand_delete_row()
 		## Set "sb" if whould like records in "sb"
 		## Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
 		## Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
-		my_rec = RecordCreator(self.alma_key)
-		my_rec.record_creating_routine()
-		sip_routine()
+		# my_rec = RecordCreator(self.alma_key)
+		# my_rec.record_creating_routine()
+		# sip_routine()
 		harvest()
-		#self.db_handler.update_the_last_issue()
+		self.db_handler.update_the_last_issue()
 		 		
 def main():
 

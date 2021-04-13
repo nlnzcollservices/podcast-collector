@@ -55,6 +55,7 @@ class AlmaTools():
 		elif alma_key == "prod":
 			self.alma_key = str(pr_key)
 		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
+		self.acq_base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines/"
 		self.mms_id = None
 		self.holding_id = None
 		self.item_pid = None
@@ -329,8 +330,63 @@ class AlmaTools():
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/representations", params=parameters)
 		self.xml_response_data=  r.text
-		self.status_code = r.status_code 
-	
+		self.status_code = r.status_code
+
+	def get_po_line(self, po_line, options={}):
+
+		""" 
+		Retrieves the purchase order line  in XML for a given Alma POL
+		Parameters:
+			po_line(str) - Alma POL
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def update_po_line(self, po_line, xml_record_data, options={}):
+
+		"""
+		Updates POL.
+		Parameters:
+			po_line(str) - Alma POL
+			xml_record_data(str) - xml of updated POL 
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.acq_base_api_url}{po_line}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+
+
+	def create_item_by_po_line(self, po_line, xml_record_data, options={}):
+
+		"""
+		Creates item.
+		Parameters:
+			po_line(str) - Alma POL
+			xml_record_data(str) - new item in xml format
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		Notes:
+			holding_id required in the  xml data
+		"""
+
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.acq_base_api_url}{po_line}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+
 
 def main():
 
@@ -361,5 +417,27 @@ def main():
 	# print(my_api.status_code)
 	#########################################
 	# my_api.get_ecollection("9918748064302836","61325625670002836")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
+	# ####################################################################
+	# my_api.get_po_line("POL-32856")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
+	####################################################################
+	# my_api.get_item("9918166772702836","22294172070002836","23361571080002836")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
+	# ####################################################################
+	# my_api.get_po_line("POL-32856")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
+	####################################################################
+	# my_list = [["9918166769702836","22294170890002836","23361559820002836"],["9918166769702836","22294170890002836","23361570070002836"],["9918166772702836","22294172070002836","23361571080002836"],["9918166769902836","22294170920002836","23361571070002836"],["9918166769502836","22294170850002836","23361559680002836"],["9918963672702836","22346162470002836","23361559670002836"],["9918166769602836","22294170870002836","23361571060002836"],["9916482513502836","22218301930002836","23361559620002836"],["9918166770602836","22294170970002836","23361557880002836"],["9918166772902836","22294172110002836","23361559600002836"],["9913788543502836","22194217920002836","23361571050002836"]]
+	# for lst in my_list:
+	# 	mms_id= lst[0]
+	# 	holding_id = lst[1]
+	# 	item_pid = lst[2]
+	# 	my_api.delete_item(mms_id, holding_id, item_pid)
+	# 	print(my_api.xml_response_data)
 if __name__ == '__main__':
 	main()
