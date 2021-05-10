@@ -11,11 +11,11 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from time import time, sleep, mktime
 from datetime import datetime as dt
-from podcast_dict import podcasts_dict
+from podcast_dict import podcasts_dict, serials
 from database_handler import DbHandler
 from nltk.corpus import words
-import nltk
-nltk.download('words')
+# import nltk
+# nltk.download('words')
 try:
 	from settings import  file_folder, report_folder, podcast_sprsh, logging,creds #!!!! report
 except:
@@ -62,11 +62,12 @@ class Harvester():
 		check_for_meaning(self, my_filename)
 	"""
 
-	def __init__(self, podcast_id, podcast_name, podcast_data, last_issue, podcast_url):
+	def __init__(self, podcast_id, podcast_name, podcast_data, last_issue, podcast_url, serial_mms):
 		
 
 		self.podcast_id = podcast_id
 		self.podcast_name = podcast_name
+		self.serial_mms = serial_mms
 		self.podcast_data = podcast_data
 		self.last_issue = last_issue
 		self.podcast_url = podcast_url
@@ -202,6 +203,7 @@ class Harvester():
 		
 		my_flag = False
 		d = feedparser.parse(self.podcast_data["rss_filename"])
+		#logger.setLevel("DEBUG")
 		logger.debug(d)
 		for ind in range(len(d["entries"])):
 			self.epis_numb = None
@@ -257,8 +259,10 @@ class Harvester():
 				except:
 					pass
 				logger.info(self.episode_link)
-				if self.podcast_name:# in ["Stag roar"]:
-					if self.episode_title:# in  ["Ep11- Dom Vettise"]:
+				if self.podcast_name:# in ["NZ history"]:
+					if self.episode_title:# in  ["New Zealand's Rivers: can we learn from history?"]:
+					#if "Aroha Harris: New Perspectives on" in self.episode_title:
+
 						my_flag = True
 				else:
 					my_flag = True
@@ -434,10 +438,13 @@ class Harvester():
 								self.description = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',self.description)
 								logger.debug(self.episode_link)
 								self.episode_link = self.episode_link.rstrip(" ")	
+								tick = False
+								if self.serial_mms in serials:
+									tick = True
 								if not self.flag_for_epis_table:
 									logger.info("this episode is not in db")
 
-									episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas}
+									episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas, "tick" : tick}
 									my_podcast.table_creator("Episode", episode_data)
 									episode = my_podcast.my_id.id
 									
@@ -453,7 +460,7 @@ class Harvester():
 									file_data = {"episode" : episode, "filepath" : downloader.filepath, "md5sum" : downloader.md5, "md5_from_file" : downloader.md5_original, "filesize" : downloader.filesize, "size_original" : downloader.size_original, "file_type" : downloader.filetype_extension}
 									my_podcast.table_creator("File", file_data)
 								print(self.episode_sprsh_check())
-								if not self.episode_sprsh_check():
+								if not self.episode_sprsh_check() and not tick:
 									 	connection_count = 0
 									 	while not connection_count >= 5:
 									 		connection_count +=1
@@ -549,7 +556,7 @@ def harvest():
 				podcast_id = my_podcast.my_id
 				last_issue = 0
 
-			my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"])
+			my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"] ,podcasts_dict[podcast_name]["serial_mms"])
 			my_episode.harvester()
 	
 
