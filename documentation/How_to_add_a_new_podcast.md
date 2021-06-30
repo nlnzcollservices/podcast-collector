@@ -18,11 +18,11 @@ There are 3 (or more) ways to download a template:
 #### Alma Enhancer and Tampermonkey FireFox add-on. 
 Alma Enhancer is internal script so if you are  not in the Library use other methods.
 Otherwise install Tampermonkey FireFox add-on.
-Add Alma Enchancer script from Alma Enhancement Scripts folder to Tampermonkey(create new script and copy content of the files from the folder)
+Add Alma Enchancer script from Alma Enhancement Scripts folder and Cataloguing Checks and Tools script to Tampermonkey (Open Tampermonkey, choose "create new" script,  copy all the content of the script file from the folder to new script, save, repeat for another script)
 Use file download MARK as XML option.
-Save the template in “assets”, “text templates” folder. 
+Save the template in “assets”, “text_templates” folder. 
 Run   **text_to_xml.py** script from the script folder.
-Check and copy the template to “assets”/“templates” folder.
+Check  in "xml_templates" folder and copy the template to “assets”/“templates” folder.
 #### Alma 
 Create a record from a template
 Add 245 field.
