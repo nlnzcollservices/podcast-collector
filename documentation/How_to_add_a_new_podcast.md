@@ -28,7 +28,7 @@ Create a record from a template
 Add 245 field.
 Save the record.
 Create a set from the records.
-Run a job to import a set
+Run a job to import a set.
 Separate the templates and save them by their own names in “assets”/“templates” folder.
 Delete all the records.
 #### Possible half python, half Alma  way.
