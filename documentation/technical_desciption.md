@@ -6,7 +6,7 @@ Title **Podcasts**
 
 Author(s)?
 
-Team **Legal Deposite**
+Team **Legal Deposit**
 
 Reviewer(s)? 
 
