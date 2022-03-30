@@ -1,4 +1,5 @@
 import os
+import io
 import re
 from pymarc import parse_xml_to_array,record_to_xml, Field 
 from bs4 import BeautifulSoup
@@ -10,7 +11,9 @@ except:
 from database_handler import DbHandler
 from alma_tools import AlmaTools
 import dateparser
+from podcast_dict import serials
 logger = logging.getLogger(__name__)
+# logger.setLevel('DEBUG')
 
 
 class RecordCreator():
@@ -119,6 +122,7 @@ def __init__(self, key):
 
 	
 	def parsing_added_fields(self, value):
+		
 
 		"""
 		Parsing fields added from the spreadsheet to prepare for marc record.
@@ -130,7 +134,7 @@ def __init__(self, key):
 			my_list(list)  - of unparsed subfieldswith their codes
 
 		"""
-
+		logger.debug(value)
 		my_list = []
 		text = value.split("$")[1:]
 		indicators = value.split("$")[0]
@@ -154,7 +158,9 @@ def __init__(self, key):
 
 		Parameters:
 			my_field (str) - field how it was taken from google spreadsheet
+
 		"""
+		logger.debug(my_field)
 		f_number = my_field[0]
 		subfields = []
 
@@ -188,6 +194,7 @@ def __init__(self, key):
 			logger.error(self.template_path)
 			logger.error(str(e))
 			quit()
+		number_dictionary = {"one":'1',"two":'2',"three":'3',"four":'4',"five":'5',"six":'6',"seven":'7',"eight":'8',"nine":'9',"zero":'0'}
 
 		##################################################Parsing rules##################################################################
 		#This part is very flexible. It is parsing titles to create correct 490 and 800 or 830 field#####################################
@@ -222,6 +229,9 @@ def __init__(self, key):
 				f245 = self.episode_title.split(":")[-1].lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 				f830v = str(f490v)
+			else:
+				f490v = "S{}:E{}".format(self.epis_seas, self.epis_numb)
+
 		if self.podcast_name  in ["Kiwi birth tales"]:
 			if ":" in self.episode_title:
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
@@ -229,31 +239,46 @@ def __init__(self, key):
 			elif "-" in self.episode_title:
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(" ")	
+
 		if self.podcast_name in ["Kiwi country"]:
-			f245 = self.episode_title.lstrip("Kiwi Country ").lstrip("Kiwi Country with Georgia").lstrip("Kiwi country")
-			if ":" in self.episode_title and "-" in self.episode_title:
-				f245 = self.episode_title.split("-")[-1]
-				f490v = self.episode_title.split(":")[1].split("-")[0]
-			elif "-" in self.episode_title:
-				f245 = self.episode_title.split("-")[-1]
-				f490v = self.episode_title.split("-")[0]
-			elif ":" in self.episode_title:
-				f245 = self.episode_title.split(":")[-1]
-				f490v = "Episode " +self.episode_title.split(":")[0]
-		if self.podcast_name in ["Taringa","The creative spear", "You're gonna' die in bed"]:
+			f245 = self.episode_title.lstrip("Kiwi Country with Georgia").lstrip("Kiwi country with Georgia").lstrip("Kiwi country").lstrip("Kiwi Country")
+			# if ":" in self.episode_title and "-" in self.episode_title:
+			# 	f245 = self.episode_title.split("-")[-1]
+			# 	f490v = self.episode_title.split(":")[1].split("-")[0]
+			# elif "-" in self.episode_title:
+			# 	f245 = self.episode_title.split("-")[-1]
+			# 	f490v = self.episode_title.split("-")[0]
+			# elif ":" in self.episode_title:
+			# 	f245 = self.episode_title.split(":")[-1]
+			# 	f490v = "Episode " +self.episode_title.split(":")[0]
+		if self.podcast_name in ["Taringa","The creative spear"]:
 			f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
 			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
 			f830v = f490v.lower().replace(", ", " ")
+		if self.podcast_name in ["You're gonna' die in bed"]:
+			if not self.episode_title.startswith("Episode"):
+				f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
+				f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
+				f830v = f490v.lower().replace(", ", " ")
+			else:
+				if "|" in self.episode_title and "-" in episode_title:
+					eps = self.episode_title.split("|")[0]
+					ssn = self.episode_title.split("|")[-1].split("-")[0]
+					f245 = "-".join(self.episode_title.split("-")[1:])
+					f490 = "Season " + number_dictionary[ssn.split(" ")[-1]] +", " +"Episode " + number_dictionary[eps.split(" ")[-1]]
+
+
 
 		if self.podcast_name in ["A Neesh audience","The lip","Stupid Questions for Scientists","Back to the disc-player podcast","DOC sounds of science podcast",  "All Blacks", "Never Repeats podcast", "The Rubbish trip", "Back to the disc-player podcast", "Snacks and chats","Classic NBL podcast"]:
 			if ":" in self.episode_title: 
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 			if f490v:
-				if not "episode" in f490v.lower() and not "ep" in f490v.lower() and not f490v.lower().startswith("e"):# and not f490v.lower().startswith("E"):
+				if not "episode" in f490v.lower() and not "ep" in f490v.lower() and not f490v.lower().startswith("e") and not "podcast" in f490v.lower():# and not f490v.lower().startswith("E"):
 					f490v = "Episode " + f490v
 
-		if self.podcast_name in ["Dietary requirements", "History of Aotearoa New Zealand podcast", "Musician's Map", "The Frickin Dangerous Bro Show", "Dirt Church Radio"]:
+
+		if self.podcast_name in ["76 small rooms","Dietary requirements", "History of Aotearoa New Zealand podcast", "Musician's Map", "The Frickin Dangerous Bro Show", "Dirt Church Radio"]:
 			if "-" in self.episode_title:
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(" ")
@@ -293,35 +318,57 @@ def __init__(self, key):
 					f490v = " ".join(self.episode_title.split(" ")[:2]).rstrip(":")
 					f830v = f490v.lower()
 
-		if self.podcast_name in ["The Angus Dunn Podcast"]:
-			if ":" in self.episode_title:
-				f245 = self.episode_title.split(":")[-1].lstrip(" ")
-				f490v = self.episode_title.split(":")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
-			if "-" in self.episode_title:
-				f245 = self.episode_title.split("-")[-1].lstrip(" ")
-				f490v = self.episode_title.split("-")[0].split("The Angus Dunn Podcast Episode")[-1].rstrip(" ").lstrip(" ")
+		if self.podcast_name in ["The Angus Dunn"]:
+			if "The Angus Dunn Podcast " in my_alma.xml_response_data:
+				f245 = my_rec["245"]["a"].lstrip("The Angus Dunn Podcast ")
+				if "-" in f245:
+					divider = "-"
+				if ":" in f245:
+					divider = ":"
+				f490v =f245.split(divider)[0]
+				f830v = f490v.lower()+"."
+				f245a = divider.join(f245.split(divider)[1:])
+				
+		if self.podcast_name in ["Business is boring"]:
+			if "Business is boring" in self.episode_title:
+				f245 = self.episode_title.lstrip("Business is boring").lstrip(" ").lstrip(":").lstrip(" ")
+			if "Business is Boring" in self.episode_title:
+				f245 = self.episode_title.lstrip("Business is Boring").lstrip(" ").lstrip(":").lstrip(" ")
+
 
 		if self.podcast_name in ["HP business class"]:
-			self.episode_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
+			#self.episode_title = self.episode_title.lstrip('HP business class').lstrip("Business Class").lstrip(' ').lstrip(':').lstrip(' ')
 			if ":" in self.episode_title:
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(' ')
 			else:
 				f245 =str(self.episode_title)
+		if self.podcast_name in ['New Zealand Brewer']:
+			if "-" in self.episode_title:
+				if not self.episode_title.startswith("NZB"):
+					f245 = self.episode_title.split("-")[0].rstrip(" ")
+					if self.episode_title.split("-")[0].lstrip(" ").startswith("NZB"):
+							f490v = "Episode " + self.episode_title.split("Episode ")[-1].lstrip(" ")
+				else:
+					f245 = self.episode_title.split("-")[-1].rstrip(" ").lstrip(" ")
+					f490v = "Episode " + self.episode_title.split("-")[0].lstrip(" ").split("Episode")[-1].lstrip(" ")
 
-		if self.podcast_name in ["Bhuja podcast"]:
-			#self.episode_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(' ')
-			elif '.' in self.episode_title:
-				f245 = ".".join(self.episode_title.split(".")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(".")[0].rstrip(' ')
-			elif '-' in self.episode_title:
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(' ')
-			else:
-				f245 =str(self.episode_title)
+
+
+		# if self.podcast_name in ["Bhuja podcast"]:
+		# 	#self.episode_title = self.episode_title.lstrip('HP business class').lstrip(' ').lstrip(':').lstrip(' ')
+		# 	if ":" in self.episode_title:
+		# 		f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
+		# 		f490v = self.episode_title.split(":")[0].rstrip(' ')
+		# 	elif '.' in self.episode_title:
+		# 		f245 = ".".join(self.episode_title.split(".")[1:]).lstrip(" ")
+		# 		f490v = self.episode_title.split(".")[0].rstrip(' ')
+		# 	elif '-' in self.episode_title:
+		# 		f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+		# 		f490v = self.episode_title.split("-")[0].rstrip(' ')
+		# 	else:
+		# 		f245 =str(self.episode_title)
+
 		if self.podcast_name in ["Mud & blood"]:
 			if ":" in self.episode_title:
 				if self.episode_title.split(":")[0].isdigit():
@@ -336,7 +383,7 @@ def __init__(self, key):
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(' ')
 
-		if self.podcast_name in ["Bosses Rebuilding"]:
+		if self.podcast_name in ["Bosses rebuilding"]:
 			if "Bosses Rebuilding:" in self.episode_title:
 				f245 = self.episode_title.split("Rebuilding:")[-1]
 
@@ -349,9 +396,9 @@ def __init__(self, key):
 				f490v = self.episode_title.split(":")[0].rstrip(' ')
 
 		if self.podcast_name in ["Girls on top"]:
-			self.episode_title = self.episode_title.lstrip('Girls on top').lstrip(' ').lstrip(':').lstrip('-').lstrip(' ')
-			f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-			f490v = self.episode_title.split("-")[0].rstrip(' ')
+			if "-" in  self.episode_title and self.episode_title.startswith("Episode"):
+				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
+				f490v = self.episode_title.split("-")[0].rstrip(' ')
 			
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
 			print(self.episode_title)
@@ -390,8 +437,15 @@ def __init__(self, key):
 				f245 = "Ep".join(self.episode_title.split("Ep")[:-1]).rstrip(" ")
 				f490v = "Ep "+self.episode_title.split("Ep")[-1].lstrip(" ").replace("..", ".")
 				f830v = "ep. "+self.episode_title.split("Ep")[-1].lstrip(" ").replace("..", ".")
+		if self.podcast_name in ["EPIC podcast"]:
+			f245 = self.episode_title.lstrip("The EPIC Podcast - ").lstrip("The Epic Podcast - ").lstrip("The EPIC Podcast ").lstrip("The Epic Podcast ")
+			f490v = f245.split("-")[0].strip(" ")
+			f245 = f245.split("-")[-1].strip(" ")
+			if " " in f490v and not "ep" in f490v.lower():
+					f490v = f490v.replace(" ",":")
+			f830v = f490v+ "."
 
-		if self.podcast_name in ["Indegious_Urbanism", "Alchemy","Stirring the pot", "Selfie reflective", "UC science radio", "Animal matters"]:
+		if self.podcast_name in ["Indegious_Urbanism", "Alchemy","Stirring the pot", "Selfie reflective", "UC science radio"]:
 			f245 = str(self.episode_title)
 			if self.epis_numb:
 				f245 = self.episode_title.strip(self.epis_numb).rstrip(" ").lstrip(" ")
@@ -402,8 +456,10 @@ def __init__(self, key):
 						f490v = str(self.epis_numb)
 					else:
 						f490v ="Episode " +  self.epis_numb
+		if self.podcast_name in ["Queenstown life", "Animal matters", "Windows on dementia"]:
+			f490v ="Episode " +  self.epis_numb
 
-		if self.podcast_name == "Property Academy":
+		if self.podcast_name in ["Property Academy"]:
 			if "⎮" in self.episode_title:
 				divider = "⎮"
 			else:
@@ -415,16 +471,20 @@ def __init__(self, key):
 			f245 = self.episode_title.split(" | ")[0]
 			if  " | EP" in self.episode_title:
 				f490v = "EP"+self.episode_title.split("EP")[1].split(" ")[0]
-
+			elif "EP" in self.episode_title:
+				f245 = self.episode_title.split("EP")[0]
+				if " - " in self.episode_title:
+					f490v="EP" + self.episode_title.split("EP")[1].split(" - ")[0]
 		if self.podcast_name in  ["Dont give up your day job"]:
 			f245  = " ".join(self.episode_title.split(" ")[2:])
 			f490v = " ".join(self.episode_title.split(" ")[:2])
-
-
+		if self.podcast_name in ["thehappy$aver.com."]:
+			if "." and self.episode_title and self.episode_title.split(".")[0].isdigit():
+				f245 =".".join(self.episode_title.split(".")[1:])
+				f490 ="Episode "+self.episode_title.split('.')[0]
 		if f490v and not f830v:
 			f830v = f490v.lower() 
-			if not f830v.endswith("."):
-				f830v = f830v+"."
+
 		##########################################################################################################################################################################################################################################
 
 		# Field 008
@@ -506,7 +566,10 @@ def __init__(self, key):
 
 		#Field 520
 		self.description = self.description#.replace#("&nbsp;"," ")
-		self.record["520"]["a"] = '"{}"--RSS feed.'.format(self.description)
+		try:
+			self.record["520"]["a"] = '"{}"--RSS feed.'.format(self.description)
+		except:
+			logger.debug("No description")
 
 		#Fields 600, 610, 650,  700, 710
 
@@ -604,8 +667,10 @@ def __init__(self, key):
 			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
 			)
 		for epis  in my_dict:
-			if "tick" in epis.keys() and epis["tick"]:
+			if "tick" in epis.keys() and epis["tick"] and not epis["serial_mms"] in serials:
 					self.mms_id = epis["mis_mms"]
+					logger.debug(epis["podcast_name"])
+					logger.debug(epis["episode_title"])
 					self.template_path = os.path.join(template_folder, epis["template_name"])
 					try:
 						self.year = str(dt.fromtimestamp(int(epis["date"])).strftime('%d %m %Y')).split(" ")[-1]
@@ -664,7 +729,12 @@ def __init__(self, key):
 									with open (os.path.join(report_folder, "mms.txt"),"a" ) as mms_file:
 										mms_file.write( self.mms_id )
 										mms_file.write("\n")
+									with io.open(os.path.join(report_folder,"mms_titles.txt"),"a", encoding="utf-8") as mms_title_file:
+										mms_title_file.write("{}|{}".format(self.mms_id, self.episode_title))
+										mms_title_file.write("\n")
 								except Exception as e:
+									print(str(e))
+									quit()
 									statement =  "Could not grab mms from {}. {}".format ( my_alma.xml_response_data, str(e)  ) 
 									logger.error(statement)
 						if self.mms_id:
@@ -693,7 +763,7 @@ def main():
 	"""
 
 	my_rec = RecordCreator("prod")
-	my_rec.record_creating_routine(True, ["The good citizen"])#,"Taxpayer talk", "The fold", "Love this podcast"])
+	my_rec.record_creating_routine(True, ["Bosses rebuilding"])#,"Taxpayer talk", "The fold", "Love this podcast"])
 	#my_rec.record_creating_routine(True, [])
 
 

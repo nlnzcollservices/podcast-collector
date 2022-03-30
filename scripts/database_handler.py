@@ -182,7 +182,7 @@ class DbHandler():
         if table == "Podcast":
             my_id = Podcast.create(podcast_name=my_data["podcast_name"], serial_mms = my_data["serial_mms"], rss_link = my_data["rss_filename"], serial_pol = my_data["serial_pol"], access_policy = my_data["access_policy"], automated_flag = my_data["automated_flag"], publish_link_ro_record = my_data["publish_link_ro_record"], last_issue = 0, template_name = my_data["template_name"],location = my_data["location"])
         if table == "Episode":
-            my_id =Episode.create(podcast=my_data["podcast"], episode_title=my_data["episode_title"],description=my_data["description"], date_harvested = my_data["date_harvested"],date=my_data["date"], harvest_link = my_data["harvest_link"], episode_link = my_data["episode_link"])            
+            my_id =Episode.create(podcast=my_data["podcast"], episode_title=my_data["episode_title"],description=my_data["description"], date_harvested = my_data["date_harvested"],date=my_data["date"], harvest_link = my_data["harvest_link"], episode_link = my_data["episode_link"], epis_numb = my_data["epis_numb"], epis_seas = my_data["epis_seas"], tick = my_data["tick"])            
         if table == "File":
             my_id =File.create(episode = my_data["episode"], filepath = my_data["filepath"], md5sum = my_data["md5sum"], md5sum_from_file = my_data["md5_from_file"],  filesize =my_data["filesize"], size_original = my_data["size_original"], file_type = my_data["file_type"])
         self.my_id = my_id
@@ -295,6 +295,12 @@ class DbHandler():
         logger.debug("Updating item in db")
         q = Episode.update(item = item_pid ).where(Episode.mis_mms == mms_id)
         q.execute()
+    def db_update_item_id_serials(self, episode_title, item_pid):
+
+        """Updating Alma item id in db"""
+        logger.debug("Updating item in db")
+        q = Episode.update(item = item_pid ).where(Episode.episode_title == episode_title)
+        q.execute()
 
     def db_update_mms(self, mms_id, episode_title, podcast_id):
 
@@ -317,7 +323,7 @@ class DbHandler():
             podcast_names(list) - names of podcasts
             returning (bool) - set True if return or False to print
         """
-        logger.info("Reading DB")
+        logger.debug("Reading DB")
         self.full_dict = {}
         self.returning_dict = {}
         self.returning_list = []
@@ -333,11 +339,13 @@ class DbHandler():
             podcasts = Podcast.select()
             for pod in podcasts:
                 self.podcast_name = pod.podcast_name
+                #print(self.podcast_name)
                 if self.podcast_name == podc_name:
                     self.podcast_id = pod.id
                     self.serial_mms = pod.serial_mms
                     self.serial_pol = pod.serial_pol
                     self.rss_link = pod.rss_link
+                    self.serial_holding= pod.serial_holding
                     self.location = pod.location
                     self.access_policy = pod.access_policy
                     self.publish_link_to_record = pod.publish_link_to_record
@@ -348,6 +356,7 @@ class DbHandler():
                     self.full_dict["podcast_name"]= self.podcast_name
                     self.full_dict["serial_mms"]= self.serial_mms
                     self.full_dict["serial_pol"]= self.serial_pol
+                    self.full_dict["serial_holding"] = self.serial_holding
                     self.full_dict["rss_link"] = self.rss_link
                     self.full_dict["location"] = self.location
                     self.full_dict["access_policy"]= self.access_policy
@@ -492,9 +501,13 @@ def main():
     ###Set True if return and False to print
     ### the names of values to return could be seen in "podcaast_models.py" and can return everything except of "cataloguing fields" (650,655,700 etc)
     my_db = DbHandler()
-    #my_db.db_reader(["podcast_name","episode_title","description", "mis_mms", "holdings", "item"],[],  False)
-    #print(my_list)
-    my_db.insert_the_last_issue("How to save the world", "October 04 2020")
+    #mport os
+    #print(os.path.getsize(r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\Human-robot interaction podcast\HRI-Podcast-Episode-018-The-Science-Beyond-The-Horizon.mp3"))
+    # #my_db.db_reader(["podcast_name","episode_title","description", "mis_mms", "holdings", "item"],[],  False)
+    # #print(my_list)
+    # my_db.insert_the_last_issue("How to save the world", "October 04 2020")
+    #7ee29280ef3ccca9769e622d7f630e23
+    #my_db.table_creator( "File", {'episode': 8747, 'filepath': r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\Cooking the books\goodbye.mp3", 'md5sum': '3874aaaab78b8ed05027a0f70c6bc944', 'md5_from_file': None, 'filesize': 708555, 'size_original': 708555, 'file_type': "mp3"})
 
 if __name__ == '__main__':
     main()

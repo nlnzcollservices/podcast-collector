@@ -7,9 +7,9 @@ from podcast_dict import podcasts_dict, serials
 from rosetta_sip_factory.sip_builder import build_sip_from_json
 import shutil
 try:
-	from settings import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type, rosetta_sb_folder, report_folder
+	from settings import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type, ie_entity_type_serial, rosetta_sb_folder, report_folder
 except:
-	from settings_prod import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type, rosetta_sb_folder, report_folder
+	from settings_prod import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type,  ie_entity_type_serial, rosetta_sb_folder, report_folder
 
 from database_handler import DbHandler
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 
 	filename= os.path.basename(filepath)
 	ie_dmd_dict = [{'dc:title': episode_title}]
-	general_ie_chars = [{'IEEntityType': ie_entity_type}]
+	general_ie_chars = [{'IEEntityType': ie_entity_type,"UserDefinedA":"podcasts"}]
 	object_identifier=[{'objectIdentifierType': 'ALMAMMS','objectIdentifierValue': mis_mms}]
 	access_rights_policy = [{'policyId': ar_policy}]
 	sip_title = str(serial_mms)
@@ -104,20 +104,22 @@ def generate_sips_for_serials (podcast_name, ar_policy, serial_mms,  episode_tit
 	year = ""
 	month = ""
 	day = ""
-	title_for_label = episode_title
+	title_for_label = str(episode_title)
+	title_for_dc_title = str(episode_title)
 	if podcast_name in ["Kelli from the Tron"]:
 		my_date = episode_title.split(" ")[-1]
-		title_for_label = episode_title.split("-")[0].rstrip(" ")
+		title_for_dc_title = episode_title.split("-")[0].rstrip(" ")
+		title_for_label = "_".join(episode_title.split("-")[-3:]).lstrip(" ")
 		day = dateparser.parse(my_date).strftime("%d")
 		month = dateparser.parse(my_date).strftime("%m")
 		year = dateparser.parse(my_date).strftime("%Y")
 	filename= os.path.basename(filepath)
-	ie_dmd_dict = [{'dc:title': title_for_label,"dc:date":year,"dcterms:available":month, "dc:coverage":day }]
-	general_ie_chars = [{'IEEntityType': ie_entity_type}]
+	ie_dmd_dict = [{'dc:title': title_for_dc_title,"dc:date":year,"dcterms:available":month, "dc:coverage":day }]
+	general_ie_chars = [{'IEEntityType': ie_entity_type_serial}]#HERE Userdefind
 	object_identifier=[{'objectIdentifierType': 'ALMAMMS','objectIdentifierValue': serial_mms}]
 	access_rights_policy = [{'policyId': ar_policy}]
-	sip_title = str(serial_mms)
-	output_dir = os.path.join(sip_folder, sip_title)
+	sip_title = title_for_dc_title + str(serial_mms)
+	output_dir = os.path.join(sip_folder, title_for_dc_title)
 	#simple_file_name = os.path.basename(full_filename)
 	file_original_path = f'{filename}'
 	my_json = {}
@@ -128,7 +130,7 @@ def generate_sips_for_serials (podcast_name, ar_policy, serial_mms,  episode_tit
 	my_json["fileSizeBytes"] = str(os.path.getsize(filepath))
 	my_json["fileCreationDate"] = time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(os.path.getctime(filepath)))
 	my_json["fileModificationDate"] = time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(os.path.getmtime(filepath)))
-	my_json["label"] = podcast_name + ": " + episode_title
+	my_json["label"] = podcast_name + ": " + title_for_label
 	pres_master_json = json.dumps(my_json)
 	json_object = json.loads(pres_master_json )
 	json_object['fileOriginalPath'] = json_object['fileOriginalPath']
@@ -319,7 +321,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 					logger.error("Something wrong with file {} {} {}".format(podcast_name, filename, mis_mms))
 					quit()
 
-			elif not tick and not mis_mms and filepath and not sip and serial_mms in serials:
+			elif tick and not mis_mms and filepath and not sip and serial_mms in serials:
 				file_count +=1
 				met_filename = episode_title.replace(" ","_")+".xml"
 				output_dir, filename = generate_sips_for_serials(podcast_name, ar_policy, serial_mms, episode_title, filepath, met_filename)
@@ -329,9 +331,9 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 					if update_sip_in_db:
 						my_db.db_update_sip(episode_title)
 					if copy_to_rosetta_prod_folder:
-						destination = os.path.join(rosetta_folder_for_serials, serial_mms )
+						destination = os.path.join(rosetta_folder_for_serials, episode_title.split('-')[0].rstrip(" ") )
 					if copy_to_sb_folder:
-						destination = os.path.join(rosetta_sb_folder, serial_mms )
+						destination = os.path.join(rosetta_sb_folder, episode_title.split('-')[0].rstrip(" ") )
 					if copy_to_rosetta_prod_folder or copy_to_sb_folder:
 						print("TEST!")
 						try:
@@ -346,9 +348,11 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 						 		logger.error(str(e))
 						 		quit()
 						logger.info("Copied to {}".format(destination))
+						my_db.db_update_sip(episode_title)
 						with open(os.path.join(report_folder, "sips.txt"), "a") as f:
 							f.write("{}|{}".format(destination, episode_title))
 							f.write("\n")
+
 
 
 				else:

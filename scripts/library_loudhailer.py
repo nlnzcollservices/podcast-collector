@@ -28,76 +28,73 @@ def library_loudhailer_routine():
 
 	base_url = r"https://natlib.govt.nz"	
 	#url = r"https://natlib.govt.nz/blog/tags/podcast"
-	url = r"https://natlib.govt.nz/blog/categories/library-loudhailer"
+	url = podcasts_dict[podcast_name]["url"]
 
 	"""Harvests Library loudhailer website , populates google spreadsheet and runs spreadsheet reader"""
-
 	r = requests.get(url)
+
 	my_soup = bs(r.text, "lxml")
-
-
-
 	episode_links = my_soup.find_all("div", {'class':'blog-card'})
 	for link in episode_links:
 		episode_link = base_url+link.find("a").attrs["href"]
-
-		r = requests.get(episode_link)
-		my_soup2 = bs(r.text, "lxml")
-		#print(my_soup2)
-		try:
-			episode_download_link = base_url+my_soup2.find_all("audio")[0].attrs["src"]
-		except:
-			episode_download_link =""
-		episode_title = my_soup2.find("h1").text
-		date = my_soup2.find("span", {"class":"dove-gray"}).text
-		logger.info(date)
-		new_date = dateparser.parse(date)
-		time_stamp = mktime(new_date.timetuple())
-
-		if time_stamp > time_dict[0]["last_issue"]:
-		# #print(new_date)
-			new_date = new_date.strftime("%B %d %Y")
-			description_html=my_soup2.find("div",{"class":"contentful-blog-content__body"})
-			tags_list = ""
-			tags = my_soup2.find("h3", {"class":"margin-top-0"}).parent.find_all("a")
-			for tag in tags:
-				tags_list+=tag.text+", "
-			tags_list = tags_list.rstrip(", ").lstrip(",")
-			plogger.info(tags_list)
-
-
+		if "ep-" in episode_link:
+			r = requests.get(episode_link)
+			my_soup2 = bs(r.text, "lxml")
+			#print(my_soup2)
 			try:
-				description1 = description_html.find("div",{"class":"summary-block"}).text.strip("\n")
+				episode_download_link = base_url+my_soup2.find_all("audio")[0].attrs["src"]
 			except:
-				description1 = ""
-			try:
-				description2 = description_html.find("h2").text
-			except:
-				description2 = ""
-			try:
-				description3= description_html.find("p").text
-			except:
-				description3 = ""
-			description = description1+description2+description3
-			logger.info(description)
-			connection_count = 0
-			while not connection_count >= 5:
-				connection_count +=1
+				episode_download_link =""
+			episode_title = my_soup2.find("h1").text
+			date = my_soup2.find("span", {"class":"dove-gray"}).text
+			logger.info(date)
+			new_date = dateparser.parse(date)
+			time_stamp = mktime(new_date.timetuple())
+
+			if time_stamp > time_dict[0]["last_issue"]:
+			# #print(new_date)
+				new_date = new_date.strftime("%B %d %Y")
+				description_html=my_soup2.find("div",{"class":"contentful-blog-content__body"})
+				tags_list = ""
+				tags = my_soup2.find("h3", {"class":"margin-top-0"}).parent.find_all("a")
+				for tag in tags:
+					tags_list+=tag.text+", "
+				tags_list = tags_list.rstrip(", ").lstrip(",")
+				logger.info(tags_list)
+
+
 				try:
+					description1 = description_html.find("div",{"class":"summary-block"}).text.strip("\n")
+				except:
+					description1 = ""
+				try:
+					description2 = description_html.find("h2").text
+				except:
+					description2 = ""
+				try:
+					description3= description_html.find("p").text
+				except:
+					description3 = ""
+				description = description1+description2+description3
+				logger.info(description)
+				connection_count = 0
+				while not connection_count >= 5:
+					connection_count +=1
+					try:
 
-					ws.append_row([podcast_name, podcasts_dict[podcasat_name]["serial_mms"], podcasts_dict[podcast_name]["rss_filename"], episode_title, description, episode_link,new_date, tags_list, episode_download_link])
-					ws = gs.get_worksheet(0)
-					logger.info("a new row appended")
-					logger.info(row_count)
-					start_row = ws.row_count
-					finish_row = int(start_row) 
-					rs = ReadFromSpreadsheet(start_row,finish_row)
-					rs.get_metadata_from_row()
-					break
+						ws.append_row([podcast_name, podcasts_dict[podcast_name]["serial_mms"], podcasts_dict[podcast_name]["rss_filename"], episode_title, description, episode_link,new_date, tags_list, episode_download_link])
+						ws = gs.get_worksheet(0)
+						logger.info("a new row appended")
+						logger.info(ws.row_count)
+						start_row = ws.row_count
+						finish_row = int(start_row) 
+						rs = ReadFromSpreadsheet(start_row,finish_row)
+						rs.get_metadata_from_row()
+						break
 
-				except gspread.exceptions.APIError as e:
-					logger.error(str(e))
-					sleep(10)
+					except gspread.exceptions.APIError as e:
+						logger.error(str(e))
+						sleep(10)
 
 if __name__ == "__main__":
 	library_loudhailer_routine()

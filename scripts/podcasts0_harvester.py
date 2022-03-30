@@ -14,8 +14,8 @@ from datetime import datetime as dt
 from podcast_dict import podcasts_dict, serials
 from database_handler import DbHandler
 from nltk.corpus import words
-# import nltk
-# nltk.download('words')
+import nltk
+nltk.download('words')
 try:
 	from settings import  file_folder, report_folder, podcast_sprsh, logging,creds #!!!! report
 except:
@@ -135,23 +135,23 @@ class Harvester():
 				return True #
 		return False
 
-	def jhove_check(self, filepath):
+	# def jhove_check(self, filepath):
 
-		"""Checks if the file well-formed valid:
-		Arguments:
-			filepath(str) - file to the pass to check
-		Returns:
-			(bool) - true if file is good and False in other case"""
+	# 	"""Checks if the file well-formed valid:
+	# 	Arguments:
+	# 		filepath(str) - file to the pass to check
+	# 	Returns:
+	# 		(bool) - true if file is good and False in other case"""
 
-		command = [r'jhove',filepath,'-t', 'text'] # the shell command
-		process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-		output, error = process.communicate()
-		output = str(output).split(r"\r\n")[1:-1]
-		for el in output:
-			if 'Status' in el:
-				if "Well-Formed and valid" in el:
-					return True
-		return False
+	# 	command = [r'jhove',filepath,'-t', 'text'] # the shell command
+	# 	process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	# 	output, error = process.communicate()
+	# 	output = str(output).split(r"\r\n")[1:-1]
+	# 	for el in output:
+	# 		if 'Status' in el:
+	# 			if "Well-Formed and valid" in el:
+	# 				return True
+	# 	return False
 
 
 
@@ -203,6 +203,7 @@ class Harvester():
 		
 		my_flag = False
 		d = feedparser.parse(self.podcast_data["rss_filename"])
+		print(d)
 		#logger.setLevel("DEBUG")
 		logger.debug(d)
 		for ind in range(len(d["entries"])):
@@ -228,8 +229,11 @@ class Harvester():
 			try:
 			#parses the date into a timestamp
 				self.episode_date = d["entries"][ind]["published"]
+				print(self.episode_date)
 				try:
+
 					self.episode_date = mktime(dt.strptime(self.episode_date,"%a, %d %b %Y %H:%M:%S %z").timetuple())
+
 				except:
 					try:
 						self.episode_date = mktime(dt.strptime(self.episode_date,"%a, %d %b %Y %H:%M:%S GMT").timetuple())
@@ -259,13 +263,13 @@ class Harvester():
 				except:
 					pass
 				logger.info(self.episode_link)
-				if self.podcast_name:# in ["NZ history"]:
-					if self.episode_title:# in  ["New Zealand's Rivers: can we learn from history?"]:
+				if self.podcast_name:# in ["Between two beers"]:
+					#if self.episode_title in  ["Sam Wilkinson: The Method Man"]:
 					#if "Aroha Harris: New Perspectives on" in self.episode_title:
 
 						my_flag = True
 				else:
-					my_flag = True
+					my_flag = False
 				if my_flag:
 
 					logger.debug(d["entries"][ind]["links"])
@@ -358,9 +362,12 @@ class Harvester():
 						flag_for_file = False
 						self.f_path = os.path.join(file_folder, self.podcast_name.strip('’'))
 						if ":" in self.podcast_name:
-							self.f_path =os.path.join(file_folder, podcast_name.split(":")[0].strip("’").rstrip(" "))
+							self.f_path =os.path.join(file_folder, self.podcast_name.split(":")[0].strip("’").rstrip(" "))
 						if "/" in self.podcast_name:
-							self.f_path =os.path.join(file_folder, podcast_name.split("/")[0].strip("’").rstrip(" "))
+							self.f_path =os.path.join(file_folder, self.podcast_name.split("/")[0].strip("’").rstrip(" "))
+						if "." in self.podcast_name:
+							self.f_path =os.path.join(file_folder, self.podcast_name.strip(".").rstrip(" "))
+
 						if not os.path.isdir(self.f_path):
 							os.mkdir(os.path.join(self.f_path))
 
@@ -371,7 +378,7 @@ class Harvester():
 						if downloader.size_original == 0:
 							logger.info("Ther is empty file on {} in {} of {}. Please contact publisher".format(episode_download_link, episode_title, podcast_name))
 							self.spreadsheet_message = "!!!D Not Tick. Empty file. Ask piblisher!!!"
-						if not downloader.download_status or not self.jhove_check(downloader.filepath) or (downloader.filesize == 0 and downloader.size_original != 0):
+						if not downloader.download_status or  (downloader.filesize == 0 and downloader.size_original != 0):# or not self.jhove_check(downloader.filepath)
 
 						# if not downloader.download_status  or (downloader.filesize == 0 and downloader.size_original != 0):
 
@@ -381,7 +388,7 @@ class Harvester():
 								with open("skipped_episode_check_please.txt","a") as f:
 									f.write("{}|{}|{}|{}|{}".format(self.podcast_name, self.episode_title, self.episode_link, self.episode_download_link, downloader.message))
 									f.write("\n")
-							elif not self.jhove_check(downloader.filepath):
+							elif not downloader.jhove_check(downloader.filepath):
 								logger.error("File is not well-formed")
 								quit()
 
@@ -432,7 +439,7 @@ class Harvester():
 								if not self.description:
 									self.description = ""
 								self.description = bs(self.description,"lxml").text
-								self.description = self.description.replace(r"\n", " ").replace(r"\'s", 's')
+								self.description = self.description.replace(r"\n", " ").replace(r"\'s", 's').replace("  "," ")#.replace("►"," ").
 								self.description = self.description.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
 								#this line removes emoji
 								self.description = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',self.description)
@@ -441,7 +448,10 @@ class Harvester():
 								tick = False
 								if self.serial_mms in serials:
 									tick = True
+								if podcasts_dict[self.podcast_name]["automated_flag"] == True:
+									tick = True
 								if not self.flag_for_epis_table:
+
 									logger.info("this episode is not in db")
 
 									episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas, "tick" : tick}

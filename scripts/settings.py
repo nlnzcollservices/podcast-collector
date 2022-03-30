@@ -19,13 +19,14 @@ file_folder = os.path.join(working_folder, "files")
 logs_folder = os.path.join(working_folder, "log")
 assets_folder = os.path.join(working_folder,"assets")
 template_folder = os.path.join(assets_folder, "templates")
-report_folder= os.path.join(assets_folder, "reports")
+report_folder= os.path.join(logs_folder, "reports")
 log_folder = os.path.join(logs_folder, "log")
 database_folder = os.path.join(working_folder, "database")
 database_fullname = os.path.join(database_folder, "podcasts.db")
 sip_folder = os.path.join(working_folder, "SIP")
 rosetta_folder = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_audio"
 rosetta_sb_folder = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\UAT\podcasts"
+rosetta_folder_for_serials = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\periodic"
 archived_folder = os.path.join(working_folder, "archived")
 database_archived_folder = os.path.join(working_folder, "archived","db_copy")
 ndha_report_folder = os.path.join(report_folder, "NDHA_reports")
@@ -98,6 +99,7 @@ end_xml = '</bib>'
 
 ###############################SIP settings###############################################
 ie_entity_type = 'AudioIE'
+ie_entity_type_serial= 'PeriodicIE'
 ##################################e-mail settings########################################
 my_email_box = "Rhonda.grantham@dia.govt.nz"
 report_part_name = "45. Weekly Published"

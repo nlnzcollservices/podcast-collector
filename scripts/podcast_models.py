@@ -15,6 +15,7 @@ class Podcast(peewee.Model):
     podcast_name = peewee.CharField(max_length=255)
     serial_mms = peewee.CharField(max_length=20)
     serial_pol = peewee.CharField(max_length = 15, null= True, default = None )
+    serial_holding = peewee.CharField(default=None, max_length = 30, null = True)
     rss_link = peewee.CharField(max_length = 125)
     location = peewee.CharField(max_length = 125, null= True, default = None )
     access_policy = peewee.CharField(max_length = 3)

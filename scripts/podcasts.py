@@ -1,4 +1,5 @@
 import os
+import re
 import io
 import gspread
 import shutil
@@ -17,11 +18,14 @@ from podcasts3_holdings_items import Holdings_items
 from podcasts4_update_fields import Manage_fields
 from podcasts0_harvester import harvest
 from podcasts2_make_sips import sip_routine
+from podcast_dict import podcasts_dict, serials
 import csv
 import win32com.client
 import os
 import datetime
 import itertools
+import dateparser
+# os.environ['REQUESTS_CA_BUNDLE'] = os.path.join( r'C:\Users\Korotesv\AppData\Roaming\Python\Python310\site-packages\certifi', 'ZscalerRootCertificate-2048-SHA256.crt')
 
 
 
@@ -172,16 +176,23 @@ class Podcast_pipeline():
 		
 		mms_dict = {}
 		my_alma = AlmaTools("prod")
-		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num"],None,True)
+		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num","serial_mms", "podcast_name"],None,True)
 		rosetta_ies_list = self.read_ies_file()
 		for mm in mms_dict:
+			# print(mm)
+			# print("here")
 			if mm != {}:
 				ies_list = []
 				episode_id = None
 				mms = None
-				mms = mm["mis_mms"]
-				ie_num = mm["ie_num"]
-				episode_id = mm["episode_id"]
+				if "mis_mms" in mm.keys():
+					mms = mm["mis_mms"]
+					ie_num = mm["ie_num"]
+					episode_id = mm["episode_id"]
+				else:
+					mms = None
+					ie_num = None
+									
 				if mms and not ie_num:
 					my_alma.get_representations(mms)
 					#logger.info(my_alma.xml_response_data)
@@ -198,6 +209,36 @@ class Podcast_pipeline():
 								print(mms)
 								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
 								quit()
+				elif not mms and mm["serial_mms"] in serials and not mm["ie_num"]:
+					mms=mm["serial_mms"]
+					my_title_parsed =  re.sub(mm["podcast_name"].lower(), "", mm["episode_title"].lower())
+					logger.debug(my_title_parsed)
+					my_title_date = dateparser.parse( my_title_parsed,settings={'DATE_ORDER': 'DMY'})
+					logger.info(my_title_date)
+					my_alma.get_representations(mms,{"limit":"100"})
+					total_count = re.findall(r'count="(.*?)">',my_alma.xml_response_data)[0]
+					for i in range((int(total_count)//100)+2):
+						my_alma.get_representations(mms,{"limit":"100","offset":99*i})
+						repres = re.findall(r"<id>(.*?)</id>",my_alma.xml_response_data)
+						for rep in repres:
+							my_alma.get_representation (mms, rep)
+							ie = re.findall(r"pubam:(.*?)</",my_alma.xml_response_data)[0]
+							year = re.findall(r"year>(.*?)</year",my_alma.xml_response_data)[0]
+							label = re.findall(r"label>(.*?)</label",my_alma.xml_response_data)[0]
+							#print(label)
+							my_label_date = dateparser.parse(label,settings={'DATE_ORDER': 'YMD'})
+							if my_title_date  == my_label_date:
+								self.db_handler.db_update_ie(ie,mm["episode_id"])
+								print("IE updated in db")
+
+
+
+
+
+					# my_alma.get_representations(mms,{"limit":"100"))
+					# 					reps = rep_grab.find( 'representations' ).find_all('id' )
+					# ies = rep_grab.find_all( 'originating_record_id' )
+
 
 
 	def file_cleaning(self):
@@ -210,6 +251,7 @@ class Podcast_pipeline():
 		file_list_to_delete = []
 		#list of all filepaths in db
 		filepath_in_db_list = ["\\".join(el["filepath"].split("\\")[-2:]) for el in file_dictionary if el !={}]
+		# file_folder=r"Y:\ndha\pre-deposit_prod\LD_proj\podcasts\files"
 		for root, dirs, files in os.walk(file_folder):
 			for name in files:
 				fl_path = os.path.join(root, name)
@@ -227,69 +269,40 @@ class Podcast_pipeline():
 		Deletes file from file folder, the sip from project sip folder and sip from rosetta_folder 
 
 		"""
-		episode_list = []
-		mms_list_for_items = []
-		title_list_for_items = []
-		existing_items_mms_list = []
-		existing_items_title_list = []
-		mms_list_for_updating = []
-		titles_list_for_updating = []
-		new_mms_list_for_updating = []
-		new_titles_list_for_updating = []
-		item_dictionary = self.db_handler.db_reader(["podcast_name","serial_mms","mis_mms","episode_title","holdings", "ie_num","item","updated"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
-		logger.info(item_dictionary)
-		for itm in item_dictionary:
-			#print(itm)
-			if itm != {} and len(itm) >1:
-				if itm["ie_num"]:
-					if itm["item"]:
-						existing_items_mms_list.append(itm["mis_mms"])
-						existing_items_title_list.append(itm["episode_title"])
-					if not itm["item"]:
-						mms_list_for_items.append(itm["mis_mms"])
-						title_list_for_items.append(itm["episode_title"])
-						episode_list.append([itm["mis_mms"], itm["holdings"], itm["item"], itm["ie_num"], itm["podcast_name"], itm["serial_mms"], itm["episode_title"]])
-					if not itm["updated"]:
-						mms_list_for_updating.append(itm["mis_mms"])
-						titles_list_for_updating.append(itm["episode_title"])
-
 		my_item = Holdings_items(key)
-		my_item.item_routine(episode_list, False)
-		created_item_mms_list = my_item.mms_list
-		created_item_mms_list = my_item.title_list
-		existing_items_mms_list= existing_items_mms_list + created_item_mms_list
-		existing_items_title_list = existing_items_title_list + created_item_title_list
-		for el in mms_list_for_updating:
-			if el in existing_items_mms_list:
-				new_mms_list_for_updating.append(el)
-		for el in titles_list_for_updating:
-			if el in existing_items_title_list:
-				new_titles_list_for_updating.append(el)
+		my_item.item_routine()
 		my_alma_record = Manage_fields(key)
-		my_alma_record.cleaning_routine(new_mms_list_for_updating)
+		my_alma_record.cleaning_routine()
 		report_filename = "report_{}.txt".format(dt.now().strftime("%Y-%m-%d_%H"))
 		report_full_filename= os.path.join(report_folder,report_filename)	 		
 		report_dictionary = self.db_handler.db_reader(["podcast_name","serial_mms","episode_title","mis_mms","holdings","item","ie_num","filepath", "updated"],None,True)
 		for epis in report_dictionary:
 			if epis != {} and "item" in epis.keys():
-				if epis["item"] and epis["ie_num"]:
-					met_filename = epis["episode_title"].replace(" ","_")
+				if (epis["item"] and epis["ie_num"] and epis["updated"]) or (epis["item"] and epis["ie_num"] and epis["serial_mms"] in serials):
+					if epis["serial_mms"] in serials:
+
+						met_filename = epis["episode_title"].replace(" ","_").replace('"',"") + ".xml"
+						sip_title = epis["episode_title"]
+
+					else:
+						met_filename = epis["mis_mms"] + ".xml"
+						sip_title = epis["mis_mms"]
 					with io.open(report_full_filename, mode="a", encoding="utf-8") as f:
-						f.write(epis["podcast_name"] + "|" + epis["episode_title"]  + "|" + epis["mis_mms"]  + "|" + str(epis["holdings"]) + "|" + str(epis["item"]) + "|" + str(epis["ie_num"]) + "|" +str(epis["updated"])   + "\n" )
+						f.write(epis["podcast_name"] + "|" + epis["episode_title"]  + "|" + str(epis["mis_mms"])  + "|" + str(epis["holdings"]) + "|" + str(epis["item"]) + "|" + str(epis["ie_num"]) + "|" +str(epis["updated"])   + "\n" )
 					try:
 						os.remove(epis["filepath"])
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(sip_folder, epis["serial_mms"],"content","streams", epis["mis_mms"] ))
+					 	shutil.rmtree(os.path.join(sip_folder, epis["serial_mms"],"content","streams", sip_title ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	shutil.remove(os.path.join(sip_folder, epis["serial_mms"],"content","streams", filepath.split("\\")[-1] ))
+					 	os.remove(os.path.join(sip_folder, epis["serial_mms"],"content","streams", epis["filepath"].split("\\")[-1] ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	os.remove(os.path.join(sip_folder, epis["serial_mms"],"content",epis["mis_mms"]+".xml" ))
+					 	os.remove(os.path.join(sip_folder, epis["serial_mms"],"content",sip_title+".xml" ))
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
@@ -301,15 +314,15 @@ class Podcast_pipeline():
 					except FileNotFoundError as e:
 					 	logger.error(str(e))
 					try:
-					 	shutil.rmtree(os.path.join(rosetta_folder, epis["serial_mms"],"content","streams", epis["mis_mms"] ))
+					 	shutil.rmtree(os.path.join(rosetta_folder, epis["serial_mms"],"content","streams", sip_title ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	shutil.remove(os.path.join(rosetta_folder, epis["serial_mms"],"content","streams", met_filename ))
+					 	os.remove(os.path.join(rosetta_folder, epis["serial_mms"],"content","streams", met_filename ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
-					 	os.remove(os.path.join(rosetta_folder, epis["serial_mms"],"content", epis["mis_mms"]+".xml" ))
+					 	os.remove(os.path.join(rosetta_folder, epis["serial_mms"],"content", sip_title+".xml" ))
 					except FileNotFoundError as e:
 						logger.error(str(e))
 					try:
@@ -334,7 +347,13 @@ class Podcast_pipeline():
 						if os.listdir(os.path.join(rosetta_folder, epis["serial_mms"],"content")) == []:
 							shutil.rmtree(os.path.join(rosetta_folder, epis["serial_mms"],"content"))
 							logger.info("SIP folder removed - {}".format(os.path.join(rosetta_folder, epis["serial_mms"],"content")))
-				
+					for fold in os.listdir(rosetta_folder):
+						fold_path = os.path.join(rosetta_folder, fold)
+						if len(os.listdir(fold_path)) == 1:
+							if os.listdir(fold_path)[0] == "error":
+								os.remove(os.path.join(fold_path,"error"))
+						if len(os.listdir(fold_path)) == 0:
+							os.rmdir(fold_path)
 
 
 				
@@ -473,38 +492,42 @@ class Podcast_pipeline():
 
 	def podcast_routine(self):
 
-		"""The main function which manages all the processes in Podcast pipline:
-			1. Copies db with current date in title
-			2. Deletes all the files which are not in db
-			3. Reading emails to identify NDHA report and reading the ie numbers of finished episodes which have digital representation to list
-			4. Inserting ie from Alma to db checking it also in NDHA report_folder
-			5. Finishing existing records and deleting files
-			6. Updating the last issue in db for each podcast (to start harvest from it)
-			7. Updating database from spreadsheet and deleting row
-			8. Creating records for previously harvested files
-			9. Creating sip packages
-			10. Harvesting new episodes"""
+		# """The main function which manages all the processes in Podcast pipline:
+		# 	1. Copies db with current date in title
+		# 	2. Deletes all the files which are not in db
+		# 	3. Reading emails to identify NDHA report and reading the ie numbers of finished episodes which have digital representation to list
+		# 	4. Inserting ie from Alma to db checking it also in NDHA report_folder
+		# 	5. Finishing existing records and deleting files
+		# 	6. Updating the last issue in db for each podcast (to start harvest from it)
+		# 	7. Updating database from spreadsheet and deleting row
+		# 	8. Creating records for previously harvested files
+		# 	9. Creating sip packages
+		# 	10. Harvesting new episodes"""
 
 
 
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
-		self.file_cleaning()
-		self.get_ies_from_reports()
-		lst = self.read_ies_file()
-		self.insert_ies()
-		self.finish_existing_records_and_delete_files("prod")
-		self.db_handler.update_the_last_issue()
-		self.db_handler.delete_done_from_db()
-		self.update_database_from_spreadsheetand_delete_row()
-		## ! Set "sb" if whould like records in "sb"
-		## !Set my_rec.record_creating_routune(update = True) to update records with existing mms id.
-		## !Be careful not to update record with SB mms_id in Production. Normally SB is updating regularly by making Production copy.
-		my_rec = RecordCreator(self.alma_key)
-		my_rec.record_creating_routine()
-		sip_routine()
+
+		# self.file_cleaning()
+
+		# self.get_ies_from_reports()
+		# lst = self.read_ies_file()
+		# self.insert_ies()
+		# self.finish_existing_records_and_delete_files("prod")
+		# self.db_handler.delete_done_from_db()
+
+		# self.update_database_from_spreadsheetand_delete_row()
+
+		# my_rec = RecordCreator(self.alma_key)
+		# my_rec.record_creating_routine()
+
+		# sip_routine()
+
 		harvest()
+		
 		self.db_handler.update_the_last_issue()
+
 		 		
 def main():
 

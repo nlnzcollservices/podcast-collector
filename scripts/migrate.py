@@ -34,9 +34,9 @@ def main():
 
 	"""This is support tool for modifying database structure"""
 
-	table_name = "file"
-	field_name = "size_original"
-	field_content = CharField(default=None, max_length = 100, null = True)
+	table_name = "podcast"
+	field_name = "serial_holding"
+	field_content = CharField(default=None, max_length = 30, null = True)
 	#field_content = BooleanField(default = False)
 	#field_name2= "seas_n"
 	#drop_column(table_name, field_name2)

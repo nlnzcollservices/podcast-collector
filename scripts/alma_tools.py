@@ -6,6 +6,11 @@ except:
 	from settings_prod import sb_key, pr_key
 from bs4 import BeautifulSoup as bs
 import re
+import os
+from openpyxl import load_workbook
+from selenium import webdriver
+from podcast_dict import podcasts_dict
+# driver = webdriver.Firefox()
 ##################################################################################################
 class AlmaTools():
 	
@@ -64,6 +69,7 @@ class AlmaTools():
 			self.alma_key = str(pr_key)
 		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
 		self.acq_base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines/"
+		self.config_base_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/conf/"
 		self.mms_id = None
 		self.holding_id = None
 		self.item_pid = None
@@ -82,9 +88,26 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}", params=parameters,verify= False)
+		#print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+
+	def get_set(self, set_id, options={}):
+
+		"""Retrieves sets by set_id"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r= requests.get(f"{self.config_base_url}sets/{set_id}",params = parameters)
+		# print(f'{self.config_base_url}sets/{set_id}')
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+	def get_set_members(self, set_id, options={}):
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r= requests.get(f"{self.config_base_url}sets/{set_id}/members",params = parameters)
+		# print(f'{self.config_base_url}sets/{set_id}')
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
 
 	def get_ecollection(self, mms_id, ecollection_id, options = {}):
 
@@ -96,7 +119,7 @@ class AlmaTools():
 
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/e-collections/{ecollection_id}", params=parameters)
-		print(r.text)
+		# print(r.text)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -142,16 +165,16 @@ class AlmaTools():
 		Returns:
 			self.xml_response_data
 		"""
-		
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.post(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.post(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
 	def delete_bib(self, mms_id,options = {}):
 
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.delete(f"{self.base_api_url}{mms_id}", params=parameters)
+		r = requests.delete(f"{self.base_api_url}{mms_id}", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -167,8 +190,9 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
@@ -184,7 +208,7 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/holdings", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -201,7 +225,7 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/holdings{holding_id}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -218,8 +242,9 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.post(f"{self.base_api_url}{mms_id}/holdings", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.post(f"{self.base_api_url}{mms_id}/holdings", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -251,7 +276,7 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -269,7 +294,7 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -286,8 +311,10 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.post(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		
+		r = requests.post(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -304,6 +331,7 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
 		self.xml_response_data=  r.text
@@ -321,7 +349,7 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
-		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}?apikey={self.alma_key}")
+		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}?apikey={self.alma_key}",verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -336,7 +364,7 @@ class AlmaTools():
 			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/representations", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/representations", params=parameters, verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 	def get_representation(self, mms_id, rep_id, options={}):
@@ -351,7 +379,7 @@ class AlmaTools():
 			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/representations/{rep_id}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/representations/{rep_id}", params=parameters,verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
@@ -369,8 +397,10 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data#.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.base_api_url}{mms_id}/representations/{rep_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		# print(r.url)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
@@ -388,9 +418,26 @@ class AlmaTools():
 			self.status_code
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters)
+		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+
+	def get_po_lines(self, options={}):
+
+		""" 
+		Retrieves the purchase order line  in XML for a given Alma POL
+		Parameters:
+			po_line(str) - Alma POL
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_api_url}", params=parameters,verify= False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
 
 	def update_po_line(self, po_line, xml_record_data, options={}):
 
@@ -404,12 +451,31 @@ class AlmaTools():
 			self.xml_response_data
 			self.status_code
 		"""
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.acq_base_api_url}{po_line}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
+	def get_items_by_po_line(self, po_line, options={}):
+		
+		""" 
+		Gets items by po_line
+		Parameters:
+			po_line(str) - Alma POL
+		Returns:
+			self.xml_response_data
+			self.status_code
+		Notes:
+			holding_id required in the  xml data
+		"""
 
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_api_url}{po_line}/items", params=parameters)
+		# print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
 
+	
 	def create_item_by_po_line(self, po_line, xml_record_data, options={}):
 
 		"""
@@ -424,27 +490,46 @@ class AlmaTools():
 		Notes:
 			holding_id required in the  xml data
 		"""
-
+		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.post(f"{self.acq_base_api_url}{po_line}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.post(f"{self.acq_base_api_url}{po_line}/items", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
+		# print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+	def receive_item(self, po_line, item_pid, xml_record_data, options={}):
+
+		"""
+		Creates item.
+		Parameters:
+			po_line(str) - Alma POL
+			xml_record_data(str) - new item in xml format
+			options(dict) - optional parameters for request
+		Returns:
+			self.xml_response_data
+			self.status_code
+		Notes:
+			holding_id required in the  xml data
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.acq_base_api_url}{po_line}/items/{item_pid}", xml_record_data, headers=self.headers, params=parameters)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
 
 
 def main():
 
 	"""Example of usage"""
 
-	#mms_id = "9918975967302836"
+	mms_id = ""
 
 	my_api = AlmaTools("prod")
-	# mis_mms_list = ['9919046572802836','9919046573002836']
+	# mis_mms_list = ['991906572802836','9919046573002836']
 	# for mms in mis_mms_list:
 	# 		my_api.delete_bib(mms)
 	# 		print(my_api.xml_response_data.encode("utf-8"))
 	#######################################
-	# my_api.get_bib(mms_id, {"limit":"100"})
+	# my_api.get_bib("9919108809002836")#, {"limit":"100"})
 	# print(my_api.xml_response_data.encode("utf-8"))
 	# #######################################
 	# my_api.get_holdings(mms_id, {"limit":"100"})
@@ -453,7 +538,7 @@ def main():
 	# my_api.update_bib(mms_id, my_api.xml_record_data)
 	# print(my_api.status_code)
 	#######################################
-	# my_api.get_representations(mms_id)
+	# my_api.get_representations("9915184833502836",{"limit":'100',"offset":"500"})
 	# print(my_api.xml_response_data.encode("utf-8"))
 	###############################################
 	# my_api.get_porfolio("9919012972402836","53354322810002836")
@@ -464,17 +549,37 @@ def main():
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	# ####################################################################
-	# my_api.get_po_line("POL-32856")
+	# my_api.get_po_line("POL-76418")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
+	# my_api.get_item("9918137053802836","22278070670002836","23319192270002836")
+	# print(my_api.xml_response_data)
+
+	# my_api.receive_item("POL-76418","23319192270002836",my_api.xml_response_data,{"op":"receive"})
+	# print(my_api.xml_response_data)
+	# my_api.update_po_line("POL-76418",my_api.xml_response_data)
+	# print(my_api.xml_response_data)
 	####################################################################
 	# my_api.get_item("9918166772702836","22294172070002836","23361571080002836")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	# ####################################################################
-	# my_api.get_po_line("POL-32856")
+	# my_api.get_po_line("POL-158984")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
+	#######################################################################
+	# with open("items_data_test.txt","r") as f:
+	# 	data=f.read()
+	# print(data)
+	# my_api.create_item("9914758883502836","22254819960002836",data, {"generate_description":True})
+	# print(my_api.xml_response_data)
+	
+	####################################################################
+	# with open(r"Y:\ndha\pre-deposit_prod\LD_working\issuu_main\assets\templates\holding.xml","r") as f:
+	# 	data = f.read()
+	# my_api.create_holding("",data)
+	# print(my_api.xml_response_data)
+
 	####################################################################
 	# my_list = [["9918166769702836","22294170890002836","23361559820002836"],["9918166769702836","22294170890002836","23361570070002836"],["9918166772702836","22294172070002836","23361571080002836"],["9918166769902836","22294170920002836","23361571070002836"],["9918166769502836","22294170850002836","23361559680002836"],["9918963672702836","22346162470002836","23361559670002836"],["9918166769602836","22294170870002836","23361571060002836"],["9916482513502836","22218301930002836","23361559620002836"],["9918166770602836","22294170970002836","23361557880002836"],["9918166772902836","22294172110002836","23361559600002836"],["9913788543502836","22194217920002836","23361571050002836"]]
 	# for lst in my_list:
@@ -490,39 +595,166 @@ def main():
 	# for el in data.split("\n"):
 	# 	my_api.delete_bib(el)
 	#################################################################################
-	# mms_list = []
+	# mms_list = ["9919077172602836" ,"9919078573602836","9919078670802836"]
 	# for mms in mms_list:
 	# 	my_api.delete_bib(mms)
-	#####################UPDATE REPRESENTATION########################################3
-# 	my_xml_dict = {
-# 	'32361841600002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361841600002836"><id>32361841600002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.01APR21 2021 04 01 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>01APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>01</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796195</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796195&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66796195</originating_record_id><linking_parameter_1>IE66796195</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361830170002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361830170002836"><id>32361830170002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.06APR21 2021 04 06 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>06APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>06</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795725</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795725&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66795725</originating_record_id><linking_parameter_1>IE66795725</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361830190002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361830190002836"><id>32361830190002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.12APR21 2021 04 12 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>12APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>12</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795691</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795691&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66795691</originating_record_id><linking_parameter_1>IE66795691</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32362169660002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32362169660002836"><id>32362169660002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.29APR21 2021 04 29 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>29APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>29</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67700992</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67700992&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE67700992</originating_record_id><linking_parameter_1>IE67700992</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-05-04Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-05-04Z</last_modified_date></representation></representations>',
-# '32362019360002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32362019360002836"><id>32362019360002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.22APR21 2021 04 22 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>22APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>22</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67554477</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67554477&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE67554477</originating_record_id><linking_parameter_1>IE67554477</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-29Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-29Z</last_modified_date></representation></representations>',
-# '32362149710002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32362149710002836"><id>32362149710002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.28APR21 2021 04 28 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>28APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>28</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67700966</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67700966&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE67700966</originating_record_id><linking_parameter_1>IE67700966</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-05-04Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-05-04Z</last_modified_date></representation></representations>',
-# '32361830070002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361830070002836"><id>32361830070002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.08APR21 2021 04 08 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>08APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>08</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795923</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795923&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66795923</originating_record_id><linking_parameter_1>IE66795923</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361841740002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361841740002836"><id>32361841740002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.07APR21 2021 04 07 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>07APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>07</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795757</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66795757&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66795757</originating_record_id><linking_parameter_1>IE66795757</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361841560002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361841560002836"><id>32361841560002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.15APR21 2021 04 15 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>15APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>15</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796370</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796370&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66796370</originating_record_id><linking_parameter_1>IE66796370</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361997560002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361997560002836"><id>32361997560002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.27APR21 2021 04 27 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>27APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>27</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67554376</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE67554376&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE67554376</originating_record_id><linking_parameter_1>IE67554376</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-29Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-29Z</last_modified_date></representation></representations>',
-# '32361829930002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361829930002836"><id>32361829930002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.09APR21 2021 04 09 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>09APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>09</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796371</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796371&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66796371</originating_record_id><linking_parameter_1>IE66796371</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
-# '32361829950002836':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><representations><representation> is_remote="true" link="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/9913231823502836/representations/32361829950002836"><id>32361829950002836</id><library desc="The Alexander Turnbull Library">ATL</library><label>iss.13APR21 2021 04 13 </label><public_note>Limited On Site Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><issue>13APR21</issue><year>2021</year><season_month>04</season_month><day_in_month>13</day_in_month><delivery_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796352</delivery_url><thumbnail_url>https://ndhadeliver.natlib.govt.nz/delivery/DeliveryManagerServlet?dps_pid=IE66796352&amp;dps_func=thumbnail</thumbnail_url><repository desc="National Digital Heritage Archive">NDHA_PROD-OAIDC01</repository><originating_record_id>oai:d4I1-pubam:IE66796352</originating_record_id><linking_parameter_1>IE66796352</linking_parameter_1><linking_parameter_2></linking_parameter_2><linking_parameter_3></linking_parameter_3><linking_parameter_4></linking_parameter_4><linking_parameter_5></linking_parameter_5><created_by>exl_api</created_by><created_date>2021-04-20Z</created_date><last_modified_by>exl_api</last_modified_by><last_modified_date>2021-04-20Z</last_modified_date></representation></representations>',
+	# 	print(my_api.xml_response_data)
 
-# 	}
-# 	replacement = [4435,4436,4440,4452,4448,4451,4438,4437,4443,4450,4439,4441]
-# 	#missing=[4442,4444,4445,4446,4447,4449]
-# 	count = 0
-# 	for el in my_xml_dict.keys():
-# 		xml = my_xml_dict[el]
-# 		link = re.findall(r'link="(.*?)"',xml)[0]
-# 		mms = re.findall(r'bibs/(.*?)/',link)[0]
-# 		repres = link.split('/')[-1]
-# 		my_api.get_representation(mms, repres)
-# 		alma_xml = my_api.xml_response_data
-# 		issue = re.findall(r'issue>(.*?)</issue',alma_xml)[0]
-# 		new_alma_xml = alma_xml.replace(issue,str(replacement[count]))
-# 		my_api.update_representation(mms, repres, new_alma_xml)
-# 		count+=1
+	###############################FROM ALMA SET FULL VIEW SPREADSHEET#########################################################
+	# workook_path = r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\assets\results_Kelli.xlsx"
+	# if os.path.exists(workook_path):
+
+
+	# 	wb = load_workbook(workook_path)
+	# 	#Enter name of the working sheet below
+	# 	ws= wb.get_sheet_by_name("results")
+	# 	#if now headers min_row =1
+	# 	for row in ws.iter_rows(min_row=2):
+	# 	#21for full results
+	# 	#depending on where mms id is row[3] should be changed to number of column started from 0.
+	# 		mms = row[26].value
+	# 		my_api.delete_bib(row[26].value)
+	# 		print(my_api.xml_response_data)
+	###############################################GET REPRESENTATIONS#################3
+	# my_dict = {}
+	# rosetta_report_path = r"D:ddd_query.xlsx"
+	# if os.path.exists(rosetta_report_path):
+	# 	wb = load_workbook(rosetta_report_path)
+	# 	#Enter name of the working sheet below
+	# 	ws= wb.get_sheet_by_name("ddd_query")
+	# 	#if now headers min_row =1
+	# 	for row in ws.iter_rows(min_row=2):
+	# 		mms = row[2].value
+	# 		ie = row[1].value
+	# 		label = row[10].value
+
+	# 		print(mms)
+	# 		print(label)
+	# 		print(ie)
+	# 		my_label = "Session "+label.split("-")[-1].lstrip(" Session").split(" ")[0]
+	# 		print(my_label)
+	# 		my_dict[ie] =my_label
+	# # # mms_id = "9919049372602836"	
+	# my_api.get_representations(mms_id,{"limit":"100"})
+	# # my_repres = []
+	# repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
+
+	# for rep in repres:
+	# 	#</label><public_note>Open Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><number>27</number><year>2016</year><delivery_url>
+	# 	#9919049372602830
+	# mms = "9918166769602836"
+	# rep = "32373566970002836"
+	# my_api.get_representation (mms,rep )
+	# print(my_api.xml_response_data)
+	# # ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+	# # label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0]
+	# # print(label)
+	# my_data = my_api.xml_response_data.replace("<season_month>12</season_month>",'<season_month>01</season_month>').replace("v.30 iss.7 2022 12","v.30 iss.7 2022 01")
+	# print(mms)
+	# print(rep)
+	# print(my_data)
+	# my_api.update_representation(mms, rep,my_data)
+	# print(my_api.xml_response_data)
+
+	########################################GET REPRESENTATION####################################
+	# my_api.get_representation ("9918991865302836", "32363085860002836")
+	# print(my_api.xml_response_data)
+	########################################GET PO_Lines by mms##############################################
+	#my_api.get_po_lines({"q":"mms_id~9919124598602836","status":"ACTIVE","limit":"100","offset":"0","order_by":"title","direction":"desc","expand":"LOCATIONS"})
+	#print(my_api.xml_response_data)
+	######################################## GET SET MEMBERS##############################
+
+	# my_api.get_set_members("10799432720002836",{"limit":"100"})
+	# print(my_api.xml_response_data)
+	# bibs = re.findall(r"<id>(.*?)</id>", my_api.xml_response_data)	
+	# print(bibs)
+	# titles = re.findall(r'<description>(.*?)</description>', my_api.xml_response_data)
+	# print(len(bibs))
+	# for ind in range(len(bibs)):
+	# 	print(bibs[ind])
+	# 	print(titles[ind])
+
+#######################################GET REPRESENTATIONS####################################
+	mms_id = "9918182371202836"
+	rep = "32376219950002836"
+	my_api.get_representations(mms_id,{"limit":"100"})
+	print(my_api.xml_response_data)
+	labels = {}
+	labels_to_delete = {}
+	total_count = re.findall(r'count="(.*?)">',my_api.xml_response_data)[0]
+	print(total_count)
+	# for i in range((int(total_count)//100)+2):
+	# 	# print(i)
+	# 	my_api.get_representations(mms_id,{"limit":"100","offset":99*i})
+	# 	repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
+	# 	# print(repres)
+	# 	for rep in repres:
+	# 		# print(rep)
+	# 		my_api.get_representation (mms_id, rep)
+	# 		ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+	# 		try:
+	# 			year = re.findall(r"year>(.*?)</year",my_api.xml_response_data)[0]
+	# 			# print(year)
+	# 		except:
+	# 			pass
+	# 		label = re.findall(r"label>(.*?)</label",my_api.xml_response_data)[0]
+	# 		# print(label)
+			
+	# 		# print(ie)
+	# 		if "2021" in label:
+	# 			print(label)
+	# 			print(my_api.xml_response_data)
+	my_api.get_representation(mms_id,rep)
+	new_data = my_api.xml_response_data.replace("label>2021 Spring </label", "label>2021 Autumn</label")
+	my_api.update_representation(mms_id, rep, new_data)
+	print(my_api.xml_response_data)
+				# quit()
+	# 			labels[label] = ie
+	# 		else:
+	# 			labels_to_delete[label] = ie
+	# for el in labels_to_delete:
+	# 	print(labels_to_delete[el])
+		# print(labels_to_delete[el])
+
+			
+				
+			# if year in["2021"]:
+			# 	print(re.findall(r"label>(.*?)</label",my_api.xml_response_data)[0])
+			# 	print (ie)
+	# with open("report_items_03092021.txt",'r') as f:
+	# 	data = f.read()
+
+	# for line in data.split('\n')[:-1]:
+	# 	# print(line)
+	# 	mms_id = line.split("|")[2]
+	# 	holding_id = line.split("|")[3]
+	# 	item_id = line.split("|")[4]
+	# 	my_api.get_item(mms_id, holding_id, item_id)
+	# 	print(my_api.xml_resgponse_data)
+	# 	try:
+	# 		print(re.findall(r"description>(.*?)</description",my_api.xml_response_data)[0])
+	# 	except:
+	# 		print(my_api.xml_response_data)
+
+####################################UPDATE REPRESENTATIONS FROM LIST###################################
+	# reps =["32366340600002836","32372987750002836","32372987890002836"]
+	# mms = ""
+	# for rep in reps:
+	# 	my_api.get_representation(mms, rep)
+	# 	# print(my_api.xml_response_data)
+	# 	my_api.xml_response_data
+	# 	label = re.findall(r"<label>(.*?)</label>", my_api.xml_response_data)[0]
+	# 	if "iss.1" in label:
+	# 		new_label = label.replace("iss.1","iss.01").rstrip(" ")
+	# 		print(new_label)
+	# 		rep_data = my_api.xml_response_data.replace(label,new_label)
+	# 		my_api.update_representation(mms",rep, xml_record_data = rep_data)
+	# 		print(my_api.status_code)
+
+
+
+
+
 
 
 
