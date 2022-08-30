@@ -1,13 +1,19 @@
-# Podcasts
+# Podcast Collector
 ## Table of Contents
-1. [General Info](#general-info)
+1. [Project description](#project-description)
 2. [Technologies](#technologies)
 3. [Installation](#installation)
 4. [Collaboration and integration](#collaboration-and-integration)
 5. [FAQs](#faqs)
-## General Info
+## Project description
 ***
-This script is aimed to harvest podcasts' episodes based on rss feed, collect metadata, make and  update bibliographic records with enriched metadata in Exlibris Alma, prepare SIPs for Exlibris Rosetta and manage submitted episodes.
+This pipeline is used by the legal deposit team at the National Library of New Zealand to collect podcasts in scope for New Zealand legal deposit.
+It monitors podcast RSS feeds to collect the audio files for new episodes and descriptive metadata about them. 
+
+For some podcast titles, the pipeline then presents the harvested metadata for each episode to our cataloguers using a Google Sheet, allowing them to enrich the metadata before further automated processing. For other podcast titles, this manual enrichment step is not required.
+
+Records for the newly-collected episodes are then created in Alma and submission information packages (SIPs) are created for ingest to Rosetta.
+
 ### Pipeline
 ![Podcasts](/documentation/Podcasts.png)
 ## Technologies
