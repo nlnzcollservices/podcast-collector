@@ -12,7 +12,7 @@ from alma_tools import AlmaTools
 try:
 	from settings_prod import  logging, creds, podcast_sprsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies, failed_ies
 except:
-	from settings import  logging, creds, podcast_sprsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies, failed_ies
+	from settings import  logging, creds, podcast_spsrsh, database_archived_folder, database_fullname, file_folder, report_folder, sip_folder, rosetta_folder, client_secrets_file, archived_folder, ndha_report_folder, ndha_used_report_folder, my_email_box, report_part_name, done_ies, failed_ies
 from podcasts1_create_record import RecordCreator
 from podcasts3_holdings_items import Holdings_items
 from podcasts4_update_fields import Manage_fields
@@ -135,9 +135,12 @@ class Podcast_pipeline():
 				try:
 					for row in reader:
 						if len(row)>3:
-							alma_mms_id = row[2]
+							alma_mms_id = row[4]
 							ie_num = row[3].rstrip(" ")
 							status = row[8].rstrip(" ")
+							# alma_mms_id = row[7]
+							# ie_num = row[6].rstrip(" ")
+							# status = row[14].rstrip(" ")
 							if alma_mms_id != "" and ie_num != "" and status =="FINISHED":
 								with open(done_ies, "a") as f:
 									f.write(ie_num)
@@ -203,12 +206,13 @@ class Podcast_pipeline():
 						for ie in ies:
 							ies_list.append("IE"+ie.string.split("IE")[-1])
 							logger.info("IE for db: " + ies_list[0])
-							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
 							if not ies_list[0] in rosetta_ies_list:
 								print(ies_list[0])
 								print(mms)
 								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
 								quit()
+							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
+
 				elif not mms and mm["serial_mms"] in serials and not mm["ie_num"]:
 					mms=mm["serial_mms"]
 					my_title_parsed =  re.sub(mm["podcast_name"].lower(), "", mm["episode_title"].lower())
@@ -517,12 +521,12 @@ class Podcast_pipeline():
 		# self.finish_existing_records_and_delete_files("prod")
 		# self.db_handler.delete_done_from_db()
 
-		# self.update_database_from_spreadsheetand_delete_row()
+		self.update_database_from_spreadsheetand_delete_row()
 
-		# my_rec = RecordCreator(self.alma_key)
-		# my_rec.record_creating_routine()
+		my_rec = RecordCreator(self.alma_key)
+		my_rec.record_creating_routine()
 
-		# sip_routine()
+		sip_routine()
 
 		harvest()
 		

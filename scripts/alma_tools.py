@@ -10,6 +10,11 @@ import os
 from openpyxl import load_workbook
 from selenium import webdriver
 from podcast_dict import podcasts_dict
+import urllib3
+import io
+import xml.dom.minidom
+
+urllib3.disable_warnings()
 # driver = webdriver.Firefox()
 ##################################################################################################
 class AlmaTools():
@@ -50,6 +55,7 @@ class AlmaTools():
 		get_representation(self, mms_id, rep_id, options)
 		update_representation(self, mms_id, rep_id, xml_record_data, options)
 		create_item_by_po_line(self, po_line, xml_record_data, options)
+
 		get_portfolio(self, mms_id, portfolio_id, options)
 		delete_portfolio(self, mms_id, portfolio_id, options)
 		get_ecollection(self, mms_id, ecollection_id, oprions)
@@ -69,13 +75,16 @@ class AlmaTools():
 			self.alma_key = str(pr_key)
 		self.base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/bibs/"
 		self.acq_base_api_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines/"
+		self.acq_base_vendor_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/acq/vendors/"
 		self.config_base_url = "https://api-ap.hosted.exlibrisgroup.com/almaws/v1/conf/"
+		self.acq_base_invoice_url ="https://api-ap.hosted.exlibrisgroup.com/almaws/v1/acq/invoices/"
 		self.mms_id = None
 		self.holding_id = None
 		self.item_pid = None
 		self.xml_response_data = None
 		self.status_code = None
 		self.headers = {'content-type': 'application/xml'}
+
 		
 	def get_bib(self, mms_id, options={}):
 
@@ -84,26 +93,38 @@ class AlmaTools():
 			mms_id(str) - Alma MMS ID
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}", params=parameters,verify= False)
-		#print(r.url)
+		print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
 	def get_set(self, set_id, options={}):
 
-		"""Retrieves sets by set_id"""
+		"""
+		Retrieves sets by set_id.
+		Parameters:
+			set_id(str) - id of the set
+
+		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r= requests.get(f"{self.config_base_url}sets/{set_id}",params = parameters)
+		r= requests.get(f"{self.config_base_url}sets/{set_id}",params = parameters, verify = False)
 		# print(f'{self.config_base_url}sets/{set_id}')
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+
 	def get_set_members(self, set_id, options={}):
+
+		""" 
+		Retrieves set members.
+		Parameters:
+			set_id(str) - id of the set
+		"""
+
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r= requests.get(f"{self.config_base_url}sets/{set_id}/members",params = parameters)
+		r= requests.get(f"{self.config_base_url}sets/{set_id}/members",params = parameters, verify = False)
 		# print(f'{self.config_base_url}sets/{set_id}')
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
@@ -122,6 +143,20 @@ class AlmaTools():
 		# print(r.text)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+	def get_portfolios(self, mms_id, options = {}):
+
+		"""
+		Retrieves all portfolios for a bib record in xml 
+		Argumets:
+			mms_id(str) - id of the bibliographic record
+		Returns:
+			None
+		"""
+
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.base_api_url}{mms_id}/portfolios", params=parameters, verify = False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
 
 	def get_portfolio(self, mms_id, portfolio_id, options = {}):
 
@@ -130,10 +165,29 @@ class AlmaTools():
 		Argumets:
 			mms_id(str) - id of the bibliographic record
 			portfolio_id(str) - id of the portfolio
+		Returns:
+			None
 		"""
 
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters, verify = False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+
+	def create_portfolio(self, mms_id, xml_record_data, options = {}):
+
+		"""
+		Creates a portfolio for a bib
+		Argumets:
+			mms_id(str) - id of the bibliographic record
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		xml_record_data = xml_record_data.replace("\\", "")
+		r = requests.post(f"{self.base_api_url}{mms_id}/portfolios/", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
+		#print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -142,17 +196,78 @@ class AlmaTools():
 		"""
 		Deletes portfolio
 		Argumets:
-			mms_id(str) - id of the bibliographic record
+			mms_id(str) - id of the bibliographic record 
 			portfolio_id(str) - id of the portfolio
 		Returns:
 			None
 		"""
 		
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.delete (f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters)
+		r = requests.delete (f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", params=parameters, verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+
+	def get_invoice(self, invoice_id, options={}):
+
+		"""
+		Extracts invoice in xml format
+		Argumets:
+			invoice_id(str) - id of the invoice
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_invoice_url}{invoice_id}",params=parameters, verify= False)
+		# print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_invoices(self, options={}):
+		
+		"""
+		Extracts all invoices in xml format
+		Returns:
+			None
+		"""
+
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_invoice_url}".rstrip("/"),params=parameters,verify= False)
+		# print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_invoice_lines(self, invoice_id, options={}):
+		
+		"""
+		Extracts invoice lines in xml format
+		Argumets:
+			invoice_id(str) - id of the invoice
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_invoice_url}{invoice_id}/lines",params=parameters,verify= False)
+		# print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_invoice_line(self, invoice_id, line_id, options={}):
+		
+		"""
+		Extracts invoice linein xml format
+		Argumets:
+			invoice_id(str) - id of the invoice
+			line_id(str) - id of the invoice line
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		print(f"{self.acq_base_invoice_url}{invoice_id}/lines/{line_id}")
+		r = requests.get(f"{self.acq_base_invoice_url}{invoice_id}/lines/{line_id}",params=parameters,verify= False)
+		print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
 
 
 	def create_bib(self, xml_record_data, options = {}):
@@ -163,13 +278,33 @@ class AlmaTools():
 			xml_record_data(str) - xml of updated bib record data
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.post(f"{self.base_api_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+	
+
+	def add_bib_to_collection(self, collection_id, xml_record_data, options = {}):
+
+		"""
+		Adds bibliographical record to collection
+		Paramrters:			
+			collection_id - id of collection in Alma
+			xml_record_data(str) - xml contained single mms id only <bib><mms_id>999999</mms_id><bib>
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		xml_record_data = xml_record_data.replace("\\", "")
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.base_api_url}collections/{collection_id}/bibs", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+
 
 	def delete_bib(self, mms_id,options = {}):
 
@@ -187,12 +322,97 @@ class AlmaTools():
 			xml_record_data(str) - xml of updated bib record data
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.put(f"{self.base_api_url}{mms_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+		
+
+	def update_invoice(self, invoice_id, xml_record_data, options={}):
+
+		"""
+		Updates invoice.
+		Parameters:
+			invoice_id(str) - Alma Invoice ID
+			xml_record_data(str) - xml of updated bib record data
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		xml_record_data = xml_record_data.replace("\\", "")
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.acq_base_invoice_url}{invoice_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+
+	def update_invoice_line(self, invoice_id, line_id, xml_record_data, options={}):
+
+		"""
+		Updates invoice line.
+		Parameters:
+			invoice_id(str) - Alma Invoice ID
+			line_id(str) - Alma invoice line id.
+			xml_record_data(str) - xml of updated bib record data
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		xml_record_data = xml_record_data.replace("\\", "")
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.put(f"{self.acq_base_invoice_url}{invoice_id}/lines/{line_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+
+	def process_invoice(self, invoice_id, options={"op":"process_invoice"}):
+
+		"""
+		Updates invoice after making new invoice and new lines to activate it.
+		Parameters:
+			invoice_id(str) - Alma Invoice ID
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		xml_record_data = "<invoice></invoice>"
+		r = requests.post(f"{self.acq_base_invoice_url}{invoice_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+
+	def create_invoice(self, xml_record_data, options={}):
+
+		"""
+		Creates invoice.
+		Parameters:
+			invoice_id(str) - Alma Invoice ID
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.acq_base_invoice_url}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
+		self.xml_response_data=  r.text
+		self.status_code = r.status_code
+
+
+
+	def create_invoice_line(self, invoice_id, xml_record_data, options={}):
+
+		"""
+		Creates invoice line.
+		Parameters:
+			invoice_id(str) - Alma Invoice ID
+			xml_record_data(str) - xml of updated bib record data
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		xml_record_data = xml_record_data.replace("\\", "")
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.post(f"{self.acq_base_invoice_url}{invoice_id}/lines/", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
@@ -204,8 +424,7 @@ class AlmaTools():
 			mms_id(str) - Alma MMS ID
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/holdings", params=parameters,verify= False)
@@ -221,8 +440,7 @@ class AlmaTools():
 			holding_id(str) - Alma holding ID
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}", params=parameters,verify= False)
@@ -239,8 +457,7 @@ class AlmaTools():
 			xml_record_data - item xml
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
@@ -256,8 +473,7 @@ class AlmaTools():
 			mms_id(str) - Alma MMS ID
 			holding_id(str) - Alma holding ID
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}?apikey={self.alma_key}")
 		self.xml_response_data = r.text
@@ -272,8 +488,7 @@ class AlmaTools():
 			holding_id(str) - Alma holding ID
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items", params=parameters,verify= False)
@@ -290,8 +505,7 @@ class AlmaTools():
 			item_pid(str) - Alma item PID
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", params=parameters,verify= False)
@@ -308,8 +522,7 @@ class AlmaTools():
 			xml_record_data - item xml
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
@@ -328,8 +541,7 @@ class AlmaTools():
 			xml_record_data(str) - XML of updated item record data
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
@@ -346,8 +558,7 @@ class AlmaTools():
 			holding_id(str) Alma holding ID
 			item_pid(str) - Alma item PID
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}?apikey={self.alma_key}",verify= False)
 		self.xml_response_data = r.text
@@ -394,12 +605,11 @@ class AlmaTools():
 			xml_record_data(str) - XML of updated item record data
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data#.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}{mms_id}/representations/{rep_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.base_api_url}{mms_id}/representations/{rep_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		# print(r.url)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
@@ -414,15 +624,15 @@ class AlmaTools():
 			po_line(str) - Alma POL
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-	def get_po_lines(self, options={}):
+
+	def get_po_line(self, invoice_id, options={}):
 
 		""" 
 		Retrieves the purchase order line  in XML for a given Alma POL
@@ -430,8 +640,36 @@ class AlmaTools():
 			po_line(str) - Alma POL
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters,verify= False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_vendor(self, vendor_code, options={}):
+
+		""" 
+		Retrieves the purchase order line  in XML for a given Alma POL
+		Parameters:
+			vendor_code(str) - Alma vendor code
+			options(dict) - optional parameters for request
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.get(f"{self.acq_base_vendor_url}{vendor_code}", params=parameters,verify= False)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+
+	def get_po_lines(self, options={}):
+
+		""" 
+		Retrieves the purchase order lines  in XML for a given Alma POL
+		Parameters:
+			options(dict) - optional parameters for request
+		Returns:
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.get(f"{self.acq_base_api_url}", params=parameters,verify= False)
@@ -448,8 +686,7 @@ class AlmaTools():
 			xml_record_data(str) - xml of updated POL 
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
@@ -463,10 +700,7 @@ class AlmaTools():
 		Parameters:
 			po_line(str) - Alma POL
 		Returns:
-			self.xml_response_data
-			self.status_code
-		Notes:
-			holding_id required in the  xml data
+			None
 		"""
 
 		parameters = {**{"apikey": self.alma_key}, **options}
@@ -485,8 +719,7 @@ class AlmaTools():
 			xml_record_data(str) - new item in xml format
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
+			None
 		Notes:
 			holding_id required in the  xml data
 		"""
@@ -497,6 +730,8 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
+
+	
 	def receive_item(self, po_line, item_pid, xml_record_data, options={}):
 
 		"""
@@ -506,10 +741,7 @@ class AlmaTools():
 			xml_record_data(str) - new item in xml format
 			options(dict) - optional parameters for request
 		Returns:
-			self.xml_response_data
-			self.status_code
-		Notes:
-			holding_id required in the  xml data
+			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
 		r = requests.post(f"{self.acq_base_api_url}{po_line}/items/{item_pid}", xml_record_data, headers=self.headers, params=parameters)
@@ -523,33 +755,88 @@ def main():
 
 	mms_id = ""
 
-	my_api = AlmaTools("prod")
-	# mis_mms_list = ['991906572802836','9919046573002836']
-	# for mms in mis_mms_list:
-	# 		my_api.delete_bib(mms)
-	# 		print(my_api.xml_response_data.encode("utf-8"))
-	#######################################
-	# my_api.get_bib("9919108809002836")#, {"limit":"100"})
+	my_api = AlmaTools("sb")
+	# my_api.get_bib("9919000573502836")
+	# print(my_api.xml_response_data)
+	# item_pid = "23376150750002836"
+	# po_line = "245690-ilsdb"
+	# my_api.get_items_by_po_line( po_line, options={})
+
+	# # mis_mms_list = ["999999999999"]
+
+	# # for mms in mis_mms_list:
+	# # 		my_api.delete_bib(mms)
 	# print(my_api.xml_response_data.encode("utf-8"))
+	#######################################
+	# my_api.get_bib("9919173839702836")#, {"limit":"100"})
+	# print(my_api.xml_response_data)
+	#######################################
+	#my_api.get_invoices()
+	invoice_id = "11882474040002836"
+	# invoice_id = "11882474040002836"
+	# invoice_id = "10581159270002836"
+	#invoice_id = "11882474040002836"
+	# my_api.get_invoice(invoice_id)
+	# # new_data= my_api.xml_response_data
+	# my_api.process_invoice(invoice_id)
+	# print(my_api.xml_response_data)
+	# new_data = my_api.xml_response_data.replace('desc="In-Review"','desc="Ready"').replace(">INREVIEW<",">READY<").replace('desc="Pending"','desc="Approved"').replace(">PENDING<",">APPROVED<").replace('<invoice_workflow_status desc="In Review">InReview</invoice_workflow_status>','<invoice_workflow_status/>')#..replace('desc="Active"','desc="Closed"').replace(">ACTIVE<",">CLOSED<")
+	# new_data = new_data.replace('</invoice_approval_status><additional_charges>','</invoice_approval_status><approved_by>Cousens Dale*</approved_by><approval_date>2021-09-09Z</approval_date><additional_charges>')
+	# print(new_data)
+	# my_api.update_invoice(invoice_id, new_data)
+	# print(my_api.xml_response_data)
+	# my_api.get_invoice_lines(invoice_id)
+	# #print(my_api.xml_response_data)
+	# lines = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
+
+	# for line in lines:
+	# 	print(line)
+	# 	my_api.get_invoice_line(invoice_id, line)
+	# 	#print(my_api.xml_response_data)
+		
+	# 	new_data = my_api.xml_response_data.replace("<percent>100.00</percent>","<percent></percent>")#.replace('desc="In-Review"','desc="Ready"').replace(">INREVIEW<",">READY<")		print(new_data)
+	# 	my_api.update_invoice_line(invoice_id, line, new_data)
+	# 	print(my_api.xml_response_data)
+	# 	quit()
+	# invoice_template = r"Y:\ndha\pre-deposit_prod\LD_working\invoice_test\invoice_line_template_short.xml"
+	# with open (invoice_template, "r") as f:
+	# 	data = f.read()
+	# my_api.create_invoice_line("11882474040002836",data, {'op':'process_invoice'}
+	# print(my_api.xml_response_data)
+
+	#####################################
+	# print(my_api.xml_response_data.encode("utf-8"))
+	# dom = xml.dom.minidom.parse(io.StringIO(my_api.xml_response_data)) # or xml.dom.minidom.parseString(xml_string)
+	# pretty_xml_as_string = dom.toprettyxml()
+	# print(pretty_xml_as_string)
 	# #######################################
-	# my_api.get_holdings(mms_id, {"limit":"100"})
-	# print(my_api.xml_response_data.encode("utf-8"))
-	#######################################
+	# mms_id = "9919119906902836"
+	# my_hold = "22369219170002836"
+	# item = "23380731890002836"
+
+	# my_api.get_item(mms_id, my_hold,item)
+	# print(my_api.xml_response_data)
+	# #######################################
 	# my_api.update_bib(mms_id, my_api.xml_record_data)
 	# print(my_api.status_code)
 	#######################################
 	# my_api.get_representations("9915184833502836",{"limit":'100',"offset":"500"})
 	# print(my_api.xml_response_data.encode("utf-8"))
 	###############################################
-	# my_api.get_porfolio("9919012972402836","53354322810002836")
+	# my_api.get_portfolios("9919000573502836")#,"53354322810002836")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
+	# ###############################################
+
+	my_api.get_portfolio("9918122880502836","53376296880002836")
+	print(my_api.xml_response_data)
+	print(my_api.status_code)
 	#########################################
 	# my_api.get_ecollection("9918748064302836","61325625670002836")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	# ####################################################################
-	# my_api.get_po_line("POL-76418")
+	# my_api.get_po_line("POL-180272")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	# my_api.get_item("9918137053802836","22278070670002836","23319192270002836")
@@ -634,27 +921,32 @@ def main():
 	# 		my_label = "Session "+label.split("-")[-1].lstrip(" Session").split(" ")[0]
 	# 		print(my_label)
 	# 		my_dict[ie] =my_label
-	# # # mms_id = "9919049372602836"	
-	# my_api.get_representations(mms_id,{"limit":"100"})
-	# # my_repres = []
-	# repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
+	# for mms in os.listdir(r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_audio\9919014268602836\content"):
+	# 	my_api.get_representations(mms.split(".")[0])
+	# 	print(mms.split(".")[0])
+	# # 	print(my_api.xml_response_data)\
+	# mms_id = "9912860763502836"
 
-	# for rep in repres:
-	# 	#</label><public_note>Open Access</public_note><usage_type desc="Master">PRESERVATION_MASTER</usage_type><active desc="Active">true</active><entity_type desc="Issue-Detailed">IssueDet</entity_type><number>27</number><year>2016</year><delivery_url>
-	# 	#9919049372602830
-	# mms = "9918166769602836"
-	# rep = "32373566970002836"
-	# my_api.get_representation (mms,rep )
+	# my_api.get_representations(mms_id,{"limit":"100"})
 	# print(my_api.xml_response_data)
-	# # ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
-	# # label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0]
-	# # print(label)
-	# my_data = my_api.xml_response_data.replace("<season_month>12</season_month>",'<season_month>01</season_month>').replace("v.30 iss.7 2022 12","v.30 iss.7 2022 01")
-	# print(mms)
-	# print(rep)
-	# print(my_data)
-	# my_api.update_representation(mms, rep,my_data)
-	# print(my_api.xml_response_data)
+	# num = re.findall(r'record_count="(.*?)">',my_api.xml_response_data)[0]
+	# print(num)
+	# for i in range((int(num)//100)+1):
+		
+	# 	my_api.get_representations(mms_id,{"limit":"100","offset":str(100*i)})
+	# 	repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
+	# 	for rep in repres:
+	# 		my_api.get_representation (mms_id,rep )
+	# 		#print(my_api.xml_response_data)
+	# 		ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+	# 		label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0]
+	# 		if "2022" in label and "iss.20" in label:
+	# 		# 	#new_label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0].replace(")","").replace("(","").replace(". ",".")
+	# 			my_data = my_api.xml_response_data.replace("2022","2021")#.replace("2022 <",">2021<")
+	# 			my_api.update_representation(mms_id, rep, my_data)
+	# 			print(my_api.xml_response_data)
+	# 			print(ie)
+	# 			print(label)
 
 	########################################GET REPRESENTATION####################################
 	# my_api.get_representation ("9918991865302836", "32363085860002836")
@@ -675,14 +967,21 @@ def main():
 	# 	print(titles[ind])
 
 #######################################GET REPRESENTATIONS####################################
-	mms_id = "9918182371202836"
-	rep = "32376219950002836"
-	my_api.get_representations(mms_id,{"limit":"100"})
-	print(my_api.xml_response_data)
-	labels = {}
-	labels_to_delete = {}
-	total_count = re.findall(r'count="(.*?)">',my_api.xml_response_data)[0]
-	print(total_count)
+	# mms_id = "9918755167602836"
+
+	# my_api.get_representations(mms_id,{"limit":"100"})
+	# # print(my_api.xml_response_data)
+	# labels = {}
+	# labels_to_delete = {}
+	# try:
+	# 	total_count = re.findall(r'count="(.*?)">',my_api.xml_response_data)[0]
+	# 	# print(total_count)
+	# 	print(mms_id)
+	# except Exception as e:
+	# 	# print(my_api.xml_response_data)
+	# 	pass
+
+
 	# for i in range((int(total_count)//100)+2):
 	# 	# print(i)
 	# 	my_api.get_representations(mms_id,{"limit":"100","offset":99*i})
@@ -690,31 +989,42 @@ def main():
 	# 	# print(repres)
 	# 	for rep in repres:
 	# 		# print(rep)
-	# 		my_api.get_representation (mms_id, rep)
-	# 		ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
 	# 		try:
-	# 			year = re.findall(r"year>(.*?)</year",my_api.xml_response_data)[0]
-	# 			# print(year)
+	# 			my_api.get_representation (mms_id, rep)
 	# 		except:
-	# 			pass
+	# 			sleep(2)
+	# 			my_api.get_representation (mms_id, rep)
+	# 		# ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+	# 		# try:
+	# 		# 	year = re.findall(r"year>(.*?)</year",my_api.xml_response_data)[0]
+	# 		# 	# print(year)
+	# 		# except:
+	# 		# 	pass
+
+				
 	# 		label = re.findall(r"label>(.*?)</label",my_api.xml_response_data)[0]
-	# 		# print(label)
-			
-	# 		# print(ie)
-	# 		if "2021" in label:
-	# 			print(label)
-	# 			print(my_api.xml_response_data)
-	my_api.get_representation(mms_id,rep)
-	new_data = my_api.xml_response_data.replace("label>2021 Spring </label", "label>2021 Autumn</label")
-	my_api.update_representation(mms_id, rep, new_data)
-	print(my_api.xml_response_data)
-				# quit()
-	# 			labels[label] = ie
-	# 		else:
-	# 			labels_to_delete[label] = ie
-	# for el in labels_to_delete:
-	# 	print(labels_to_delete[el])
-		# print(labels_to_delete[el])
+	# 		if "2022" in label:# or "2021" in label:
+						
+	# s 			print(label)
+				
+				# print(ie)
+				# if "2022" in my_api.xml_response_data:
+				# 	print(label)
+				# 	print(my_api.xml_response_data)
+		# my_api.get_representation(mms_id,rep)
+		# new_data = my_api.xml_response_data.replace("label>2919 08 </label", "label>2022 01</label")
+		# my_api.update_representation(mms_id, rep, new_data)
+		# print(my_api.xml_response_data)
+		# 			# quit()
+		# 			labels[label] = ie
+		# 		else:
+		# 			labels_to_delete[label] = ie
+		# for el in labels_to_delete:
+		# 	print(labels_to_delete[el])
+		# 	print(labels_to_delete[el])
+	# for el in os.listdir(r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_audio\9919014268602836\content"):
+	# 	if "xml" in el:
+	# 		my_repres_getter(el.split(".")[0])
 
 			
 				
@@ -751,11 +1061,43 @@ def main():
 	# 		my_api.update_representation(mms",rep, xml_record_data = rep_data)
 	# 		print(my_api.status_code)
 
+	# pol = "POL-131442"
+	
+	# my_api.get_po_line(pol)
+	# print(my_api.xml_response_data)
+	# vendor_code = "JBDPUB"
+	# my_api.get_vendor(vendor_code)
+	# print(my_api.xml_response_data)
+##############################UPDATING ITEMS####################################################################3
+	# my_api.get_items("9916487913502836","22218308440002836",{"limit":"100"})
+	# print(my_api.xml_response_data)
+	# items = re.findall(r"<pid>(.*?)</pid>", my_api.xml_response_data)
+	# for el in items:
+	# 	my_api.get_item("9916487913502836","22218308440002836",el)
+	# 	print(my_api.xml_response_data)
+	# 	descr = re.findall(r"<description>(.*?)</description>", my_api.xml_response_data)[0]
+	# 	if descr.endswith(" 01"):
+	# 		new_descr = " ".join(descr.split(" ")[:-1])
+	# 		print(new_descr)
+	# 		cron = re.findall(r"<chronology_k>(.*?)</chronology_k>", my_api.xml_response_data)[0]
+	# 		new_data = my_api.xml_response_data.replace("k>01</ch","k></ch" ).replace(descr, new_descr)
+	# 		print(new_data)
+	# 		my_api.update_item("9916487913502836","22218308440002836",el, new_data)
+	# 		print(my_api.xml_response_data)
+ 
+	# items =["23379982560002836","23379963540002836","23379963940002836","23379963950002836","23379963570002836","23379966370002836","23379962140002836","23379963470002836","23379982610002836","23379965300002836","23379963890002836","23379984370002836","23379964640002836","23379982660002836","23379964650002836","23379982770002836","23379984320002836","23379963410002836","23379963340002836","23379962090002836","23379963600002836","23379963370002836","23379966450002836","23379965750002836","23379963510002836","23379966470002836","23379963840002836","23379982540002836","23379982650002836","23379966480002836","23379984080002836","23379963830002836","23379983510002836","23379964900002836","23379984440002836","23379961990002836","23379984360002836","23379962000002836","23379962060002836","23379963440002836","23379984270002836","23379963880002836","23379963770002836","23379983540002836","23379963920002836","23379966440002836","23379963480002836","23379963860002836","23379982620002836","23379963490002836","23379984300002836","23379982700002836","23379962030002836","23379982530002836","23379982640002836","23379982670002836","23379963800002836","23379984340002836","23379962020002836","23379962010002836","23379982760002836","23379984450002836","23379963460002836","23379982600002836","23379983530002836","23379963590002836","23379984350002836","23379963420002836","23379965070002836","23379982680002836","23379984390002836","23379984420002836","23379963850002836","23379984410002836","23379962150002836","23379963580002836","23379962130002836","23379963500002836","23379963900002836","23379984430002836","23379962110002836","23379963520002836","23379963430002836","23379982730002836","23379982690002836","23379983520002836","23379964810002836","23379966460002836","23379964660002836","23379963930002836","23379982630002836","23379982550002836","23379984330002836","23379962120002836","23379963530002836","23379962100002836","23379962190002836","23379962160002836","23379984380002836","23379984400002836","23379982590002836","23379963380002836","23379963550002836","23379983590002836","23379982580002836","23379966060002836","23379963560002836","23379982570002836","23379982520002836","23379983550002836","23379963870002836","23379984310002836","23379983600002836","23379983560002836","23379963450002836","23379961960002836"]	
 
+	# mms_id = "9918191969802836"
+	# holding_id = "22305544680002836"
+	# my_api.get_items(mms_id, holding_id)
+	# items = ["23380740110002836"]
+	# for item in items:
+	# 	my_api.get_item(mms_id, holding_id, item)
+	# 	data = my_api.xml_response_data
+	# 	my_api.update_item(mms_id, holding_id, item, data, {"generate_description":True})
+	# 	print(my_api.status_code)
 
-
-
-
+	# 	print(my_api.xml_response_data)
 
 
 if __name__ == '__main__':

@@ -410,36 +410,38 @@ def main():
 	#sets = ["10348089760002836", "10315857720002836","10036805200002836","10310621450002836","10310584880002836","10310550350002836","10310518530002836", "10265912860002836"]
 		
 	##################################################Property academy cleaning#########################################################################
-
-	# sets = ["10036799140002836"]
+	# lst = ["63","64","65","66","70","71","97","99","101"]
+	sets = ["11790601660002836"]
 	# mms_ids_to_delete= []
 	# my_titles = []
 	# for st in sets:
 	# 	offset_step = 90
-	# 	offset = 450
+	# 	offset = 0
 	# 	for i in range(20):
 	# 		offset = offset+offset_step
-	# 		my_alma.get_set_members(st,{'limit':'100',"offset":str(offset)})
+	my_alma.get_set_members(sets[0],{'limit':'100'})
 
-	# 		bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
-	# 		for ind in range(len(bibs)):
-	# 			# print(bibs[ind])
-	# 			my_alma.get_bib(bibs[ind])
-								
-	# 			if "⎜" in my_alma.xml_response_data:
-	# 				my_rec = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
-	# 				f245a = my_rec["245"]["a"].split("⎜")[0]
-	# 				f490v = my_rec["245"]["a"].split("⎜")[-1]
-	# 				if f490v.endswith("."):
-	# 					f490v = f490v.rstrip(".")
-	# 				f830v = f490v.lower()+"."
-	# 				my_rec["245"]["a"] = f245a
-	# 				my_rec["490"]["v"] = f490v
-	# 				my_rec["800"]["v"] = f830v
+	bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
 
-	# 				bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
-	# 				my_alma.update_bib(bibs[ind], bib_data)
-	# 				print(bibs[ind]," - updated")
+	for ind in range(len(bibs)):
+			print(ind)
+		# print(bibs[ind])
+			my_alma.get_bib(bibs[ind])
+						
+		# if "⎜" in my_alma.xml_response_data:
+			my_rec = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
+			# f245a = my_rec["245"]["a"].split("⎜")[0]
+			f490v = "Episode "+my_rec["490"]["v"]#.split("⎜")[-1]
+			# if f490v.endswith("."):
+			# 	f490v = f490v.rstrip(".")
+			f830v = f490v.lower()+"."
+			#my_rec["245"]["a"] = f245a
+			my_rec["490"]["v"] = f490v
+			my_rec["800"]["v"] = f830v
+
+			bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
+			my_alma.update_bib(bibs[ind], bib_data)
+			print(bibs[ind]," - updated")
 	# ###########################################################EPIC PODCAST Cleaning#################################################################################
 
 

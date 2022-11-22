@@ -565,10 +565,19 @@ def harvest():
 				logger.info("Podcast table for {} created. ID - {}".format(podcast_name, my_podcast.my_id))
 				podcast_id = my_podcast.my_id
 				last_issue = 0
-
+			# for i in range(3):
+			# 	process = True
+			# 	if process:
+			# try:
 			my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"] ,podcasts_dict[podcast_name]["serial_mms"])
 			my_episode.harvester()
-	
+			# 	process = False
+
+			# except Exception as e:
+			# 	sleep(10)
+
+						
+
 
 
 def main():
