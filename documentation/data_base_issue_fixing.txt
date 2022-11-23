@@ -1,0 +1,5 @@
+'The real pod' said that has items but in reality not
+Item id was  the same 23374000450002836 for 1600 podcasts
+529 from them had ie and were updated. I have set item == None via print out podcasts data script. And run podcasts again.
+
+

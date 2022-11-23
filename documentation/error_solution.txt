@@ -1,0 +1,81 @@
+Error:
+qlite3.OperationalError: unable to open database file
+peewee.OperationalError: unable to open database file
+
+Reason:
+Something was written in a wrong way in db
+
+Solution:
+Use the last copy in "archived" folder. Replace "podcasts.db" with the copy. It might happen that some data lost, which was
+written in the faulty db in the same session. So additional duplicate check required after using db copy.\\
+------------------------------------------------------------------------------------------------------------------------------
+Error:
+UnboundLocalError: local variable 'field2' referenced before assignment
+in podcasts1_create_record.py
+
+Reason:
+template contained only one 856 field
+
+Solution:
+	Open "Assets"/"Templates" and find the name the script was stuck.
+	Add another 856 as in example.
+    <datafield ind1="4" ind2="2" tag="856">
+      <subfield code="3">File host</subfield>
+      <subfield code="u">&lt;insert page URL&gt;</subfield>
+    </datafield>
+------------------------------------------------------------------------------------------------------------------------------
+Error:
+xml.sax._exceptions.SAXParseException: Y:\ndha\pre-deposit_prod\LD_working\podcasts\assets\templates\mis_Podcast_NZ_history.xml:1:909: not well-formed
+
+Reason:
+checked template, found "&" as it is. "&" considered to be special character for xml and should be replaced.
+
+Solution:
+replaced & by &#38; which is it's html code in template
+
+------------------------------------------------------------------------------------------------------------------------------
+Error:
+When add new  podcast did not pass further "NFO:root:'Content-Disposition' exists in headers but failed to parse "
+from downloader_light_modified.
+
+Reason:
+Logic
+if not downloader.message or (downloader.message and self.podcast_name in ["Kiwi birth tales", "Board matters"]):
+
+From this  type or rss there is not info in "Content-Disposition"
+It gives message in dowloader light modified, which does not allow to go further
+
+Solution:
+Add podcast name to exception list.	
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+Error:
+When add new podcast NoneType object has not attribure rstrip in harvester script.
+
+Reason:
+No episode_link from 
+[{'length': '10154576', 'type': 'audio/mpeg', 'href': 'https://www.buzzsprout.com/2014336/11152051-wayfinding-pae-ora-with-chris-webber-minstd.mp3', 'rel': 'enclosure'}]
+
+Solution:
+Add podcast name to one of the exception list  of pocast_harvester script.
+					if self.podcast_name in ["Taxpayer talk","Board matters"] and not self.episode_link:
+						self.episode_link = self.episode_download_link.split(".mp3")[0]
+if self.podcast_name in ["Paige's space","Kelli from the Tron","Top writers radio show", "Dont give up your day job","Motherness","Kiwi birth tales","Board matters"]:
+	self.episode_link = self.podcast_url
+
+It will assign podcast url as episode link or download link as episode link. Depends on list.
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Error:
+my_podcast_name = list(podcasts_dict.keys())[0]  list of indeces out of range
+
+Reason:
+podcasts_dict is empty
+
+Solution:
+Make sure that all titles uncommented
+
+------------------------------------------------------------------------------------------------------------------------------------
