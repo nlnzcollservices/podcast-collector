@@ -21,7 +21,7 @@ Records for the newly-collected episodes are then created in Alma and submission
 A list of technologies used within the project:
 * [Python](https://www.python.org/downloads/release/python-370/): Version  3.7.2 
 * [Google Spreadsheets APIs](https://developers.google.com/sheets/api/quickstart/python): Version current
-* [JHOVE](https://jhove.openpreservation.org/getting-started/): Vesion Rel. 1.24.1
+* [AlmaTools](https://github.com/nlnzcollservices/alma-tools): Vesion 3
 * [Exiftool](https://exiftool.org/): Version 12.10
 * [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
 * [Downloader](https://github.com/nlnzcollservices/file-downloader): Version downloader_light_modified
