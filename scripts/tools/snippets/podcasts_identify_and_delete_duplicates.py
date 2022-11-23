@@ -1,13 +1,36 @@
 import os
 from pymarc import parse_xml_to_array,record_to_xml, Field, parse_xml
-from settings import logging, template_folder,start_xml, end_xml, report_folder, pr_key#, podcast_sprsh, 
+from settings_prod import assets_folder,  logging, template_folder,start_xml, end_xml, report_folder, pr_key#, podcast_sprsh, 
 from alma_tools import AlmaTools
 import io
+from openpyxl import load_workbook
 
+wb = load_workbook(os.path.join(assets_folder,"results_auto.xlsx")) 
+ws = wb["results"]
+my_dict ={}
+for row in ws.iter_rows(min_row=2):
+	podcast_name = row[3].value.split(";")[0].rstrip(" ")
+	number = row[3].value.split(";")[1].lstrip(" ")
+	title = row[4].value
+	mms = row[26].value
+	print(title)
+	if title in my_dict:
+		print("here2")
+		my_dict[title] +=1
+	else:
+		print("here")
+		my_dict[title] =1
+count =0 
+for el in my_dict:
+	if my_dict[el]>1:
+		count+=1
+		print(el)
+		print(my_dict[el])
+print(count)
 
 
 				
-
+quit()
 def main():
 
 		"""Finds all mms from mms.txt file in record folder. And deletes those which have the title in title_list"""

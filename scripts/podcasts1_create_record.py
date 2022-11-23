@@ -173,6 +173,41 @@ def __init__(self, key):
 			field = Field(tag = f_number, indicators = [indicator1, indicator2], subfields = subfields)
 			self.record.add_ordered_field(field)
 
+	def parsing_bib_xml_serials(self, my_record_xml):
+		"""
+		Modifies 500  field.
+
+		"""
+		print(my_record_xml)
+		try:
+			self.record = parse_xml_to_array(my_record_xml)[0]
+		except Exception as e:
+			logger.error(self.template_path)
+			logger.error(str(e))
+			quit()
+		if self.podcast_name in ["Can I steal you for a second"]:
+			field505_a = self.record["505"]["a"]
+			my_episodes = field505_a.split(" -- ")
+			my_episodes_dict = {}
+			for ep in my_episodes:
+				number = ep.split(".")[0]
+				name = ep.split(". ")[1]
+				my_episodes_dict[number] = name
+			#my_episodes_dict[self.episode_title.split(".")[0]] = my_episodes_dict[self.episode_title.split(".")[1]]
+			temp=sorted(my_episodes_dict)
+			my_episodes_dict = dict([(k,my_episodes_dict[k]) for i,k in enumerate(temp)])
+			new505 = ""
+			for el in my_episodes_dict:
+				new505+=el
+				new505+=". "
+				new505+=my_episodes_dict[el]
+				new505+=" -- "
+			new505.rstrip(" -- ")
+			self.record["505"]["a"] = new505
+		bib_data = record_to_xml(self.record)
+		bib_data = str(bib_data).replace("\\n", "\n").replace("\\", "")
+		self.bib_data = start_xml + bib_data +end_xml
+
 	def parsing_bib_xml(self):
 		"""
 		Parses template , modifies it and adds new fields. It is also parses episode title according to rules for 245, 490  and 800 or 830 fields.
@@ -199,6 +234,8 @@ def __init__(self, key):
 		##################################################Parsing rules##################################################################
 		#This part is very flexible. It is parsing titles to create correct 490 and 800 or 830 field#####################################
 		if self.podcast_name in ["Crave!"]:
+			# print(self.episode_title)
+			# print(self.harvest_link)
 			if ":" in self.episode_title and (self.episode_title.split(":")[0][-1].isdigit() or self.episode_title.split(":")[0][-2].isdigit()):
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
 				f490v = self.episode_title.split(":")[0].replace('Crave ',"").replace("Crave!","").lstrip(" ")
@@ -207,9 +244,17 @@ def __init__(self, key):
 				f490v = self.episode_title.split("-")[0].lstrip(" ").replace('Crave!',"").replace("Crave","").lstrip(" ")
 			else:
 				logger.info("Crave!!!Check  245 and 490!!!")
-				episode = self.find_episode()
-				f245 = self.episode_title.replace("Crave!", "").replace(episode, "").lstrip(" ").lstrip(":").lstrip("-").lstrip(' ')
-				f490v = episode
+				try:
+					episode = self.find_episode()
+					f245 = self.episode_title.replace("Crave!", "").replace(episode, "").lstrip(" ").lstrip(":").lstrip("-").lstrip(' ')
+					f490v = episode
+				except:
+					f245 = self.episode_title.replace("Crave!", "").lstrip(" ").lstrip(":").lstrip("-").lstrip(' ')
+					f490v = None
+			if self.episode_title in ["Crave! episode one hundred"]:
+				f245 = "Episode one hundred"
+				f490v = None
+
 		
 		if self.podcast_name in ["CIRCUIT cast"]:
 			if ":" in self.episode_title:
@@ -274,16 +319,24 @@ def __init__(self, key):
 				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
 				f490v = self.episode_title.split(":")[0].rstrip(" ")
 			if f490v:
-				if not "episode" in f490v.lower() and not "ep" in f490v.lower() and not f490v.lower().startswith("e") and not "podcast" in f490v.lower():# and not f490v.lower().startswith("E"):
-					f490v = "Episode " + f490v
+				try:
+					if not "episode" in f490v.lower() and not "ep" in f490v.lower() and not f490v.lower().startswith("e") and not "podcast" in f490v.lower():# and not f490v.lower().startswith("E"):
+						f490v = "Episode " + f490v
+				except:
+					f490v=None
 
 
-		if self.podcast_name in ["76 small rooms","Dietary requirements", "History of Aotearoa New Zealand podcast", "Musician's Map", "The Frickin Dangerous Bro Show", "Dirt Church Radio"]:
+		if self.podcast_name in ["76 small rooms","Dietary requirements", "History of Aotearoa New Zealand podcast", "Musician's Map", "The Frickin Dangerous Bro Show", "Dirt Church Radio","Baboon yodel"]:
 			if "-" in self.episode_title:
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(" ")
 			if not f490v and self.epis_numb:
 				f490v = "Episode " + self.epis_numb
+			if self.podcast_name in ["Baboon yodel"]:
+				try:
+					f490v = "Episode " + self.epis_numb
+				except:
+					f490v = None
 
 		if self.podcast_name in ["On the rag" , "Papercuts" , "The real pod" , "The Offspin podcast", "Taxpayer talk","The fold"]:
 			if ":" in self.episode_title:
@@ -401,10 +454,10 @@ def __init__(self, key):
 				f490v = self.episode_title.split("-")[0].rstrip(' ')
 			
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
-			print(self.episode_title)
+			# print(self.episode_title)
 			if  ":" in self.episode_title and ("NZ Tech Podcast" in self.episode_title or "Episode" in self.episode_title) and not "Running time" in self.episode_title:
 				ep_number = None
-				print(self.episode_title)
+				# print(self.episode_title)
 				if ": NZ Tech Podcast" in self.episode_title:
 					f245 =  ":".join(self.episode_title.split(":")[:-1])
 					ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[-1])[0]
@@ -611,7 +664,7 @@ def __init__(self, key):
 				self.record["810"]["v"] = f830v + "."
 			else:
 				self.record["810"]["v"] = my_date + "."
-
+		# print(self.record)
 		#Field 856
 
 		my_fields = self.record.get_fields("856")
@@ -635,16 +688,16 @@ def __init__(self, key):
 					if subfields[idx] == "u":
 						same_field_flag = True
 				field2 = Field(tag = "856", indicators = indicators, subfields = subfields)
-
+		logger.debug(str(self.record))
 		self.record.remove_fields("856")
 		self.record.add_ordered_field(field1)
 		if self.episode_link:
 			self.record.add_ordered_field(field2)
 
+
 		bib_data = record_to_xml(self.record)
 		bib_data = str(bib_data).replace("\\n", "\n").replace("\\", "")
-		self.bib_data = start_xml + bib_data +end_xml
-				
+		self.bib_data = start_xml + bib_data +end_xml	
 
 	def record_creating_routine(self, update = False, list_of_podcasts = []):
 
@@ -667,6 +720,13 @@ def __init__(self, key):
 			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
 			)
 		for epis  in my_dict:
+			self.podcast_name = epis["podcast_name"]
+			self.podcast_id = epis["podcast_id"]
+			self.serial_mms = epis["serial_mms"]
+			self.rss_link = epis["rss_link"]
+			self.location = epis["location"]
+			self.publish_link_to_record = epis["publish_link_to_record"]
+
 			if "tick" in epis.keys() and epis["tick"] and not epis["serial_mms"] in serials:
 					self.mms_id = epis["mis_mms"]
 					logger.debug(epis["podcast_name"])
@@ -678,12 +738,6 @@ def __init__(self, key):
 						self.year = dateparser.parse(epis["date"]).strftime("%Y")
 						print(self.year)
 						print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					self.podcast_name = epis["podcast_name"]
-					self.podcast_id = epis["podcast_id"]
-					self.serial_mms = epis["serial_mms"]
-					self.rss_link = epis["rss_link"]
-					self.location = epis["location"]
-					self.publish_link_to_record = epis["publish_link_to_record"]
 					self.episode_title = epis["episode_title"]
 					self.tags = epis["tags"]
 					self.description = epis["description"]
@@ -752,7 +806,23 @@ def __init__(self, key):
 								logger.error(my_alma.xml_response_data)
 								quit()
 
-						
+
+			elif "tick" in epis.keys() and epis["tick"] and epis["serial_mms"] in serials:
+				print(epis)
+				my_alma = AlmaTools(self.alma_key)
+				my_alma.get_bib(self.serial_mms)
+				self.episode_title = epis["episode_title"]
+				my_record_xml = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
+				self.parsing_bib_xml_serials(my_record_xml)
+				my_alma.update_bib(self.serial_mms, self.bib_data)
+				if my_alma.status_code ==200:
+					logger.info("updated")
+					my_db.db_update_updated(self.mms_id)
+				else:
+					logger.error(my_alma.xml_response_data)
+					quit()
+
+				
 					
 	
 

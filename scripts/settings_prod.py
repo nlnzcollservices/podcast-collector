@@ -47,19 +47,21 @@ secrets_and_credentials_fold = r'H:\secrets_and_credentials'
 sys.path.insert(0, secrets_and_credentials_fold)
 secret_file = os.path.join(secrets_and_credentials_fold, "secrets") 
 config = configparser.ConfigParser()
+# print(secret_file)
 config.read(secret_file)
 
 #######################Setting google sreadsheet credentials#################
 
 #* - google spreadsheet code could be replaced on another one
 podcast_sprsh = config.get("configuration", "google_spreadsheet_key")
+# print(podcast_sprsh)
 
 #* - getting google credentials from client_secrect.json file
 client_secrets_file = os.path.join(secrets_and_credentials_fold, "client_secrets.json")
 store = file.Storage(client_secrets_file )
 creds = store.get()
 
-# # * - this part could be removed after setting new tokens
+# # # # * - this part could be removed after setting new tokens
 if creds.access_token_expired:
 	creds.refresh(httplib2.Http())
 

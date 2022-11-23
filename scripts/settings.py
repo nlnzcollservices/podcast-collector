@@ -57,6 +57,7 @@ podcast_sprsh = config.get("configuration", "google_spreadsheet_key")
 client_secrets_file = os.path.join(secrets_and_credentials_fold, "client_secrets.json")
 store = file.Storage(client_secrets_file )
 creds = store.get()
+print("here")
 # * - this part could be removed after setting new tokens
 if creds.access_token_expired:
     creds.refresh(httplib2.Http())

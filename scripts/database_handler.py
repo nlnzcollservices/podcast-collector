@@ -293,8 +293,11 @@ class DbHandler():
 
         """Updating Alma item id in db"""
         logger.debug("Updating item in db")
+        print(mms_id)
+        print(item_pid)
         q = Episode.update(item = item_pid ).where(Episode.mis_mms == mms_id)
         q.execute()
+
     def db_update_item_id_serials(self, episode_title, item_pid):
 
         """Updating Alma item id in db"""
@@ -330,11 +333,14 @@ class DbHandler():
         self.req_list = req_list
         self.returning = returning
         self. podcast_names = podcast_names
+        #print(podcast_names)
         if not self.podcast_names:
             self.podcast_names = []
             podcasts = Podcast.select() 
             for pod in podcasts:
+                #print(pod.podcast_name)
                 self.podcast_names.append(pod.podcast_name)
+
         for podc_name in self.podcast_names:
             podcasts = Podcast.select()
             for pod in podcasts:

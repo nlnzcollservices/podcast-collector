@@ -1,21 +1,16 @@
 import requests
 from time import sleep
-try:
-	from settings import sb_key, pr_key
-except:
-	from settings_prod import sb_key, pr_key
 from bs4 import BeautifulSoup as bs
 import re
 import os
-from openpyxl import load_workbook
-from selenium import webdriver
-from podcast_dict import podcasts_dict
-import urllib3
-import io
-import xml.dom.minidom
+import sys
 
-urllib3.disable_warnings()
-# driver = webdriver.Firefox()
+
+
+
+pr_key = "YOUR KEY"
+sb_key = "YOUR SB KEY"
+
 ##################################################################################################
 class AlmaTools():
 	
@@ -50,16 +45,24 @@ class AlmaTools():
 		get_items(self, mms_id, holding_id, options)
 		get_item(self, mms_id, holding_id, item_pid, options)
 		update_item(self, mms_id, holding_id, item_pid, xml_record_data, options)
-		delete_item(self, mms_id, holding_id, item_pid)
+		delete_item(self, mms_id, holding_id, item_pid, options)
 		get_representations(self, mms_id, options)
 		get_representation(self, mms_id, rep_id, options)
 		update_representation(self, mms_id, rep_id, xml_record_data, options)
 		create_item_by_po_line(self, po_line, xml_record_data, options)
-
+		get_portfolios(self, mms_id, portfolio_id, oprions)
 		get_portfolio(self, mms_id, portfolio_id, options)
+		create_portfolio(self, mms_id, options)
+		update_portfolio(self, mms_id, portfolio_id, options)
 		delete_portfolio(self, mms_id, portfolio_id, options)
-		get_ecollection(self, mms_id, ecollection_id, oprions)
-
+		get_ecollection(self, mms_id, ecollection_id, options)
+		get_invoice(self, invoice_id, options)
+		get_invoice_linesself, (invoice_id, options)
+		get_invoice_line(self, invoice_id, line_id, options)
+		update_invoice_line(self, invoice_id, line_id, options)
+		create_invoice(self, xml_record_data)
+		get_po_lines(self)
+		get_po_line(self, po_line)
 	"""
 
 	def __init__(self, alma_key):
@@ -139,7 +142,7 @@ class AlmaTools():
 		"""
 
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.base_api_url}{mms_id}/e-collections/{ecollection_id}", params=parameters)
+		r = requests.get(f"{self.base_api_url}{mms_id}/e-collections/{ecollection_id}", params=parameters,verify= False)
 		# print(r.text)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
@@ -187,6 +190,22 @@ class AlmaTools():
 		parameters = {**{"apikey": self.alma_key}, **options}
 		xml_record_data = xml_record_data.replace("\\", "")
 		r = requests.post(f"{self.base_api_url}{mms_id}/portfolios/", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
+		#print(r.url)
+		self.xml_response_data = r.text
+		self.status_code = r.status_code
+		
+	def update_portfolio(self, mms_id, portfolio_id, xml_record_data, options = {}):
+
+		"""
+		Creates a portfolio for a bib
+		Argumets:
+			mms_id(str) - id of the bibliographic record
+		Returns:
+			None
+		"""
+		parameters = {**{"apikey": self.alma_key}, **options}
+		xml_record_data = xml_record_data.replace("\\", "")
+		r = requests.put(f"{self.base_api_url}{mms_id}/portfolios/{portfolio_id}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"), verify= False)
 		#print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
@@ -545,11 +564,11 @@ class AlmaTools():
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 
-	def delete_item( self, mms_id, holding_id, item_pid):
+	def delete_item( self, mms_id, holding_id, item_pid,options={}):
 
 		"""
 		Deletes item by item PID
@@ -560,7 +579,8 @@ class AlmaTools():
 		Returns:
 			None
 		"""
-		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}?apikey={self.alma_key}",verify= False)
+		parameters = {**{"apikey": self.alma_key}, **options}
+		r = requests.delete(f"{self.base_api_url}{mms_id}/holdings/{holding_id}/items/{item_pid}",params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
@@ -632,20 +652,7 @@ class AlmaTools():
 		self.status_code = r.status_code
 
 
-	def get_po_line(self, invoice_id, options={}):
-
-		""" 
-		Retrieves the purchase order line  in XML for a given Alma POL
-		Parameters:
-			po_line(str) - Alma POL
-			options(dict) - optional parameters for request
-		Returns:
-			None
-		"""
-		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.acq_base_api_url}{po_line}", params=parameters,verify= False)
-		self.xml_response_data = r.text
-		self.status_code = r.status_code
+	
 
 	def get_vendor(self, vendor_code, options={}):
 
@@ -690,7 +697,7 @@ class AlmaTools():
 		"""
 		xml_record_data = xml_record_data.replace("\\", "")
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.put(f"{self.acq_base_api_url}{po_line}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"))
+		r = requests.put(f"{self.acq_base_api_url}{po_line}", headers=self.headers, params=parameters, data=xml_record_data.encode("utf-8"),verify= False)
 		self.xml_response_data=  r.text
 		self.status_code = r.status_code
 	def get_items_by_po_line(self, po_line, options={}):
@@ -704,7 +711,7 @@ class AlmaTools():
 		"""
 
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.get(f"{self.acq_base_api_url}{po_line}/items", params=parameters)
+		r = requests.get(f"{self.acq_base_api_url}{po_line}/items", params=parameters,verify= False)
 		# print(r.url)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
@@ -730,8 +737,6 @@ class AlmaTools():
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
 
-
-	
 	def receive_item(self, po_line, item_pid, xml_record_data, options={}):
 
 		"""
@@ -744,9 +749,22 @@ class AlmaTools():
 			None
 		"""
 		parameters = {**{"apikey": self.alma_key}, **options}
-		r = requests.post(f"{self.acq_base_api_url}{po_line}/items/{item_pid}", xml_record_data, headers=self.headers, params=parameters)
+		r = requests.post(f"{self.acq_base_api_url}{po_line}/items/{item_pid}", xml_record_data, headers=self.headers, params=parameters,verify= False)
 		self.xml_response_data = r.text
 		self.status_code = r.status_code
+
+def main():
+
+	"""Example of usage"""
+
+	mms_id = ""
+	my_api = AlmaTools("prod")
+	my_api.get_bib(mms_id)
+
+
+
+if __name__ == '__main__':
+	main()
 
 
 def main():
@@ -755,24 +773,24 @@ def main():
 
 	mms_id = ""
 
-	my_api = AlmaTools("sb")
-	# my_api.get_bib("9919000573502836")
+	my_api = AlmaTools("prod")
+	# my_api.get_bibs({"view":"brief"})
 	# print(my_api.xml_response_data)
+	# quit()
 	# item_pid = "23376150750002836"
 	# po_line = "245690-ilsdb"
 	# my_api.get_items_by_po_line( po_line, options={})
 
-	# # mis_mms_list = ["999999999999"]
-
-	# # for mms in mis_mms_list:
-	# # 		my_api.delete_bib(mms)
-	# print(my_api.xml_response_data.encode("utf-8"))
+	# mis_mms_list = [""]
+	# for mms in mis_mms_list:
+	# 		my_api.delete_bib(mms)
+	# 		print(my_api.xml_response_data)
 	#######################################
 	# my_api.get_bib("9919173839702836")#, {"limit":"100"})
 	# print(my_api.xml_response_data)
 	#######################################
 	#my_api.get_invoices()
-	invoice_id = "11882474040002836"
+	# invoice_id = "11882474040002836"
 	# invoice_id = "11882474040002836"
 	# invoice_id = "10581159270002836"
 	#invoice_id = "11882474040002836"
@@ -826,24 +844,41 @@ def main():
 	# my_api.get_portfolios("9919000573502836")#,"53354322810002836")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
+	##################################################GET SERVICES####################################
+	# my_api.get_services("9919224595702836","61383366250002836")
+	# print(my_api.xml_response_data)
 	# ###############################################
 
-	my_api.get_portfolio("9918122880502836","53376296880002836")
-	print(my_api.xml_response_data)
-	print(my_api.status_code)
+	# my_api.get_portfolio("9918122880502836","53376296880002836")
+	# print(my_api.xml_response_data)
+	# print(my_api.status_code)
 	#########################################
 	# my_api.get_ecollection("9918748064302836","61325625670002836")
 	# print(my_api.xml_response_data)
 	# print(my_api.status_code)
 	# ####################################################################
-	# my_api.get_po_line("POL-180272")
+	# my_api.get_po_line("POL-184930")
 	# print(my_api.xml_response_data)
+	# my_api.get_po_line("POL-49685")
+	# my_po_data = my_api.xml_response_data
+	# my_api.update_po_line("POL-49685", my_po_data)
+	# print(my_api.xml_response_data)
+	# item_data = "<item />"
+	# my_api.receive_item("POL-184930","23384395350002836", item_data, {"op":"receive"})
 	# print(my_api.status_code)
+	# print(my_api.xml_response_data)
+	# my_api.delete_item("9918193160502836","22305993790002836","23386083860002836")
+	# print(my_api.xml_response_data)
+	#22277155100002836 = holding, existing item = 23372819680002836, 9918136057402836, POL-7159, awhi
+	# my_api.get_item("9918136057402836","22277155100002836","23372819680002836")
+	# item_data = my_api.xml_response_data
+	# my_api.create_item_by_po_line("POL-7159", my_api.xml_response_data, {"receive_date":"2022-08-28"})
+	# print(my_api.xml_response_data)
 	# my_api.get_item("9918137053802836","22278070670002836","23319192270002836")
 	# print(my_api.xml_response_data)
 
 	# my_api.receive_item("POL-76418","23319192270002836",my_api.xml_response_data,{"op":"receive"})
-	# print(my_api.xml_response_data)
+	# print(my_api.xml_response_data).get
 	# my_api.update_po_line("POL-76418",my_api.xml_response_data)
 	# print(my_api.xml_response_data)
 	####################################################################
@@ -925,28 +960,39 @@ def main():
 	# 	my_api.get_representations(mms.split(".")[0])
 	# 	print(mms.split(".")[0])
 	# # 	print(my_api.xml_response_data)\
-	# mms_id = "9912860763502836"
+	# mms_id = "9918219672402836"
 
 	# my_api.get_representations(mms_id,{"limit":"100"})
 	# print(my_api.xml_response_data)
 	# num = re.findall(r'record_count="(.*?)">',my_api.xml_response_data)[0]
-	# print(num)
-	# for i in range((int(num)//100)+1):
+	# for i in range(((int(num)+10)//100)+1):
 		
-	# 	my_api.get_representations(mms_id,{"limit":"100","offset":str(100*i)})
+	# 	my_api.get_representations(mms_id,{"limit":"100"})#,"offset":str(100*(i+10))})
 	# 	repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
 	# 	for rep in repres:
-	# 		my_api.get_representation (mms_id,rep )
+	# 		try:
+	# 			my_api.get_representation (mms_id,rep )
+	# 		except:
+	# 			sleep(5)
+	# 			try:
+	# 				my_api.get_representation (mms_id,rep )
+	# 			except Exception as e:
+	# 				print(str(e))
+					
+					
+
 	# 		#print(my_api.xml_response_data)
 	# 		ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
 	# 		label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0]
-	# 		if "2022" in label and "iss.20" in label:
-	# 		# 	#new_label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0].replace(")","").replace("(","").replace(". ",".")
-	# 			my_data = my_api.xml_response_data.replace("2022","2021")#.replace("2022 <",">2021<")
-	# 			my_api.update_representation(mms_id, rep, my_data)
-	# 			print(my_api.xml_response_data)
-	# 			print(ie)
-	# 			print(label)
+	# 		if "2021" in label:# "iss.20" in label:
+			# 	#new_label = re.findall(r'<label>(.*?)</label', my_api.xml_response_data)[0].replace(")","").replace("(","").replace(". ",".")
+				#my_data = my_api.xml_response_data.replace("2022 08","iss.89 2022 Autumn")
+				#my_api.update_representation(mms_id, rep, my_data)
+				
+
+				#print(my_api.xml_response_data)
+				# print(ie)
+				# print(label)
 
 	########################################GET REPRESENTATION####################################
 	# my_api.get_representation ("9918991865302836", "32363085860002836")
@@ -967,23 +1013,59 @@ def main():
 	# 	print(titles[ind])
 
 #######################################GET REPRESENTATIONS####################################
-	# mms_id = "9918755167602836"
+	# mms_id = "9919016171702836"
+	# mms_ids = ['9919236632102836', '9919236631702836', '9919236633302836', '9919236734202836', '9919236735402836', '9919236631602836', '9919236633202836', '9919236735302836', '9919236633402836', '9919236631402836', '9919236631902836', '9919236633702836', '9919236634102836', '9919236735202836', '9919236632002836', '9919236633602836', '9919236734602836', '9919236631502836', '9919236633802836', '9919236632202836', '9919236633102836', '9919236632402836', '9919236632902836', '9919236632702836', '9919236631802836', '9919236633002836', '9919236633902836', '9919236632602836', '9919236632802836', '9919236734402836', '9919236632302836', '9919236632502836', '9919236734802836', '9919236735502836', '9919236735102836', '9919236735002836', '9919236634002836', '9919236734902836', '9919236734302836', '9919236734502836', '9919236734702836', '9919236633502836']
+	# mms_ids = ['9919236735502836']
+	# my_dict = {}
+	# for mms_id in mms_ids:
+			#my_api.get_representations(mms_id,{"limit":"100"})
+			#rep = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)[0]
+			#print(my_api.xml_response_data)
+		# my_dict = {}
+		# repres = re.findall(r"<id>(.*?)</id>", my_api.xml_response_data)
+		# for rep in repres:
+			# # print(rep)
+			#my_api.get_representation(mms_id,rep)
+			#print(my_api.xml_response_data)
+			# # year = re.findall(r"year>(.*?)</year", my_api.xml_response_data)
+			#number = re.findall(r"number>(.*?)</number", my_api.xml_response_data)[0]
+			# if 'total_record_count="0"' in my_api.xml_response_data:
+			# 	print(mms_id)
+			# else:
+			# 	label = re.findall(r"label>(.*?)</label", my_api.xml_response_data)[0]
+			# 	ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+			# 	print(ie, "\t" ,label)
+			# my_dict[number] = [ie, label]
+		# print(my_dict)
 
-	# my_api.get_representations(mms_id,{"limit":"100"})
-	# # print(my_api.xml_response_data)
-	# labels = {}
-	# labels_to_delete = {}
-	# try:
-	# 	total_count = re.findall(r'count="(.*?)">',my_api.xml_response_data)[0]
-	# 	# print(total_count)
-	# 	print(mms_id)
-	# except Exception as e:
-	# 	# print(my_api.xml_response_data)
-	# 	pass
+	# my_label_list = []
+	# my_ie_list = []
+	# od = collections.OrderedDict(sorted(my_dict.items()))
+	# for el in od:
+	# 	my_ie_list.append(od[el][0])
+	# for el in od:
+	# 	my_label_list.append(od[el][1])
+	# my_label_list = my_label_list[::-1]
+	# my_ie_list = my_ie_list[::-1]
+	# for el in my_ie_list:
+	# 	print(el)
+	# for el in my_label_list:
+	# 	print(el)
 
+		# labels = {}
+		# labels_to_delete = {}
+		# try:
+		# 	total_count = re.findall(r'count="(.*?)">',my_api.xml_response_data)[0]
+		# 	# print(total_count)
+		# 	print(mms_id)
+		# except Exception as e:
+		# 	# print(my_api.xml_response_data)
+		# 	pass
+	# mms_id = "9915789603502836"
 
+	# total_count = 400
 	# for i in range((int(total_count)//100)+2):
-	# 	# print(i)
+	# 	print(i)
 	# 	my_api.get_representations(mms_id,{"limit":"100","offset":99*i})
 	# 	repres = re.findall(r"<id>(.*?)</id>",my_api.xml_response_data)
 	# 	# print(repres)
@@ -994,27 +1076,30 @@ def main():
 	# 		except:
 	# 			sleep(2)
 	# 			my_api.get_representation (mms_id, rep)
-	# 		# ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
+	# 		ie = re.findall(r"pubam:(.*?)</",my_api.xml_response_data)[0]
 	# 		# try:
 	# 		# 	year = re.findall(r"year>(.*?)</year",my_api.xml_response_data)[0]
 	# 		# 	# print(year)
 	# 		# except:
 	# 		# 	pass
 
-				
-	# 		label = re.findall(r"label>(.*?)</label",my_api.xml_response_data)[0]
-	# 		if "2022" in label:# or "2021" in label:
-						
-	# s 			print(label)
-				
-				# print(ie)
-				# if "2022" in my_api.xml_response_data:
-				# 	print(label)
-				# 	print(my_api.xml_response_data)
-		# my_api.get_representation(mms_id,rep)
-		# new_data = my_api.xml_response_data.replace("label>2919 08 </label", "label>2022 01</label")
-		# my_api.update_representation(mms_id, rep, new_data)
-		# print(my_api.xml_response_data)
+			
+			# label = re.findall(r"label>(.*?)</label",my_api.xml_response_data)[0]
+			# if "2022" in label:# or "2021" in label:
+					
+			# 	print(label)
+			# 	print(ie)
+			
+			# print(ie)
+			# if "2022" in my_api.xml_response_data:
+			# 	print(label)
+			# 	print(my_api.xml_response_data)
+
+
+				# my_api.get_representation(mms_id,rep)
+				# new_data = my_api.xml_response_data.replace("2016 11", "2016 12")
+				# my_api.update_representation(mms_id, rep, new_data)
+				# print(my_api.xml_response_data)
 		# 			# quit()
 		# 			labels[label] = ie
 		# 		else:
@@ -1068,13 +1153,95 @@ def main():
 	# vendor_code = "JBDPUB"
 	# my_api.get_vendor(vendor_code)
 	# print(my_api.xml_response_data)
-##############################UPDATING ITEMS####################################################################3
-	# my_api.get_items("9916487913502836","22218308440002836",{"limit":"100"})
-	# print(my_api.xml_response_data)
-	# items = re.findall(r"<pid>(.*?)</pid>", my_api.xml_response_data)
-	# for el in items:
-	# 	my_api.get_item("9916487913502836","22218308440002836",el)
+##############################Delete ITEMS####################################################################3
+
+	# mms_id = "9919201961502836"
+	# mms_ids = ["919266429402836","9919266427602836"]
+	# po_lines = ["POL-195825","POL-195847"]
+	# print(len(mms_ids))
+	# print(len(po_lines))
+	# for i,mms_id in enumerate(mms_ids):
+	# 	print("#"*50)
+	# 	print(mms_id)
+	# 	print(po_lines[i])
+	# 	new_item_data = None
+	# 	my_api.get_holdings(mms_id)
 	# 	print(my_api.xml_response_data)
+	# 	holding_ids = re.findall(r"<holding_id>(.*?)</holding_id>",my_api.xml_response_data)
+	# 	print("holding id")
+	# 	print(holding_ids)
+	# 	for holding_id in holding_ids:
+	# 		item_count=0
+	# 		my_api.get_items(mms_id,holding_id,{"limit":"100"})
+	# 		try:
+	# 			item_count = re.findall(r'_count="(.*?)">',my_api.xml_response_data)[0]
+	# 		except:
+	# 			item_count = 0
+	# 		for i in range((int(item_count)//100)+2):
+	# 			my_api.get_items(mms_id,holding_id,{"limit":"100"})#,"offset":100*i})
+	# 			items = re.findall(r"<pid>(.*?)</pid>",my_api.xml_response_data)
+	# 			print("items")
+	# 			print(items)
+	# 			for item in items:
+	# 				my_api.get_item(mms_id,holding_id, item)
+	# 				# print(my_api.xml_response_data)
+	# 				if str(my_api.status_code).startswith("2"):
+	# 					item_data = my_api.xml_response_data
+	# 					#descr = re.findall(r"<description>(.*?)</description>", my_api.xml_response_data)[0]
+	# 					# if descr in designations:
+	# 					# 	if descr not in design2:
+	# 					# 		print(descr)
+	# 					# 		my_api.create_item(mms_id2, holding_id2, my_api.xml_response_data)
+	# 					# 		print(my_api.status_code)
+	# 					# 		if str(my_api.status_code).startswith("2"):
+	# 					#item_data = str(my_api.xml_response_data)
+	# 					new_item_data = item_data.replace('<committed_to_retain desc="Yes">true</committed_to_retain>','<committed_to_retain desc="No">false</committed_to_retain>')
+	# 					print("Updating item")
+	# 					my_api.update_item(mms_id,holding_id, item, new_item_data)
+	# 					print("Deleting item")
+	# 					my_api.delete_item(mms_id,holding_id, item)
+	# 					print(my_api.xml_response_data)
+	# 					# print( mms_id, descr, my_api.status_code)
+	# 	if holding_ids !=[]:
+	# 		"Deleting holdings"
+	# 		my_api.delete_holding(mms_id,  holding_id)
+	# 		print(my_api.xml_response_data)
+	# 	print("Deleting bib")
+	# 	my_api.delete_bib(mms_id)
+	# 	print(my_api.xml_response_data)
+	# 	print("Getting po_line")
+	
+	# 	my_api.get_po_line(po_lines[i])
+	# 	po_data= my_api.xml_response_data.replace(mms_id,"")
+	# 	print(po_data)
+	# 	print("Removing mms from po_line")
+	# 	my_api.update_po_line(po_lines[i], po_data)
+	# 	print(my_api.xml_response_data)
+	# 	print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	# 	print("Removing pol")
+	# 	my_api.delete_po_line(po_lines[i],{"reason":"TECHNICAL_ISSUES","override":True})
+	
+	# 	print(my_api.xml_response_data)
+	# 	if new_item_data:
+	# 		print("$"*50)
+	# 		print("Second time")
+	# 		new_item_data = new_item_data.replace(po_lines[i],"")
+	# 		print("Removing pol from item")
+	# 		my_api.update_item(mms_id,holding_id, item, new_item_data)
+	# 		print("Delete item")
+	# 		my_api.delete_item(mms_id,holding_id, item)
+	# 		print("Delee holding")
+	# 		my_api.delete_holding(mms_id,  holding_id)
+	# 		print(my_api.xml_response_data)
+	# 		print("delete bib")
+	# 		my_api.delete_bib(mms_id)
+	# 		print(my_api.xml_response_data)
+
+
+						# my_api.update_item(mms_id,  holding_id, item, item_data,{"generate_description":True} )
+						# if str(my_api.status_code).startswith("2"):
+						# 	print(mms_id, holding_id, item, " - updated")		
+
 	# 	descr = re.findall(r"<description>(.*?)</description>", my_api.xml_response_data)[0]
 	# 	if descr.endswith(" 01"):
 	# 		new_descr = " ".join(descr.split(" ")[:-1])

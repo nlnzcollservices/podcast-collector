@@ -182,8 +182,6 @@ class Podcast_pipeline():
 		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num","serial_mms", "podcast_name"],None,True)
 		rosetta_ies_list = self.read_ies_file()
 		for mm in mms_dict:
-			# print(mm)
-			# print("here")
 			if mm != {}:
 				ies_list = []
 				episode_id = None
@@ -213,27 +211,28 @@ class Podcast_pipeline():
 								quit()
 							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
 
-				elif not mms and mm["serial_mms"] in serials and not mm["ie_num"]:
-					mms=mm["serial_mms"]
-					my_title_parsed =  re.sub(mm["podcast_name"].lower(), "", mm["episode_title"].lower())
-					logger.debug(my_title_parsed)
-					my_title_date = dateparser.parse( my_title_parsed,settings={'DATE_ORDER': 'DMY'})
-					logger.info(my_title_date)
-					my_alma.get_representations(mms,{"limit":"100"})
-					total_count = re.findall(r'count="(.*?)">',my_alma.xml_response_data)[0]
-					for i in range((int(total_count)//100)+2):
-						my_alma.get_representations(mms,{"limit":"100","offset":99*i})
-						repres = re.findall(r"<id>(.*?)</id>",my_alma.xml_response_data)
-						for rep in repres:
-							my_alma.get_representation (mms, rep)
-							ie = re.findall(r"pubam:(.*?)</",my_alma.xml_response_data)[0]
-							year = re.findall(r"year>(.*?)</year",my_alma.xml_response_data)[0]
-							label = re.findall(r"label>(.*?)</label",my_alma.xml_response_data)[0]
-							#print(label)
-							my_label_date = dateparser.parse(label,settings={'DATE_ORDER': 'YMD'})
-							if my_title_date  == my_label_date:
-								self.db_handler.db_update_ie(ie,mm["episode_id"])
-								print("IE updated in db")
+				elif not mms and mm["serial_mms"] in serials and "ie_num" in mm.keys():
+					if not mm["ie_num"]:
+						mms=mm["serial_mms"]
+						my_title_parsed =  re.sub(mm["podcast_name"].lower(), "", mm["episode_title"].lower())
+						logger.debug(my_title_parsed)
+						my_title_date = dateparser.parse( my_title_parsed,settings={'DATE_ORDER': 'DMY'})
+						logger.info(my_title_date)
+						my_alma.get_representations(mms,{"limit":"100"})
+						total_count = re.findall(r'count="(.*?)">',my_alma.xml_response_data)[0]
+						for i in range((int(total_count)//100)+2):
+							my_alma.get_representations(mms,{"limit":"100","offset":99*i})
+							repres = re.findall(r"<id>(.*?)</id>",my_alma.xml_response_data)
+							for rep in repres:
+								my_alma.get_representation (mms, rep)
+								ie = re.findall(r"pubam:(.*?)</",my_alma.xml_response_data)[0]
+								year = re.findall(r"year>(.*?)</year",my_alma.xml_response_data)[0]
+								label = re.findall(r"label>(.*?)</label",my_alma.xml_response_data)[0]
+								#print(label)
+								my_label_date = dateparser.parse(label,settings={'DATE_ORDER': 'YMD'})
+								if my_title_date  == my_label_date:
+									self.db_handler.db_update_ie(ie,mm["episode_id"])
+									print("IE updated in db")
 
 
 
@@ -255,7 +254,7 @@ class Podcast_pipeline():
 		file_list_to_delete = []
 		#list of all filepaths in db
 		filepath_in_db_list = ["\\".join(el["filepath"].split("\\")[-2:]) for el in file_dictionary if el !={}]
-		# file_folder=r"Y:\ndha\pre-deposit_prod\LD_proj\podcasts\files"
+		#file_folder=r"Y:\ndha\pre-deposit_prod\LD_proj\podcasts\files"
 		for root, dirs, files in os.walk(file_folder):
 			for name in files:
 				fl_path = os.path.join(root, name)
@@ -513,24 +512,23 @@ class Podcast_pipeline():
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
 
-		# self.file_cleaning()
+		self.file_cleaning()
 
-		# self.get_ies_from_reports()
-		# lst = self.read_ies_file()
-		# self.insert_ies()
-		# self.finish_existing_records_and_delete_files("prod")
-		# self.db_handler.delete_done_from_db()
+		self.get_ies_from_reports()
+		lst = self.read_ies_file()
+		self.insert_ies()
+		self.finish_existing_records_and_delete_files("prod")
+		self.db_handler.delete_done_from_db()
 
-		self.update_database_from_spreadsheetand_delete_row()
+		#self.update_database_from_spreadsheetand_delete_row()
 
 		my_rec = RecordCreator(self.alma_key)
 		my_rec.record_creating_routine()
-
 		sip_routine()
-
 		harvest()
-		
+	
 		self.db_handler.update_the_last_issue()
+		
 
 		 		
 def main():

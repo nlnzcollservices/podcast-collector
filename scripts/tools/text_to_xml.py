@@ -7,6 +7,11 @@ import re
 script_folder = os.getcwd()
 working_folder = "\\".join(script_folder.split("\\")[:-1])
 print(working_folder)
+
+"""This script produced template  in  xml from text output of Alma Enchancer script.
+Template could  be  made other way. Just make record, downloading it  in xml format, remove
+beginning after "<record>" (look at other templates) and then deleting records"""
+
 def make_dir(path):
     if not os.path.isdir(path):
         os.mkdir(path)
@@ -37,7 +42,7 @@ def main():
             print(field)
             field_content = re.findall(r'>(.*?)<',field)[0]
             field_content = field_content.rstrip(" ").lstrip(" ")
-            field_content = field_content.replace("#", " ")
+            field_content = field_content.replace("#", " ").replace("KMnae","Kōnae")
             ######################################################################################################################
             #to separate Leader field
             if "LDR"in field:
@@ -89,6 +94,7 @@ def main():
         full_new_template_name = os.path.join(new_templates_folder, fl.split("cases_")[-1].replace(" ", "_"))
         if not full_new_template_name.endswith(".xml"):
             full_new_template_name = full_new_template_name + ".xml"
+        templatefile = new_xml.replace("&", "&amp;")
         with open(full_new_template_name, "w") as templatefile:
             templatefile.write(new_xml)
         

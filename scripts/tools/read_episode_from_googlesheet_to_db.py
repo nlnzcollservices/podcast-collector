@@ -104,32 +104,31 @@ class ReadFromSpreadsheet():
 		filesize = None
 		size_original = None
 		file_type  =  None
-		print("here")
 		for ind  in range(start_point, end_point+1):
-			print("here0")
 			my_row_numb = ind+2
 			flag_for_epis_table = False
 			filepath=None
-			print(self.rows_list)
-			print(my_row_numb)
+			# print(self.rows_list)
+			# print(my_row_numb)
 			if my_row_numb in self.rows_list:
 				my_row = ws.row_values(my_row_numb)
 				logging.info(my_row_numb)
 				#not filepath entered
 				if len(my_row)<= 28:
-					print("here2")
 					podcast_name = my_row[0]
 					episode_title = my_row[3].lstrip(" ").rstrip(" ")
 					description = my_row[4]
 					episode_link = my_row[5]
 					episode_date = my_row[6]
 					tags = my_row[7]
+					tick = my_row[27]
 					episode_download_link = my_row[8]
 				#filepath in the spreadsheet which means that file already downloaded
 				if len(my_row)>=33:	
 					episode_number = my_row[30]
 					episode_season = my_row[31]
 					filepath = my_row[32]
+					tick = my_row[27]
 					podcast_name = my_row[0]
 					print(podcast_name)
 					episode_title = my_row[3].lstrip(" ").rstrip(" ")
@@ -141,7 +140,6 @@ class ReadFromSpreadsheet():
 					print(filepath)
 
 				if not filepath:
-					print("here4")
 					if episode_download_link != "":
 						f_path = os.path.join(file_folder, podcast_name.strip('’'))
 						downloader = Downloader(episode_download_link, f_path, collect_html=False, proxies=None)
@@ -149,7 +147,7 @@ class ReadFromSpreadsheet():
 						if downloader.size_original == 0:
 							logging.info("Ther is empty file on {} in {} of {}. Please contact publisher".format(episode_download_link, episode_title, podcast_name))
 							spreadsheet_message = "!!!D Not Tick. Empty file. Ask piblisher!!!"
-						print(downloader.filepath)
+						# print(downloader.filepath)
 						if not downloader.download_status or not self.jhove_check(downloader.filepath) or (downloader.filesize == 0 and downloader.size_original != 0):
 							downloader = Downloader(episode_download_link, f_path, collect_html=False, proxies=None)
 							if not downloader.download_status:
@@ -204,7 +202,7 @@ class ReadFromSpreadsheet():
 
 				if not flag_for_epis_table and episode_download_link != "":
 					#podcast_id = my_db.get_podcast_id(podcast_name)
-					episode_data = {"podcast": podcast_id,"episode_title":episode_title, "description":description, "date_harvested":str(dt.now().strftime( '%Y-%m-%d')), "date":mktime(dt.strptime(episode_date, "%B %d %Y").timetuple()), "harvest_link": episode_download_link, "episode_link":episode_link, "epis_numb" : episode_number, "epis_seas" : episode_season}
+					episode_data = {"podcast": podcast_id,"episode_title":episode_title, "description":description, "date_harvested":str(dt.now().strftime( '%Y-%m-%d')), "date":mktime(dt.strptime(episode_date, "%B %d %Y").timetuple()), "harvest_link": episode_download_link, "episode_link":episode_link, "epis_numb" : episode_number, "epis_seas" : episode_season, "tick":tick}
 					my_db.table_creator("Episode", episode_data)
 					episode = my_db.my_id.id
 					file_data = {"episode" : episode, "filepath" : filepath, "md5sum" : md5, "md5_from_file" : md5_original, "filesize" : filesize, "size_original" : size_original, "file_type" : file_type}
@@ -215,8 +213,8 @@ class ReadFromSpreadsheet():
 def main():
 	pass
 
-	# my_sprdsht_reader = ReadFromSpreadsheet(174,183)
-	# my_sprdsht_reader.get_metadata_from_row()
+	my_sprdsht_reader = ReadFromSpreadsheet(1580,1593)
+	my_sprdsht_reader.get_metadata_from_row()
 
 if __name__ == "__main__":
 	main()

@@ -169,7 +169,7 @@ class Manage_fields():
 		"""
 		#logger.setLevel("DEBUG")
 		self.mms_id_list = mms_id_list
-		logger.info("Updating records with 942 and removeing duplicated fields")
+		logger.info("Updating records with 942 and removing duplicated fields")
 		sb_mms = None
 		if self.key=="sb":
 			sb_mms = "9918602951502836"
