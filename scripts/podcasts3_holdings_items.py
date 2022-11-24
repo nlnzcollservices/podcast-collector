@@ -19,7 +19,6 @@ except:
 from openpyxl import load_workbook
 from podcast_dict import podcasts_dict, serials
 from database_handler import DbHandler
-from alma_tools import AlmaTools
 logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")
 # print(serials)

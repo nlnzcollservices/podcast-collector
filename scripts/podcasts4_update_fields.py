@@ -14,7 +14,6 @@ try:
 except:
 	from settings_prod import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
 from openpyxl import load_workbook
-from alma_tools import AlmaTools
 from database_handler import DbHandler
 logger = logging.getLogger(__name__)
 

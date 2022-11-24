@@ -71,18 +71,18 @@ def generate_sips(podcast_name, ar_policy, serial_mms,  mis_mms,  episode_title,
 	json_object['MD5'] = json_object['MD5']
 	pres_master_json = json.dumps([json_object])
 	build_sip_from_json(
-	ie_dmd_dict=ie_dmd_dict,
-	pres_master_json=pres_master_json,
-	generalIECharacteristics=general_ie_chars,
-	objectIdentifier=object_identifier,
-	accessRightsPolicy=access_rights_policy,
-	digital_original=True,
-	sip_title=sip_title,
-	input_dir = file_folder,
-	output_dir=output_dir,
-	mets_filename=mis_mms,
-	structmap_type="PHYSICAL",
-	encoding = "utf-8"
+				ie_dmd_dict=ie_dmd_dict,
+				pres_master_json=pres_master_json,
+				generalIECharacteristics=general_ie_chars,
+				objectIdentifier=object_identifier,
+				accessRightsPolicy=access_rights_policy,
+				digital_original=True,
+				sip_title=sip_title,
+				input_dir = file_folder,
+				output_dir=output_dir,
+				mets_filename=mis_mms,
+				structmap_type="PHYSICAL",
+				encoding = "utf-8"
 	)
 	logger.info (f"{mis_mms} - Done")
 	return output_dir, filename
@@ -137,18 +137,19 @@ def generate_sips_for_serials (podcast_name, ar_policy, serial_mms,  episode_tit
 	json_object['MD5'] = json_object['MD5']
 	pres_master_json = json.dumps([json_object])
 	build_sip_from_json(
-	ie_dmd_dict=ie_dmd_dict,
-	pres_master_json=pres_master_json,
-	generalIECharacteristics=general_ie_chars,
-	objectIdentifier=object_identifier,
-	accessRightsPolicy=access_rights_policy,
-	digital_original=True,
-	sip_title=sip_title,
-	input_dir = file_folder,
-	output_dir=output_dir,
-	mets_filename=met_filename.split(".")[0],
-	structmap_type="PHYSICAL",
-	encoding = "utf-8"
+					ie_dmd_dict=ie_dmd_dict,
+					pres_master_json=pres_master_json,
+					generalIECharacteristics=general_ie_chars,
+					objectIdentifier=object_identifier,
+					accessRightsPolicy=access_rights_policy,
+					digital_original=True,
+					sip_title=sip_title,
+					input_dir = file_folder,
+					output_dir=output_dir,
+					mets_filename=met_filename.split(".")[0],
+					structmap_type="PHYSICAL",
+					encoding = "utf-8",
+					exclude_file_char = ['fileOriginalPath','fileSizeBytes', 'fileModificationDate','fileCreationDate']
 	)
 	logger.info (f"{episode_title} - Done")
 	return output_dir, filename

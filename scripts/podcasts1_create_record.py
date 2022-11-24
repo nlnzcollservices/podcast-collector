@@ -9,7 +9,6 @@ try:
 except:
 	from settings_prod import logging, template_folder,start_xml, end_xml, report_folder
 from database_handler import DbHandler
-from alma_tools import AlmaTools
 import dateparser
 from podcast_dict import serials
 logger = logging.getLogger(__name__)
