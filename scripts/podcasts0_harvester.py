@@ -7,6 +7,8 @@ import subprocess
 import gspread
 sys.path.insert(0, r'H:\GIT\file-downloader')
 from downloader_light_modified import DownloadResource as Downloader
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
+from alma_tools import AlmaTools
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from time import time, sleep, mktime
@@ -15,24 +17,18 @@ from podcast_dict import podcasts_dict, serials
 from database_handler import DbHandler
 from nltk.corpus import words
 import nltk
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
 nltk.download('words')
+##################################SSL  problem########################################
 import ssl
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = ssl._create_unverified_context
+##############################################################################
 try:
 	from settings import  file_folder, report_folder, podcast_sprsh, logging,creds #!!!! report
 except:
 	from settings_prod import  file_folder, report_folder, podcast_sprsh, logging,creds
 logger = logging.getLogger(__name__)
-try:
-	import library_loudhailer
-
-except Exception as e:
-	print(str(e))
-	logger.error("check if library_loundhailer script to the same folder")
-
 
 #######################################Creating google spreadsheet object#################################################
 

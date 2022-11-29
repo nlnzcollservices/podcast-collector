@@ -2,6 +2,7 @@ import hashlib
 import time
 import json
 import os
+import sys
 import dateparser
 from podcast_dict import podcasts_dict, serials
 from rosetta_sip_factory.sip_builder import build_sip_from_json
@@ -12,6 +13,8 @@ except:
 	from settings_prod import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type,  ie_entity_type_serial, rosetta_sb_folder, report_folder
 
 from database_handler import DbHandler
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
+from alma_tools import AlmaTools
 logger = logging.getLogger(__name__)
 
 

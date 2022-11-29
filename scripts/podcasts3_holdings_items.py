@@ -1,6 +1,7 @@
 import os
 import re
 import io
+import sys
 import peewee
 import requests
 import hashlib
@@ -12,6 +13,10 @@ from pymarc import parse_xml_to_array,record_to_xml, Field
 from datetime import datetime as dt
 from podcast_models import Podcast, Episode, File
 from bs4 import BeautifulSoup
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
+from alma_tools import AlmaTools
 try:
 	from settings import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items
 except:
@@ -369,9 +374,9 @@ class Holdings_items():
 
 			if itm != {} and len(itm) >1:
 				if "ie_num" in itm.keys():# and not "Kelli" in itm["podcast_name"]:
-					print("here0")
+					# print("here0")
 					if itm["ie_num"] and not itm["item"]:
-						print("here")
+						# print("here")
 						self.holding_data = None
 						self.item_data = None
 						self.items_data = None

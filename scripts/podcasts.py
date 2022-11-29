@@ -1,6 +1,7 @@
 import os
 import re
 import io
+
 import gspread
 import shutil
 from bs4 import BeautifulSoup as bs
@@ -8,6 +9,7 @@ from oauth2client import file
 from time import sleep
 from datetime import datetime as dt
 from database_handler import DbHandler
+import sys
 sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
 try:
@@ -26,9 +28,9 @@ import os
 import datetime
 import itertools
 import dateparser
-# os.environ['REQUESTS_CA_BUNDLE'] = os.path.join( r'C:\Users\Korotesv\AppData\Roaming\Python\Python310\site-packages\certifi', 'ZscalerRootCertificate-2048-SHA256.crt')
-
-
+import urllib3
+import  sys
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 c = gspread.authorize(creds)
 gs = c.open_by_key(podcast_sprsh)
@@ -521,7 +523,7 @@ class Podcast_pipeline():
 		self.finish_existing_records_and_delete_files("prod")
 		self.db_handler.delete_done_from_db()
 
-		#self.update_database_from_spreadsheetand_delete_row()
+		self.update_database_from_spreadsheetand_delete_row()
 
 		my_rec = RecordCreator(self.alma_key)
 		my_rec.record_creating_routine()

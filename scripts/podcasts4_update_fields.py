@@ -13,6 +13,9 @@ try:
 	from settings import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
 except:
 	from settings_prod import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
+import sys
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
+from alma_tools import AlmaTools
 from openpyxl import load_workbook
 from database_handler import DbHandler
 logger = logging.getLogger(__name__)

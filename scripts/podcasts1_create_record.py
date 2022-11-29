@@ -11,6 +11,9 @@ except:
 from database_handler import DbHandler
 import dateparser
 from podcast_dict import serials
+import sys
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
+from alma_tools import AlmaTools
 logger = logging.getLogger(__name__)
 # logger.setLevel('DEBUG')
 
