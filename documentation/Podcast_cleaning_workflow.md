@@ -11,7 +11,7 @@
 ![Podcasts cleaning scheme](podcasts_cleaning_scheme.jpg)
 ## Set and filters
 ***
-## podcasts_clesning.py script
+## podcasts_cleaning.py script
 ***
 Script is in Tools
 ### Making json
