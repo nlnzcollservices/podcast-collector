@@ -3,7 +3,7 @@
 ## Table of Contents
 1. [Worklow description](#workflow-description)
 2. [Set and filters](#making-necessary-changes-to-alma-record-creating-rools)
-3. [podcasts_clesning.py script](#podcasts_clesning.py-script)
+3. [podcasts_cleaning.py script](#podcasts_clesning.py-script)
 4. [missing episodes.py script](#missing-episodes)
 
 ## Workflow description
