@@ -8,7 +8,7 @@
 
 ## Workflow description
 ***
-![Podcasts cleaning](podcasts_cleaning_scheme.jpg)
+![Podcasts cleaning scheme](podcasts_cleaning_scheme.jpg)
 ## set and filters
 ***
 ## podcasts_clesning.py script
@@ -24,7 +24,7 @@ Duplicates
 ***
 Incomplete
 
-## missing_episodes.py
+## missing_episodes.py script
 ***
 ### rss_checker
 ### episode checking by number
