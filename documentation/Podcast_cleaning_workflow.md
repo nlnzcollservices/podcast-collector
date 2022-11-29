@@ -9,18 +9,18 @@
 ## Workflow description
 ***
 ![Podcasts cleaning scheme](podcasts_cleaning_scheme.jpg)
-## set and filters
+## Set and filters
 ***
 ## podcasts_clesning.py script
 ***
 Script is in Tools
-### Making json. 
+### Making json
 ***
 Json is the central
 ### Duplicates and duplicates cleaning 
 ***
 Duplicates
-### Incomplete
+### Incomplete 
 ***
 Incomplete
 
