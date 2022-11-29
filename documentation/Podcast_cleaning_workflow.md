@@ -8,7 +8,7 @@
 
 ## Workflow description
 ***
-![Podcasts cleaning](/podcast_cleaning_scheme.jpg)
+![Podcasts cleaning](podcast_cleaning_scheme.jpg)
 ## set and filters
 ***
 ## podcasts_clesning.py script
