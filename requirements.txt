@@ -18,6 +18,6 @@ PyExifTool==0.1.1
 pymarc==4.0.0
 pywin32==301
 regex==2020.7.14
-requests==2.24.0
+requests==2.31.0
 requests-oauthlib==1.3.0
 rosetta-sip-factory==0.1.9
