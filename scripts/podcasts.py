@@ -1,7 +1,7 @@
 import os
 import re
 import io
-
+import requests
 import gspread
 import shutil
 from bs4 import BeautifulSoup as bs
@@ -24,12 +24,18 @@ from podcasts2_make_sips import sip_routine
 from podcast_dict import podcasts_dict, serials
 import csv
 import win32com.client
+from suds.client import Client
 import os
 import datetime
 import itertools
 import dateparser
 import urllib3
 import  sys
+sys.path.insert(0,r"H:\secrets_and_credentials")
+from ros_api import a as password
+#os.environ["REQUESTS_CA_BUNDLE"]=r"C:\Users\Korotesv\AppData\Roaming\Python\Python310\site-packages\certifi\cacert.pem"
+#os.environ["REQUESTS_CA_BUNDLE"]=r"C:\Users\Korotesv\AppData\Roaming\Python\Python39\site-packages\certifi\cacert.pem"
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 c = gspread.authorize(creds)
@@ -107,8 +113,29 @@ class Podcast_pipeline():
 		                        except Exception as e:
 		                            logger.error(str(e))
 		    except Exception as e:
-		        logger.error(str(e))        
+		        logger.error(str(e))     
 
+	def check_sip_status(self,ie):
+
+		"""gets ie number by sru and status by rosetta_api"""
+
+		sru_link = r"https://ndhadeliver.natlib.govt.nz/delivery/sru?version=1.2&operation=searchRetrieve&recordPacking=xml&startRecord=0&query=IE.internalIdentifier.internalIdentifierType.PID="
+		r = requests.get(sru_link+ie)
+		print(r.text)
+		sip_id = re.findall(r'<dc:identifier xsi:type="SIPID">(.*?)</dc:identifier>',r.text)[0]
+		env_var = os.environ
+		username = os.environ["USERNAME"]
+		#wsdl_url = 'https://wlguatoprilb.natlib.govt.nz/dpsws/repository/SipWebServices?wsdl'
+		wsdl_url = "https://wlgprdoprilb.natlib.govt.nz/dpsws/repository/SipWebServices?wsdl"
+		client = Client(wsdl_url)
+		print(dir(client.service))
+		credentials = {'Username': username, 'Password': password}
+		client.set_options(soapheaders=credentials)
+		response = client.service.getSipStatus(sip_id)
+		sip_status = re.findall(r"<status>(.*?)</status>",str(response))[0]
+		if sip_status == "finished":
+			return True
+		quit()
 
 	def get_ies_from_reports(self):
 		
@@ -183,7 +210,7 @@ class Podcast_pipeline():
 		mms_dict = {}
 		my_alma = AlmaTools("prod")
 		mms_dict = self.db_handler.db_reader(["mis_mms", "episode_title", "episode_id", "ie_num","serial_mms", "podcast_name"],None,True)
-		rosetta_ies_list = self.read_ies_file()
+		#rosetta_ies_list = self.read_ies_file()
 		for mm in mms_dict:
 			if mm != {}:
 				ies_list = []
@@ -207,12 +234,13 @@ class Podcast_pipeline():
 						for ie in ies:
 							ies_list.append("IE"+ie.string.split("IE")[-1])
 							logger.info("IE for db: " + ies_list[0])
-							if not ies_list[0] in rosetta_ies_list:
-								print(ies_list[0])
-								print(mms)
+							if self.check_sip_status(ies_list[0]):
+								# print(ies_list[0])
+								# print(mms)
 								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
+								self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
+							else:
 								quit()
-							self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
 
 				elif not mms and mm["serial_mms"] in serials and "ie_num" in mm.keys():
 					if not mm["ie_num"]:
@@ -236,9 +264,6 @@ class Podcast_pipeline():
 								if my_title_date  == my_label_date:
 									self.db_handler.db_update_ie(ie,mm["episode_id"])
 									print("IE updated in db")
-
-
-
 
 
 					# my_alma.get_representations(mms,{"limit":"100"))
@@ -520,18 +545,22 @@ class Podcast_pipeline():
 		self.get_ies_from_reports()
 		lst = self.read_ies_file()
 		self.insert_ies()
-		self.finish_existing_records_and_delete_files("prod")
+
+		self.finish_existing_records_and_delete_files("prod")#update with 942 and make items and delete SIPs form prod (project and rosetta folder)
+
 		self.db_handler.delete_done_from_db()
 
-		self.update_database_from_spreadsheetand_delete_row()
+		self.update_database_from_spreadsheetand_delete_row() 
 
 		my_rec = RecordCreator(self.alma_key)
 		my_rec.record_creating_routine()
-		sip_routine()
-		harvest()
-	
+
+		sip_routine() #only 
+
+		##############################################
+		harvest() #first time when episode enter db
 		self.db_handler.update_the_last_issue()
-		
+		# ###############################################
 
 		 		
 def main():
