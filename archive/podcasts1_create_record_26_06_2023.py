@@ -1,7 +1,7 @@
 import os
 import io
 import re
-from pymarc import parse_xml_to_array,record_to_xml, Field, Subfield
+from pymarc import parse_xml_to_array,record_to_xml, Field 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
 try:
@@ -170,7 +170,8 @@ def __init__(self, key):
 
 			indicator1, indicator2, my_list = self.parsing_added_fields(my_field[1])
 			for el in my_list:
-			 	subfields += [Subfield(code = el.split(" ")[0], value= " ".join(el.split(" ")[1:]).lstrip(" ").rstrip(" ").rstrip("\t"))]
+				subfields += [el.split(" ")[0]]
+				subfields += [" ".join(el.split(" ")[1:]).lstrip(" ").rstrip(" ")]
 			field = Field(tag = f_number, indicators = [indicator1, indicator2], subfields = subfields)
 			self.record.add_ordered_field(field)
 
@@ -583,7 +584,7 @@ def __init__(self, key):
 			if f245.rstrip(" ").endswith("?") or f245.rstrip(" ").endswith("!") or f245.rstrip(" ").endswith("."):
 				dot_or_something = ""
 			self.record["245"]["a"] = f245 + dot_or_something
-		if "100" in self.record or "110" in self.record:
+		if self.record["100"] or self.record["110"]:
 			self.record["245"].indicators =["1","0"]
 		else:
 			self.record["245"].indicators = ["0","0"]
@@ -650,22 +651,23 @@ def __init__(self, key):
 
 		#Field 830 or 800
 
-		if "830" in self.record:
+		if self.record["830"]:
 			if f830v:
 				self.record["830"]["v"] = f830v + "."
 			else:
 				self.record["830"]["v"] = my_date + "."
-		elif "800" in self.record:
+		elif self.record["800"]:
 			if f830v:
 				self.record["800"]["v"] = f830v + "."
 			else:
 				self.record["800"]["v"] = my_date + "."
 
-		elif "830" in self.record:
+		elif self.record["810"]:
 			if f830v:
 				self.record["810"]["v"] = f830v + "."
 			else:
 				self.record["810"]["v"] = my_date + "."
+		# print(self.record)
 		#Field 856
 
 		my_fields = self.record.get_fields("856")
@@ -673,8 +675,7 @@ def __init__(self, key):
 			same_field_flag = False
 			subfields = self.record.get_fields("856")[ind].subfields
 			indicators = self.record.get_fields('856')[ind].indicators
-
-			if len(subfields) == 1:
+			if len(subfields) == 2:
 				for idx in range(len(subfields)):
 					if same_field_flag:
 						subfields[idx] = self.harvest_link
@@ -682,7 +683,7 @@ def __init__(self, key):
 					if subfields[idx] == "u":
 						same_field_flag = True
 				field1 = Field(tag = "856", indicators = indicators, subfields = subfields)
-			elif len(subfields) > 1:
+			elif len(subfields) > 2:
 				for idx in range(len(subfields)):
 					if same_field_flag:
 						subfields[idx] = self.episode_link
