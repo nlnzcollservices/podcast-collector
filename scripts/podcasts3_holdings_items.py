@@ -203,9 +203,9 @@ class Holdings_items():
 		year = record["264"]["c"].strip("[]")
 		logger.debug(year)
 		self.year = dateparser.parse(year)
-		if record["830"]:
+		if "830" in record:
 			my_alma = record["830"]["v"]
-		elif record["800"]:
+		elif "800" in record:
 			my_alma = record["800"]["v"]
 		self.date = dateparser.parse(my_alma)
 
@@ -368,7 +368,7 @@ class Holdings_items():
 		"""
 		db_handler = DbHandler()
 		item_dictionary = db_handler.db_reader(["podcast_name","serial_mms","serial_holding","mis_mms","episode_title","holdings", "ie_num","item","updated", "serial_pol"],[], True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
-		logger.info(item_dictionary)
+		#logger.info(item_dictionary)
 		for itm in item_dictionary:
 			print(itm)
 

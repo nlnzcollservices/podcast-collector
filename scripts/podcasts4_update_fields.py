@@ -5,7 +5,8 @@ import requests
 import hashlib
 import gspread
 import dateparser
-from pymarc import parse_xml_to_array,record_to_xml, Field 
+from time import mktime
+from pymarc import parse_xml_to_array,record_to_xml, Field, Subfield
 import time
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
@@ -104,7 +105,7 @@ class Manage_fields():
 		else:
 			if field_num == "942":
 				date_942 = 	(str(dt.now().strftime( '%Y-%m')))
-				f942 = Field(tag = '942', indicators = ["",""], subfields = ['a', 'nznb {}'.format(date_942)])
+				f942 = Field(tag = '942', indicators = ["",""], subfields = [Subfield(code='a', value="nznb {}".format(date_942))])
 				self.record.add_ordered_field(f942)
 				logger.info("record updated with 942")
 				self.update_flag = True
@@ -382,7 +383,7 @@ def main():
 	############################Normal cleaning routine#######################
 	# my_rec.cleaning_routine()	# db_handler = DbHandler()
 	# my_episodes = db_handler.db_reader(["podcast_name", "mis_mms","episode_title","epis_seas", "epis_numb"], ["Animal matters"], True)
-	my_alma = AlmaTools("prod")
+	#my_alma = AlmaTools("prod")
 	# my_alma.get_set_members("10310584880002836",{'limit':'100'})#,"offset":"90"})
 	# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
 	# for ind in range(len(bibs)):
@@ -413,37 +414,37 @@ def main():
 		
 	##################################################Property academy cleaning#########################################################################
 	# lst = ["63","64","65","66","70","71","97","99","101"]
-	sets = ["11790601660002836"]
-	# mms_ids_to_delete= []
-	# my_titles = []
-	# for st in sets:
-	# 	offset_step = 90
-	# 	offset = 0
-	# 	for i in range(20):
-	# 		offset = offset+offset_step
-	my_alma.get_set_members(sets[0],{'limit':'100'})
+	# sets = ["11790601660002836"]
+	# # mms_ids_to_delete= []
+	# # my_titles = []
+	# # for st in sets:
+	# # 	offset_step = 90
+	# # 	offset = 0
+	# # 	for i in range(20):
+	# # 		offset = offset+offset_step
+	# my_alma.get_set_members(sets[0],{'limit':'100'})
 
-	bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
+	# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
 
-	for ind in range(len(bibs)):
-			print(ind)
-		# print(bibs[ind])
-			my_alma.get_bib(bibs[ind])
+	# for ind in range(len(bibs)):
+	# 		print(ind)
+	# 	# print(bibs[ind])
+	# 		my_alma.get_bib(bibs[ind])
 						
-		# if "⎜" in my_alma.xml_response_data:
-			my_rec = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
-			# f245a = my_rec["245"]["a"].split("⎜")[0]
-			f490v = "Episode "+my_rec["490"]["v"]#.split("⎜")[-1]
-			# if f490v.endswith("."):
-			# 	f490v = f490v.rstrip(".")
-			f830v = f490v.lower()+"."
-			#my_rec["245"]["a"] = f245a
-			my_rec["490"]["v"] = f490v
-			my_rec["800"]["v"] = f830v
+	# 	# if "⎜" in my_alma.xml_response_data:
+	# 		my_rec = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
+	# 		# f245a = my_rec["245"]["a"].split("⎜")[0]
+	# 		f490v = my_rec["490"]["v"].replace("Episode Episode Episode","Episode").replace("Episode Episode","Episode")#.split("⎜")[-1]
+	# 		# if f490v.endswith("."):
+	# 		# 	f490v = f490v.rstrip(".")
+	# 		f830v = f490v.lower()+"."
+	# 		#my_rec["245"]["a"] = f245a
+	# 		my_rec["490"]["v"] = f490v
+	# 		my_rec["800"]["v"] = f830v
 
-			bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
-			my_alma.update_bib(bibs[ind], bib_data)
-			print(bibs[ind]," - updated")
+	# 		bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
+	# 		my_alma.update_bib(bibs[ind], bib_data)
+	# 		print(bibs[ind]," - updated")
 	# ###########################################################EPIC PODCAST Cleaning#################################################################################
 
 
@@ -646,38 +647,84 @@ def main():
 # ###############################################Cult popture####################################################################
 # 	mms_updated_list=[]
 # 	bibs = ["9918975860202836"]
-# 	sets = ["10358134580002836"]
-	
-# 	for st in sets:
-# 		offset = 0
-# 		offset_step = 99
-# 		title_list = []
-# 		for i in range(3):
-			
+#my_alma = AlmaTools("prod")
+# # sets = ["13345493180002836"]
+# # sets = ["13345535710002836"]
+# # sets = ["13345616790002836"]
+# # #sets = ["13345446980002836"]
+# # sets = ["13364936570002836"]#Lunch Money
+# sets = ["12558695740002836"]#all podcasts MGR
+# sets = ["13421281360002836"]
+# # 	#Planning
+# for st in sets:
+# 	my_alma.get_set_members(st,{'limit':'100',"offset":str(0)})
+# 	print(my_alma.xml_response_data)
+# 	number_of_records = re.findall(r'total_record_count="(.*?)">', my_alma.xml_response_data)[0]
+# 	offset = 0
+# 	offset_step = 100
+# 	title_list = []
+# 	for i in range(int(number_of_records)//100+1):
 # 			print(i)
-# 			print(offset)
+# 			offset = offset+offset_step
 # 			my_alma.get_set_members(st,{'limit':'100',"offset":str(offset)})
-# 			print(my_alma.xml_response_data)
+# 			#print(my_alma.xml_response_data)
 # 			bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
-			
+# 			#print(bibs)
 # 			for ind in range(len(bibs)):
 # 				my_alma.get_bib(bibs[ind])
+# 				#print(my_alma.xml_response_data)
 # 				my_rec = parse_xml_to_array(io.StringIO(my_alma.xml_response_data))[0]
-# 				#if my_rec["008"].data[13] == "n":
-# 				if my_rec["008"].data.endswith("o   ||  eng "): 
-# 				#if "o   ||" in my_rec["008"].data:
-# 						my_rec["008"].data = my_rec["008"].data.replace("o   ||  eng " ,"o      ||   eng  ")
-# 						#my_rec["008"].data = my_rec["008"].data.replace("o   ||","o      ||")
-# 						print(my_rec)
-# 						bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
-# 						my_alma.update_bib(bibs[ind], bib_data)
-# 						print(bibs[ind]," - updated")
-# 						if bibs[ind] not in mms_updated_list:
-# 							mms_updated_list.append(bibs[ind])
+# 				print(my_rec["650"])
+				# fields_650 = my_rec.get_fields('650')
+
+				# for field in fields_650:
+				# 	if 'Public policy.' in field.get_subfields('a'):
+				# 		print("here")
+				# 		my_rec.remove_field(field)
+
+					
+			
+# # 				# f651 = Field(tag = '651', indicators = ["","0"], subfields = ['a', 'New Zealand', "x",'Social conditions.'])
+# # 				# my_rec.add_ordered_field(f651)
+
+				# bib_data = start_xml +str(record_to_xml(my_rec)).replace("\\n", "\n").replace("\\", "")+end_xml
+				# my_alma.update_bib(bibs[ind], bib_data)
+				# if my_alma.status_code in [200,202]:
+				# 	print(bibs[ind]," - updated")
+				# else:
+				# 	print(bibs[ind]," - failed")
+
+# all_bibs1 = []
+# my_alma.get_set_members(set1,{'limit':'100',"offset":str(0)})
+# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
+# all_bibs1 = list(bibs)
+
+# my_alma.get_set_members(set1,{'limit':'100',"offset":str(100)})
+# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
+# all_bibs1 = all_bibs1 +bibs
+# print(len(all_bibs1))
 
 
-# 		offset = offset+99
-# 	print(mms_updated_list)
+# all_bibs2 = []
+
+# my_alma.get_set_members(set2,{'limit':'100',"offset":str(0)})
+# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
+# all_bibs2 = list(bibs)
+
+# my_alma.get_set_members(set2,{'limit':'100',"offset":str(100)})
+# bibs = re.findall(r"<id>(.*?)</id>", my_alma.xml_response_data)	
+
+# all_bibs2 = all_bibs2 +bibs
+# print(len(all_bibs2))
+
+# for el in all_bibs1:
+# 	if not el in all_bibs2:
+# 		print(el, " - record from updated set, which is not in new set")
+
+# for el in all_bibs2:
+# 	if not el in all_bibs1:
+# 		print(el, " - record from new set, which is not in updated set")
+
 
 
 
