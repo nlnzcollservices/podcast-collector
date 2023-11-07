@@ -17,6 +17,9 @@ from podcast_dict import podcasts_dict, serials
 from database_handler import DbHandler
 from nltk.corpus import words
 import nltk
+from datetime import datetime
+import dateparser
+
 nltk.download('words')
 ##################################SSL  problem########################################
 import ssl
@@ -38,6 +41,15 @@ gs = c.open_by_key(podcast_sprsh)
 #change if the name or id of the worksheet is different
 ws = gs.get_worksheet(0)
 
+
+def reload_spreadsheet():
+
+		c = gspread.authorize(creds)
+		gs = c.open_by_key(podcast_sprsh)
+		ws = gs.get_worksheet(0)
+		rng = "D2:D{}".format(ws.row_count)	
+		cell_range = ws.range(rng)
+		return cell_range
 	
 class Harvester():
 
@@ -97,23 +109,52 @@ class Harvester():
 		self.spreadsheet_message = ""
 		self.rss_filename = None
 
-	def reload_spreadsheet(self, function, parameters):
+	# def reload_spreadsheet(self, function, parameters):
 
-		"""
-		Reload the google spreadsheet
-		Parameters:
-			function (def) - any function to be reloaded with new ws
-			parameters (list) - parameters to path there
-		"""
+	# 	"""
+	# 	Reload the google spreadsheet
+	# 	Parameters:
+	# 		function (def) - any function to be reloaded with new ws
+	# 		parameters (list) - parameters to path there
+	# 	"""
 
-		store = file.Storage(client_secrets_file)
-		creds = store.get()
-		c = gspread.authorize(creds)
-		gs = c.open_by_key(podcast_sprsh)
-		ws = gs.get_worksheet(0)
-		function(ws, parameters)
+	# 	store = file.Storage(client_secrets_file)
+	# 	creds = store.get()
+	# 	c = gspread.authorize(creds)
+	# 	gs = c.open_by_key(podcast_sprsh)
+	# 	ws = gs.get_worksheet(0)
+	# 	function(ws, parameters)
 
-	def episode_sprsh_check(self):
+
+
+
+	# def episode_sprsh_check(self):
+
+	# 	"""
+	# 	Checking if this title already in spreadsheet
+	# 	Returns:
+	# 		(bool) - True if title exists or False if the title does not exist in the spreadsheet.
+
+	# 	"""
+
+	# 	logger.info("Checking {} in the spreadsheet".format(self.episode_title))
+	# 	rng = "D2:D{}".format(ws.row_count)	
+	# 	try:
+	# 		cell_range = ws.range(rng)
+	# 		logger.info("cell range found")
+	# 	except gspread.exceptions.APIError as e:
+	# 		logger.debug(str(e))
+	# 		sleep(10)
+	# 		self.reload_spreadsheet(self.episode_sprsh_check, None)
+	# 		cell_range = ws.range(rng)
+	# 	for row in cell_range:
+	# 		if row.value == self.episode_title:
+	# 			#the title exists
+	# 			return True #
+	# 	return False
+
+
+	def episode_sprsh_check(self, cell_range):
 
 		"""
 		Checking if this title already in spreadsheet
@@ -121,17 +162,6 @@ class Harvester():
 			(bool) - True if title exists or False if the title does not exist in the spreadsheet.
 
 		"""
-
-		logger.info("Checking {} in the spreadsheet".format(self.episode_title))
-		rng = "D2:D{}".format(ws.row_count)	
-		try:
-			cell_range = ws.range(rng)
-			logger.info("cell range found")
-		except gspread.exceptions.APIError as e:
-			logger.debug(str(e))
-			sleep(10)
-			self.reload_spreadsheet(self.episode_sprsh_check, None)
-			cell_range = ws.range(rng)
 		for row in cell_range:
 			if row.value == self.episode_title:
 				#the title exists
@@ -192,22 +222,82 @@ class Harvester():
 			if el["enclosures"]!=[]:
 				if el["title"]== self.episode_title:
 					self.episode_download_link=enclosure["url"]
+
+
+	def reverse_episodes(self, episodes):
+	    
+
+		date1 = episodes[0]["published"]
+		date2 = episodes[1]["published"]
+		par_date1 = dateparser.parse(date1)
+		par_date2 = dateparser.parse(date2)
+		if "+" in str(par_date1):
+			par_date_end1 = str(par_date1).split("+")[-1]
+			par_date_end2 = str(par_date2).split("+")[-1]
+			sign = "+"
+		else:
+			par_date_end1 = str(par_date1).split("-")[-1]
+			par_date_end2 = str(par_date2).split("-")[-1]
+			sign = "-"
+		my_time1 = mktime(datetime.strptime(str(par_date1), f"%Y-%m-%d %H:%M:%S{sign}{par_date_end1}").timetuple())
+		my_time2 = mktime(datetime.strptime(str(par_date2), f"%Y-%m-%d %H:%M:%S{sign}{par_date_end2}").timetuple())
+		# except:
+		# 	my_time1 = mktime(datetime.strptime(str(par_date1), "%Y-%m-%d %H:%M:%S+00:00").timetuple())
+		# 	my_time2 = mktime(datetime.strptime(str(par_date2), "%Y-%m-%d %H:%M:%S+00:00").timetuple())
+		print(my_time1)
+		print(my_time2)
+		if my_time1<my_time2:
+			print ("Ascending!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			print(episodes)
+			episodes =  self.reverse_list(episodes)
+			print("herr1")
+			print(episodes)
+		else:
+			print("Descending@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+		return episodes
+
+
+	def reverse_list(self, input_list):
+		return input_list[::-1]
+
 																					
 	def parsing_with_feedparser(self):
-
 		"""
-		Parses feeds to extract metadata such as date, title, tags, description, season, number and download_link. 
-		Calls downloader to download the file and manages the file name
-		Checks if the episode exists in db or file exist in db and creates new record for Episode and File tables
-		Checks if the episode title in the spreadsheet and adds the row if not
+		    Parses podcast feeds, extracts metadata, downloads episodes, and manages database records.
+
+		    This function performs the following tasks:
+		    1. Checks if the podcast title matches the expected title.
+		    2. Parses the feed using feedparser.
+		    3. Iterates through episodes in the feed.
+		    4. Checks the episode's publication date and filters episodes based on date.
+		    5. Extracts episode metadata such as title, description, tags, links, and download link.
+		    6. Downloads episodes using the Downloader class.
+		    7. Handles database record management for episodes and files.
+		    8. Appends episode information to a Google Sheets spreadsheet.
+
+		    Note:
+		    - This function contains a mix of tasks, consider breaking them into separate functions for clarity.
+		    - Error handling for various cases is included in the code.
+
+		    Args:
+		        self: An instance of the Harvester class.
+
+		    Returns:
+		        None
 		"""
 		podcast_name_flag = False
 		self.episode_download_link = None
 		my_flag = False
+		stop_episode_flag = False
 		######USE this list for adding backlogs#############################
 		#my_list = ["The Aramoana Massacre (PART I)", "Parker-Hulme Murder (Part 2)"]
 		###################################################################
 		d = feedparser.parse(self.podcast_data["rss_filename"])
+		if d["entries"]!=[]:
+			print(d["entries"])
+			episodes = self.reverse_episodes(d["entries"])
+			print(episodes)
+			d["entries"] = episodes
 		try:
 			parsed_title = d["feed"]["title"].rstrip(" ").strip("'")
 			podcast_name_flag = True
@@ -229,6 +319,7 @@ class Harvester():
 			logger.debug(d)
 			for ind in range(len(d["entries"])):
 				my_flag = False
+				
 				self.epis_numb = None
 				self.description = None
 				self.description2 = None
@@ -273,16 +364,20 @@ class Harvester():
 				#compares the date with the date with the last issue and takes a bigger timestamp - all issues after the last issue
 
 					max_time =  float(self.last_issue)
-					if self.podcast_name =="Front page":
-						if float(int(self.episode_date)) > max_time and   float(int(self.episode_date)) < 1540724400.0:
-							logger.debug("A new episode")
-							self.time_flag = True	
-					elif float(int(self.episode_date)) > max_time:
+					# if self.podcast_name =="Front page":
+					# 	if float(int(self.episode_date)) > max_time and   float(int(self.episode_date)) < 1540724400.0:
+					# 		logger.debug("A new episode")
+					# 		self.time_flag = True	
+					if float(int(self.episode_date)) > max_time:
 						logger.debug("A new episode")
-						self.time_flag = True	
+						self.time_flag = True
+					else: 
+						stop_episode_flag = True
+
 
 				except Exception as e:
 					logger.error("CANNOT PARSE DATE" + str(e))
+
 
 				self.episode_title  = re.sub('[(\U0001F600-\U0001F92F|\U0001F300-\U0001F5FF|\U0001F680-\U0001F6FF|\U0001F190-\U0001F1FF|\U00002702-\U000027B0|\U0001F926-\U0001FA9F|\u200d|\u2640-\u2642|\u2600-\u2B55|\u23cf|\u23e9|\u231a|\ufe0f)]+','',d["entries"][ind]["title"]).rstrip(" ")	
 				##### use this part to harvest backlogs######################################################
@@ -293,9 +388,9 @@ class Harvester():
 				# if "259" in self.episode_title is self.episode_title:
 				# 	ep_flag = True
 				###################################USE THIS  for LOGS##########################################################
-				# if self.podcast_name  == "Windows on dementia":
-				# 	if self.episode_title.startswith("The growing impact of"):
-
+				# if self.podcast_name  == "Shared lunch":
+				# # 	if self.episode_title.startswith("The growing impact of"):
+				# 	if self.episode_date > 1667397245: 
 				# 		self.time_flag = True
 				# 	else:
 				# 		self.time_flag = False
@@ -305,8 +400,8 @@ class Harvester():
 				# 	else:
 				# 		self.time_flag = False
 
-				# if self.podcast_name == "Seeds":
-				# 	if self.episode_date <1545994800.0:
+				# if self.podcast_name == "Access granted":
+				# 	if self.episode_date <1491393600.0:
 				# 		self.time_flag = True
 				# 	else:
 				# 		self.time_flag=False
@@ -327,6 +422,12 @@ class Harvester():
 				# 	for cpe in cult_pop_list:
 				# 		if cpe in self.episode_title:
 				# 			self.time_flag = True
+
+				if self.podcast_name == "B-side stories":
+					bs_list = ["Sarah Child & Pip Cameron","New Zealand Society Of Authors 20170523","Joris De Bres on Trees That Count","The 2017 Wellington Jazz Festival preview"]
+					for cpe in bs_list:
+						if cpe in self.episode_title:
+							self.time_flag = True
 
 				# if self.podcast_name == "Hosting":
 				# 	if self.episode_date <1481540400.0:
@@ -359,8 +460,14 @@ class Harvester():
 				# 	for mbe in mab_list:
 				# 		if mbe in self.episode_title:
 				# 			self.time_flag = True
+				# if self.podcast_name == 'The watercooler':
+				# 	if self.episode_date >1476529200.0:
+				# 		self.time_flag = True
+				# 	else:
+				# 		self.time_flag=False
+				self.time_flag=True
 				#######################################################################################################3
-				if self.time_flag:#and ep_flag:
+				if self.time_flag and not stop_episode_flag:
 					logger.info(self.episode_title)
 					try:
 						self.episode_link = d["entries"][ind]["link"]
@@ -405,7 +512,7 @@ class Harvester():
 							logger.error(str(e))
 
 		
-
+						print(self.episode_link)
 
 				######################################################################Some rools for links for different podcasts##########################################################################################
 						if self.podcast_name in ["Taxpayer talk","Board matters"] and not self.episode_link:
@@ -537,6 +644,7 @@ class Harvester():
 													logger.info(f"the file {downloader.filepath} exists")
 									except KeyError as e:
 										logger.debug(str(e))
+										
 
 									##################################### Cleaning part###############################################################################################################
 									#cleans epiosode title and description
@@ -581,7 +689,7 @@ class Harvester():
 										file_data = {"episode" : episode, "filepath" : downloader.filepath, "md5sum" : downloader.md5, "md5_from_file" : downloader.md5_original, "filesize" : downloader.filesize, "size_original" : downloader.size_original, "file_type" : downloader.filetype_extension}
 										my_podcast.table_creator("File", file_data)
 									# print(self.episode_sprsh_check())
-									if not self.episode_sprsh_check() and not tick:
+									if not self.episode_sprsh_check(self.cell_range) and not tick:
 										 	connection_count = 0
 										 	while not connection_count >= 5:
 										 		connection_count +=1
@@ -657,58 +765,59 @@ def harvest():
 	second_last_flag = False
 	final_flag = False
 	my_podcast_name = list(podcasts_dict.keys())[0]
-	for el in range(10):
-		print(str(el)*50)
-		ws = gs.get_worksheet(0)
-		try:
-			for i, podcast_name in enumerate(podcasts_dict):
-				print(my_podcast_name)
-				print(list(podcasts_dict.keys())[i])
 
-				if list(podcasts_dict.keys())[i] == my_podcast_name:
-					harvest_flag = True
-				if podcast_name == list(podcasts_dict.keys())[-1]:
-					if flag_last_name:
-						second_last_flag = True
-					flag_last_name = True
-			
-				if harvest_flag and not second_last_flag:
-					flag_for_podc_table = False
-					logger.info("*"*50)
-					logger.info(podcast_name)
-					logger.info("*"*50)
+	ws = gs.get_worksheet(0)
+	# try:
+	for i, podcast_name in enumerate(podcasts_dict):
 
-					my_podcast = DbHandler()
-					name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
-					print(name_dict)
-					if name_dict != []:
-						flag_for_podc_table = True
-						last_issue = name_dict[0]["last_issue"]
-						podcast_id = name_dict[0]["podcast_id"]
-					if not flag_for_podc_table:
-						my_podcast.table_creator("Podcast",{"podcast_name":podcast_name,"serial_mms":podcasts_dict[podcast_name]["serial_mms"], "serial_pol":podcasts_dict[podcast_name]["serial_pol"],"rss_filename":podcasts_dict[podcast_name]["rss_filename"],"publish_link_ro_record":podcasts_dict[podcast_name]["publish_link_ro_record"],"automated_flag":podcasts_dict[podcast_name]["automated_flag"],"access_policy":podcasts_dict[podcast_name]["access_policy"], "location":podcasts_dict[podcast_name]["url"], "template_name":podcasts_dict[podcast_name]["template_name"]})
-						logger.info("Podcast table for {} created. ID - {}".format(podcast_name, my_podcast.my_id))
-						podcast_id = my_podcast.my_id
-						last_issue = 0
-					# for i in range(3):
-					# 	process = True
-					# 	if process:
-					# try:
-					my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"] ,podcasts_dict[podcast_name]["serial_mms"])
-					my_episode.harvester()
-					# 	process = False
+		print(my_podcast_name)
+		print(list(podcasts_dict.keys())[i])
 
-					# except Exception as e:
-					# 	sleep(10)
-					final_flag = True
-		except Exception  as er:
-			print(str(er))
-			for ind in range(10):
-				print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			my_podcast_name = str(podcast_name)
-			final_flag = False
+		if list(podcasts_dict.keys())[i] == my_podcast_name:
+			harvest_flag = True
+		if podcast_name == list(podcasts_dict.keys())[-1]:
+			if flag_last_name:
+				second_last_flag = True
+			flag_last_name = True
+	
+		if harvest_flag and not second_last_flag:
+			flag_for_podc_table = False
+			logger.info("*"*50)
+			logger.info(podcast_name)
+			logger.info("*"*50)
 
-			harvest_flag = False
+			my_podcast = DbHandler()
+			name_dict = my_podcast.db_reader(["podcast_id", "last_issue"],[podcast_name],True)
+			print(name_dict)
+			if name_dict != []:
+				flag_for_podc_table = True
+				last_issue = name_dict[0]["last_issue"]
+				podcast_id = name_dict[0]["podcast_id"]
+			if not flag_for_podc_table:
+				my_podcast.table_creator("Podcast",{"podcast_name":podcast_name,"serial_mms":podcasts_dict[podcast_name]["serial_mms"], "serial_pol":podcasts_dict[podcast_name]["serial_pol"],"rss_filename":podcasts_dict[podcast_name]["rss_filename"],"publish_link_ro_record":podcasts_dict[podcast_name]["publish_link_ro_record"],"automated_flag":podcasts_dict[podcast_name]["automated_flag"],"access_policy":podcasts_dict[podcast_name]["access_policy"], "location":podcasts_dict[podcast_name]["url"], "template_name":podcasts_dict[podcast_name]["template_name"]})
+				logger.info("Podcast table for {} created. ID - {}".format(podcast_name, my_podcast.my_id))
+				podcast_id = my_podcast.my_id
+				last_issue = 0
+			# for i in range(3):
+			# 	process = True
+			# 	if process:
+			# try:
+			my_episode = Harvester(podcast_id, podcast_name, podcasts_dict[podcast_name], last_issue, podcasts_dict[podcast_name]["url"] ,podcasts_dict[podcast_name]["serial_mms"])
+			my_episode.cell_range = reload_spreadsheet()
+			my_episode.harvester()
+			# 	process = False
+
+			# except Exception as e:
+			# 	sleep(10)
+			final_flag = True
+		# except Exception  as er:
+		# 	print(str(er))
+		# 	for ind in range(10):
+		# 		print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		# 	my_podcast_name = str(podcast_name)
+		# 	final_flag = False
+
+		# 	harvest_flag = False
 	if not final_flag:
 		quit()
 

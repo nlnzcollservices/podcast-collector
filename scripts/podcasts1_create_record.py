@@ -301,6 +301,9 @@ def __init__(self, key):
 			f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
 			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
 			f830v = f490v.lower().replace(", ", " ")
+		if self.podcast_name in ["Dancing in your head"]:
+			pass #placeholder
+
 		if self.podcast_name in ["You're gonna' die in bed"]:
 			if not self.episode_title.startswith("Episode"):
 				f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
@@ -667,40 +670,42 @@ def __init__(self, key):
 			else:
 				self.record["810"]["v"] = my_date + "."
 		#Field 856
-
+		
 		my_fields = self.record.get_fields("856")
 		for ind in  range(len(self.record.get_fields("856"))):
-			same_field_flag = False
+			ndha_archived_flag=False
 			subfields = self.record.get_fields("856")[ind].subfields
 			indicators = self.record.get_fields('856')[ind].indicators
+			#For updates to exlude automated field
+			for sld in subfields:
+				if sld.code == "z":
+					idha_archived_flag = True
+			if not ndha_archived_flag:
+				#datafield tag="856" ind1="4" ind2="0"><subfield code="u"></subfield></datafield><datafield tag="856" ind1="4" ind2="2"><subfield code="3">File host</subfield><subfield code="u">&lt;insert page URL&gt;</subfield></datafield><datafield tag="901" ind1="" ind2=""><subfield code="a">MGR</subfield></datafield></recor
 
-			if len(subfields) == 1:
-				for idx in range(len(subfields)):
-					if same_field_flag:
-						subfields[idx] = self.harvest_link
-						same_field_flag = False
-					if subfields[idx] == "u":
-						same_field_flag = True
-				field1 = Field(tag = "856", indicators = indicators, subfields = subfields)
-			elif len(subfields) > 1:
-				for idx in range(len(subfields)):
-					if same_field_flag:
-						subfields[idx] = self.episode_link
-						same_field_flag = False
-					if subfields[idx] == "u":
-						same_field_flag = True
-				field2 = Field(tag = "856", indicators = indicators, subfields = subfields)
+				if len(subfields) == 1:
+					for idx in range(len(subfields)):
+						if subfields[idx].code =="u":
+							subfields[idx] = Subfield(code='u', value=self.harvest_link)
+					field1 = Field(tag = "856", indicators = indicators, subfields = subfields)
+				elif len(subfields) == 2:
+					for idx in range(len(subfields)):
+						if subfields[idx].code  == "u":
+							subfields[idx] = Subfield(code='u', value=self.episode_link)
+
+					field2 = Field(tag = "856", indicators = indicators, subfields = subfields)
+
 		logger.debug(str(self.record))
 		self.record.remove_fields("856")
 		self.record.add_ordered_field(field1)
 		if self.episode_link:
 			self.record.add_ordered_field(field2)
-
+			print(self.record)
 
 		bib_data = record_to_xml(self.record)
 		bib_data = str(bib_data).replace("\\n", "\n").replace("\\", "")
 		self.bib_data = start_xml + bib_data +end_xml	
-
+		
 	def record_creating_routine(self, update = False, list_of_podcasts = []):
 
 		"""
@@ -835,7 +840,7 @@ def main():
 	"""
 
 	my_rec = RecordCreator("prod")
-	my_rec.record_creating_routine(True, ["Bosses rebuilding"])#,"Taxpayer talk", "The fold", "Love this podcast"])
+	my_rec.record_creating_routine(True, ["The real pod"])#,"Taxpayer talk", "The fold", "Love this podcast"])
 	#my_rec.record_creating_routine(True, [])
 
 

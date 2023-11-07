@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
 import pymarc
 import io
@@ -12,7 +14,7 @@ And produces the following dictionary format
 #"A Neesh audience" : {'rss_filename': 'https://www.spreaker.com/show/4467635/episodes/feed', 'url': 'https://www.spreaker.com/show/a-neesh-audience', 'serial_mms': '9918987273002836', 'serial_pol': 'POL-126894', 'publish_link_ro_record': True, 'automated_flag': False, 'parsed_title':'A Neesh Audience', 'access_policy': '100', 'template_name': 'mis_Podcast_Neesh_audience.xml'} ,
 
 """
-filename = r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\assets\new_podcasts_11_2022.txt"
+filename = r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\assets\new_podcasts_11_2023.txt"
 with open(filename, "r") as f:
 	data= f.read()
 new_dict = {}
@@ -39,9 +41,10 @@ for el in data.split("\n")[:-1]:
 		print(my_rec)
 
 	my_alma.get_po_line(po_line)
+	print(my_alma.xml_response_data)
 	receiving_note = re.findall(r"<receiving_note>(.*?)</receiving_note>", my_alma.xml_response_data)[0]
-	rss_link = 	re.search(r"(?P<url>https?://[^\s]+)", receiving_note).group("url")
-	url = "https://www.iod.org.nz"
+	rss_link = 	re.search(r"(?P<url>https?://[^\s]+)", receiving_note).group("url").rstrip(",")
+	print(rss_link)
 	parsed_dict = feedparser.parse(rss_link)
 	parsed_title = parsed_dict["feed"]["title"]
 	new_dict[title]={'rss_filename': rss_link, 'url': my_url, 'serial_mms': mms, 'serial_pol': po_line, 'publish_link_ro_record': True, 'automated_flag': False, 'access_policy': '100', 'parsed_title': parsed_title, 'template_name': "mis_Podcast_"+ title.replace("'","").replace(",","").replace("&","and").replace(".","").replace(" ","_") + ".xml"} 

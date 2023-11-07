@@ -1,7 +1,9 @@
-from podcast_dict import podcasts_dict
 import podcastparser
 from urllib.request import urlopen
 import ssl
+import sys
+sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\scripts")
+from podcast_dict import podcasts_dict
 ssl._create_default_https_context = ssl._create_unverified_context
 
 """This  script is soring pocasts dictionary by podcast name. Be carefully. Nothing should be commented in the dictionary!!!"""
@@ -12,12 +14,12 @@ for el in podcasts_dict:
 	print(el)
 
 	new_dict[el] = dict(podcasts_dict[el])
-	try:
-		parsed_dict = podcastparser.parse(podcasts_dict[el]["url"], urlopen(podcasts_dict[el]["rss_filename"]))
-		new_dict[el]["parsed_title"] = parsed_dict["title"]
-	except:
-		new_dict[el]["parsed_title"] = el
-	print(new_dict[el]["parsed_title"])
+	# try:
+	# 	parsed_dict = podcastparser.parse(podcasts_dict[el]["url"], urlopen(podcasts_dict[el]["rss_filename"]))
+	# 	new_dict[el]["parsed_title"] = parsed_dict["title"]
+	# except:
+	# 	new_dict[el]["parsed_title"] = el
+	# print(new_dict[el]["parsed_title"])
 
 
 temp=sorted(new_dict)
@@ -26,4 +28,4 @@ print(new_dict)
 
 
 for el in new_dict:
- 	print('"'+el+'"')
+ 	print('"'+el+'":', new_dict[el],",")
