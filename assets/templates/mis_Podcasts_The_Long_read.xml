@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?><collection>
   <record>
     <leader>00994cim a22002891i 4500</leader>
-    <controlfield tag="001">9919350134602836</controlfield>
     <controlfield tag="005">20231030114011.0</controlfield>
     <controlfield tag="006">m|||||o||h||||||||</controlfield>
     <controlfield tag="007">cr#||a||||||||</controlfield>
@@ -68,6 +67,9 @@
     <datafield ind1=" " ind2="0" tag="830">
       <subfield code="t">Long read ;</subfield>
       <subfield code="v">&lt;month day, year&gt;.</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="0">
+       <subfield code="u"></subfield>
     </datafield>
     <datafield ind1="4" ind2="2" tag="856">
       <subfield code="3">File host</subfield>

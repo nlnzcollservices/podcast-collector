@@ -1,4 +1,4 @@
-<bib>
+<?xml version="1.0" encoding="UTF-8" ?>
    <record>
     <leader>01143cim a22003371i 4500</leader>
     <controlfield tag="001">9919350134802836</controlfield>
@@ -78,6 +78,9 @@
       <subfield code="a">Family, whanau and disability ;</subfield>
       <subfield code="v">&lt;date&gt;.</subfield>
     </datafield>
+    <datafield tag="856" ind1="4" ind2="0">
+       <subfield code="u"></subfield>
+    </datafield>
     <datafield ind1="4" ind2="2" tag="856">
       <subfield code="3">File host</subfield>
       <subfield code="u">&lt;insert page URL&gt;</subfield>
@@ -86,4 +89,3 @@
       <subfield code="a">MGR</subfield>
     </datafield>
   </record>
-</bib>

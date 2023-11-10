@@ -1,4 +1,6 @@
 import peewee
+import os
+import csv
 import requests
 from podcast_models import Podcast, Episode, File
 from datetime import datetime as dt
@@ -9,9 +11,9 @@ import dateparser
 from bs4 import BeautifulSoup as bs
 from podcast_dict import podcasts_dict
 try:
-    from settings import logging
+    from settings import logging, database_content_filename
 except:
-    from settings_prod import logging
+    from settings_prod import logging, report_folder, database_content_filename  
 logger = logging.getLogger(__name__)
 
 
@@ -243,6 +245,32 @@ class DbHandler():
                 q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
                 q.execute()
 
+    def update_the_last_issue_named(self, podcast_name):
+
+        """Updates db with the maximum date as timestamp of all the episode as the last_issue for given podcast name"""
+
+
+        logger.info("Updating the last issue " + podcast_name)
+        podcasts = Podcast.select().where(Podcast.id == podcast_name)
+        for pod in podcasts:
+            logger.debug(pod.podcast_name)
+            episodes = Episode.select().where(Episode.podcast == pod.id)
+            max_date = pod.last_issue
+            for epis in episodes:
+                logger.debug(epis.episode_title)
+                try:
+                    if int(epis.date) > max_date:
+                        max_date = int(epis.date)
+                except ValueError:
+                    epis.date = mktime(dateparser.parse(epis.date).timetuple())
+                    if int(epis.date) > max_date:
+                        max_date = int(epis.date)
+
+            logger.debug(max_date)
+            if pod.last_issue != max_date:
+                q = Podcast.update(last_issue = max_date).where(Podcast.id == pod.id)
+                q.execute()
+
     def insert_the_last_issue(self, podcast_name, last_issue):
 
         """
@@ -315,6 +343,27 @@ class DbHandler():
         
         q = Episode.update(sip = True).where(Episode.episode_title == episode_title)
         q.execute()
+
+    def export_to_csv(self):
+
+        """This function export content of the database to "database_content.csv" file"""
+
+        # Get the data from the database
+        db_data = self.db_reader(["podcast_name","serial_mms", "serial_pol","serial_holding","rss_link","episode_title", "episode_id","location","access_policy","automated_flag","last_issue","template_name","date","episode_link","harvest_link","tags","description","date_harvested", "mis_mms", "holdings", "item", "filepath", "md5sum", "md5from_site", "filesize", "file_type"])
+
+        # Write the data to the CSV file
+        with open(database_content_filename, mode='w', newline='', encoding='utf-8') as csv_file:
+            fieldnames = ["podcast_name","serial_mms", "serial_pol","serial_holding","rss_link","episode_title", "episode_id","location","access_policy","automated_flag","last_issue","template_name","date","episode_link","harvest_link","tags","description","date_harvested", "mis_mms", "holdings", "item", "filepath", "md5sum", "md5from_site", "filesize", "file_type"]
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+
+            # Write the header
+            writer.writeheader()
+
+            # Write the data
+            for row in db_data:
+                writer.writerow(row)
+
+        print(f"Database content exported to {database_content_filename}")
 
     def db_reader(self, req_list, podcast_names=None, returning=True):
 
@@ -514,6 +563,10 @@ def main():
     # my_db.insert_the_last_issue("How to save the world", "October 04 2020")
     #7ee29280ef3ccca9769e622d7f630e23
     #my_db.table_creator( "File", {'episode': 8747, 'filepath': r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\Cooking the books\goodbye.mp3", 'md5sum': '3874aaaab78b8ed05027a0f70c6bc944', 'md5_from_file': None, 'filesize': 708555, 'size_original': 708555, 'file_type': "mp3"})
+    #my_db.update_the_last_issue_named("Kiwi birth tales")
+
+    my_db.export_to_csv()
+
 
 if __name__ == '__main__':
     main()

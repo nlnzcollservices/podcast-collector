@@ -456,6 +456,11 @@ def __init__(self, key):
 			if "-" in  self.episode_title and self.episode_title.startswith("Episode"):
 				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
 				f490v = self.episode_title.split("-")[0].rstrip(' ')
+		
+		if self.podcast_name in ["Untamed Aotearoa"]:
+			if "#" in  self.episode_title:
+				f245 = "#".join(self.episode_title.split("#")[1:]).lstrip(" ")
+				f490v = "# "+ self.episode_title.split("#")[0].rstrip(' ')
 			
 		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
 			# print(self.episode_title)
@@ -535,9 +540,9 @@ def __init__(self, key):
 		if self.podcast_name in  ["Dont give up your day job"]:
 			f245  = " ".join(self.episode_title.split(" ")[2:])
 			f490v = " ".join(self.episode_title.split(" ")[:2])
-		if self.podcast_name in ["thehappy$aver.com."]:
+		if self.podcast_name in ["thehappy$aver.com.", "Family whanau and disability"]:
 			if "." and self.episode_title and self.episode_title.split(".")[0].isdigit():
-				f245 =".".join(self.episode_title.split(".")[1:])
+				f245 =".".join(self.episode_title.split(".")[1:]).lstrip(" ")
 				f490 ="Episode "+self.episode_title.split('.')[0]
 		if f490v and not f830v:
 			f830v = f490v.lower() 
@@ -682,7 +687,8 @@ def __init__(self, key):
 					idha_archived_flag = True
 			if not ndha_archived_flag:
 				#datafield tag="856" ind1="4" ind2="0"><subfield code="u"></subfield></datafield><datafield tag="856" ind1="4" ind2="2"><subfield code="3">File host</subfield><subfield code="u">&lt;insert page URL&gt;</subfield></datafield><datafield tag="901" ind1="" ind2=""><subfield code="a">MGR</subfield></datafield></recor
-
+				print(subfields)
+				print(len(subfields))
 				if len(subfields) == 1:
 					for idx in range(len(subfields)):
 						if subfields[idx].code =="u":

@@ -33,7 +33,8 @@ ndha_report_folder = os.path.join(report_folder, "NDHA_reports")
 ndha_used_report_folder = os.path.join(report_folder, "NDHA_used_reports")
 done_ies = os.path.join(report_folder,"done_report_ies.txt")
 failed_ies = os.path.join(report_folder,"failed_report_ies.txt")
-deleted_items_holdings = os.path.join(report_folder, "deleted_iems_holdings.txt")
+deleted_items_holdings = os.path.join(report_folder, "deleted_iems_holdings.txt") 
+database_content_filename =    os.path.join(report_folder,"database_content.csv")
 ########################Setting folder for git scripts######################
 
 # *-mainly used for Amy's downloader but might be used for other modules downloaded from git storage
