@@ -1,4 +1,4 @@
-# Technical Documentation for Podcast Processing.md
+# Technical Documentation for Podcast Processing
 
 ## System Architecture Overview
 
