@@ -3,10 +3,10 @@
 ## System Architecture Overview
 
 ### High-Level Diagram
-Include a system architecture diagram showing how each script interacts with others and external systems (like Alma, Google Sheets, and email servers).
+
 
 ### Data Flow
-Describe the flow of data through the system, from input to output, which can help in understanding how components are interlinked.
+![Podcasts](/documentation/Podcasts.png)
 
 ## Technology Stack
 
