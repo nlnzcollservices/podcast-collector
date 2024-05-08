@@ -3,7 +3,7 @@
 ## System Architecture Overview
 
 ### High-Level Diagram
-
+![Podcasts](/documentation/podcasts_high_level_chart.png)
 
 ### Data Flow
 ![Podcasts](/documentation/Podcasts.png)
