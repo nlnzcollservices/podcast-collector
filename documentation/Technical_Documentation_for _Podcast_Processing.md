@@ -22,16 +22,15 @@ Specify the programming languages, frameworks, and major libraries used:
 Detail any external services the system interacts with, such as:
 - Google Sheets API
 - Alma API
-- Email servers
 
 ## Current State Functionality
 
 ### Main Script
 - **Purpose:** Manages the overall workflow of the podcast processing system.
-- **Functions:** Downloads emails, processes attachments, updates databases, manages records, and handles file clean-ups.
+- **Functions:**Run podcast pipeline, which includes harvesting, making bib records, making SIPs, updating records, and  also it handles file clean-ups.
 - **Key Features:**
   - Integration with Google Sheets for data management.
-  - Use of external libraries for email handling and data parsing.
+  - Use of external libraries for data parsing.
   - Extensive logging for debugging and tracking the process flow.
 
 ### Record Creation Script
@@ -40,7 +39,29 @@ Detail any external services the system interacts with, such as:
 - **Key Features:**
   - Uses `pymarc` to handle MARC records.
   - Dynamically adds fields based on spreadsheet inputs.
-  - Can potentially handle various podcast formats by adjusting MARC fields.
+  - Can handle various podcast titles by adjusting MARC fields with individual rules.
+ 
+ 
+###  SIP making script
+- **Purpose:** Makes Submission Inormation Packages to submit to Rosetta folder.
+- **Functions:** Run SIPs making script and supply it with episode information.
+- **Key Features:**
+  - Use of rosetta_sip_factory
+  - Produces SIPs for Rosetta
+
+ ### Records updating script
+- **Purpose:** Updates bibliographic record with new field in the Alma system.
+- **Functions:** Identifies and removes duplicate fields, adds specific fields, and updates records.
+- **Key Features:**
+  - Focus on maintaining record integrity by removing duplicates.
+  - Capability to update records based on predefined rules and external inputs.
+    
+### Harvesting script
+- **Purpose:** Harvest new episodes  according to podcasts dictionary and based on last episode date.
+- **Functions:** Checking for, downloading, checking files, cleaning metadata, adding to Google sheet, poplulates database.
+- **Key Features:**
+  - Use of downloader script.
+  - Capability to indetify required episode
 
 ### Database Models Script
 - **Purpose:** Defines the structure of the database using `peewee` ORM.
@@ -57,14 +78,8 @@ Detail any external services the system interacts with, such as:
   - Comprehensive methods for database CRUD operations.
   - Functionality to handle complex queries and updates, such as batch updates and deletions.
 
-### Field Management Script
-- **Purpose:** Updates bibliographic fields in the Alma system.
-- **Functions:** Identifies and removes duplicate fields, adds specific fields, and updates records.
-- **Key Features:**
-  - Focus on maintaining record integrity by removing duplicates.
-  - Capability to update records based on predefined rules and external inputs.
 
-## Setup and Configuration
+ ## Setup and Configuration
 
 ### Installation Requirements
 List the requirements for setting up the system, including necessary libraries, external account setups (like Google API keys), and environment setup.
