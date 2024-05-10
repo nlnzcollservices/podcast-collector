@@ -40,13 +40,14 @@ Detail any external services the system interacts with, such as:
   - Uses `pymarc` to handle MARC records.
   - Dynamically adds fields based on spreadsheet inputs.
   - Can handle various podcast titles by adjusting MARC fields with individual rules.
+  - Uses ['alma_tools'](https://github.com/nlnzcollservices/alma-tools)
  
  
 ###  SIP Making Script
 - **Purpose:** Makes Submission Inormation Packages to submit to Rosetta folder.
 - **Functions:** Run SIPs making script and supply it with episode information.
 - **Key Features:**
-  - Use of rosetta_sip_factory
+  - Usees ['rosetta_sip_factory'](https://github.com/NLNZDigitalPreservation/rosetta_sip_factory)
   - Produces SIPs for Rosetta
 
  ### Records Updating Script
@@ -60,7 +61,7 @@ Detail any external services the system interacts with, such as:
 - **Purpose:** Harvest new episodes  according to podcasts dictionary and based on last episode date.
 - **Functions:** Checking for, downloading, checking files, cleaning metadata, adding to Google sheet, poplulates database.
 - **Key Features:**
-  - Use of downloader script.
+  - Use of [downloader script](https://github.com/nlnzcollservices/file-downloader/).
   - Capability to indetify required episode
 
 ### Database Models Script
@@ -82,28 +83,60 @@ Detail any external services the system interacts with, such as:
  ## Setup and Configuration
 
 ### Installation Requirements
-List the requirements for setting up the system, including necessary libraries, external account setups (like Google API keys), and environment setup.
+A list of technologies used within the project:
+* [Python](https://www.python.org/downloads/release/python-370/): Version  3.7.2 
+* [Google Spreadsheets APIs](https://developers.google.com/sheets/api/quickstart/python): Version current
+* [AlmaTools](https://github.com/nlnzcollservices/alma-tools): Vesion 3
+* [Exiftool](https://exiftool.org/): Version 12.10
+* [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
+* [Downloader](https://github.com/nlnzcollservices/file-downloader): Version downloader_light_modified
+* [Rosetta sip factory](https://github.com/NLNZDigitalPreservation/rosetta_sip_factory): Version 0.1.9
+* [beautifulsoup4](https://https://www.crummy.com/software/BeautifulSoup/bs4/doc/): Version 4.9.1
+* [configparser](https://docs.python.org/3/library/configparser.html): Version 5.0.0
+* [dateparser](https://pypi.org/project/dateparser/): Version 0.7.6
+* [feedparser](https://pypi.org/project/feedparser/): Version 5.2.1
+* [gspread](https://gspread.readthedocs.io/en/latest/): Version 3.6.0
+* [httplib2](https://pypi.org/project/httplib2/): Version 0.18.1
+* [lxml](https://pypi.org/project/lxml/): Version 4.5.2
+* [nltk](https://pypi.org/project/nltk/): Version 3.5
+* [openpyxl](https://pypi.org/project/openpyxl/): Version 3.0.4
+* [peewee](http://docs.peewee-orm.com/en/latest/): Version 3.13.3
+* [pymarc](https://pypi.org/project/pymarc/): Version 4.0.0
+* [requests](https://pypi.org/project/requests/): Version 2.24.0
+* [urllib3](https://pypi.org/project/urllib3/): Version 1.25.9
+
+  ## Additional technologies to set up:
+  
+  * Gain Cascade access to project_folder and server_side_deposite folder.
+  * Set Exlibris sandbox and production keys on [developers website](https://developers.exlibrisgroup.com/) 
+  * Obtain permissions for Exlibris Rosetta SIP related APIs (given individually by PRC based on system credentials and manager's approval)
 
 ### Configuration Files
-Explain any configuration files used (e.g., `settings.py` and `settings_prod.py`) and how they can be adjusted for different environments.
+
+1)`settings.py` and `settings_prod.py` are used for setting all the paths and also make initial structure of project folders
+2) 'sectrets' - contains Alma API keys for production and sandbox
+3) 'client_sectets.json' - contains Google spreadsheet credentials
+
 
 ## Usage Examples
 
 ### Typical Use Cases
-Provide scenarios or use cases that demonstrate how the system is used in daily operations.
+Script should be run between Thursday and Monday. 
 
 ### User Interaction
-Explain how users interact with the system, what inputs they need to provide, and what outputs they can expect.
+System takes podcast dictionary (podcast_dic.py) and 
 
 ## Maintenance and Support
 
 ### Updating Scripts
-Guidelines on how to update scripts when changes are needed.
+All updated should be tested with pytest or similar.
 
 ### Common Issues and Troubleshooting
-List common issues that might arise and provide basic troubleshooting steps.
+See existing errors and solutions [here](error_solution.txt)
 
 ## Security Aspects
+Script is checking downloaded files.
+Currently disabled verification during to avoid SSL errors.
 
 ### Data Handling
 Describe how sensitive data is handled and any security measures in place to protect it.
