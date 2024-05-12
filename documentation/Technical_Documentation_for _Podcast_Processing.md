@@ -152,3 +152,15 @@ The script could be wrapped into a GUI.
 There are no current plans. Changes will be made as needed.
 
 ### Contribution Guidelines
+
+#### Reporting Bugs
+To report a bug, please [open an issue](https://github.com/nlnzcollservices/podcast-collector/issues) and include a detailed description of the bug, steps to reproduce it, and any relevant information about your environment.
+
+#### Requesting Features
+If you have a feature request or suggestion, please [open an issue](https://github.com/nlnzcollservices/podcast-collector/issues) and provide a clear description of the feature you would like to see added.
+
+#### Documentation
+Contributions to the project's documentation are also welcome. If you would like to contribute to the documentation, please follow the same process as for code contributions.
+
+#### Contact
+If you have any questions or need assistance, you can reach out to the project maintainers at [collect.podcasts@gmail.com](collect.podcasts@gmail.com).
