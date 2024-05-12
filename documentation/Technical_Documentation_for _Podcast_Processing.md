@@ -121,33 +121,34 @@ A list of technologies used within the project:
 ## Usage Examples
 
 ### Typical Use Cases
-Script should be run between Thursday and Monday. 
+The script should be run between Thursday and Monday.
 
 ### User Interaction
-System takes podcast dictionary (podcast_dic.py) and 
+The system takes a podcast dictionary (`podcast_dic.py`) as input.
 
 ## Maintenance and Support
 
 ### Updating Scripts
-All updated should be tested with pytest or similar.
+All updates should be tested with pytest or a similar tool.
 
 ### Common Issues and Troubleshooting
-See existing errors and solutions [here](error_solution.txt)
+See existing errors and solutions [here](error_solution.txt).
 
 ## Security Aspects
-Script is checking downloaded files.
-Currently disabled verification during to avoid SSL errors.
+The script checks downloaded files.
+Currently, verification is disabled to avoid SSL errors.
 
 ### Data Handling
-Describe how sensitive data is handled and any security measures in place to protect it.
+The podcast data is open access, and the library can process it and deliver it to everyone using the library website. However, usage for public services should be assessed due to copyright issues.
 
 ### Access Control
-Explain how access to the system is controlled and who has permission to make changes.
+The script is located in the Cascade LD_working folder and could be accessible to any team member with Cascade access.
 
 ## Future Development
+Updates will be made based on requests or technical needs.
+The script could be wrapped into a GUI.
 
 ### Planned Improvements
-Outline any planned upgrades or features that may be added to the system.
+There are no current plans. Changes will be made as needed.
 
 ### Contribution Guidelines
-If open to contributions, provide guidelines on how others can contribute to the system.
