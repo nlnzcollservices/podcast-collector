@@ -18,7 +18,10 @@ The podcast processing pipeline currently in place manages the workflow of podca
 - **Inclusion of additional 520 Field for episode numbering**:  puts episode number in a second 520 field subfield "a" (separate from the other 520 Field for the episode description).
 
 ### 4. Script Updates
-- **Script Modification for New Spreadsheet Columns**: Modify the existing scripts to accommodate the new columns for "Date harvested" and "Episode Numbering" in the spreadsheet.
+- **Database models Script Modification**: Modify db structure to add columns for "245 Title" and "Episode numbering" variables.
+- **Data base handler Script Modification**: Modify db handler script to accommodate the new db columns for "245 title" and "Episode Numbering" in the spreadsheet.
+- **Harvesting script modification**: Modify the existing harvesting script to add rules for each title (which are currently in record making script), accommodate the new columns for "Date harvested" and "Episode Numbering" and "245 title" into the spreadsheet. Ensure that "245 title", "Episode number" and "Description" are writable back to db.
+- **Record making script modification**: remove rules for each title, use new "245 title" and "episode numbering" variables instead. Add new 520 field and "a" subfield for "episode numbering".
 - **Enhanced Logging**: Improve logging functionality to include details of the date harvested and episode numbering changes.
 
 ## Implementation Plan
@@ -46,8 +49,8 @@ The podcast processing pipeline currently in place manages the workflow of podca
 ## Risks and Mitigation
 
 - **Data Loss**: Implement backup mechanisms to prevent data loss during the update process.
-- **Integration Challenges**: Ensure close collaboration with the cataloguing team.
-- **User Acceptance**: Engage with users early in the process to gather feedback and ensure the updates meet their requirements.
+- **Integration Challenges**: Ensure close collaboration with the cataloging team proposed changes.
+- **User Acceptance**: Engage with other users early in the process to gather feedback and ensure the updates meet their requirements.
 
 ## Conclusion
 
