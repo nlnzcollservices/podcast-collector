@@ -2,13 +2,15 @@
 
 ## Overview
 
-The podcast processing system currently in place manages the workflow of podcast data from harvesting to record creation and SIP production. This proposal outlines the updates required to enhance the system's functionality based on recent requirements from the cataloguing team.
+The podcast processing pipeline currently in place manages the workflow of podcast data from harvesting to record creation and SIP production. This proposal outlines the updates required to enhance the system's functionality based on recent requirements from the cataloguing team.
 
 ## Proposed Updates
 
 ### 1. Spreadsheet Changes
 - **Addition of "Date harvested" Column**: Introduce a new column in the spreadsheet to record the date when podcast titles are added. This will facilitate tracking of when episodes were discovered.
-- **Inclusion of "Episode Numbering" Column**: Add a column to handle episode numbering in titles. This will be used to separate the episode number from the rest of the title, enabling easier processing.
+- **Inclusion of "Episode Numbering" Column**: Add a column to handle episode numbering in titles. This will be used to separate the episode number from the rest of the title, enabling easier processing. Should allow cataloguing to change db info.
+- **Inclusion of "245 title" Column**: Add a column to keep title text separated from number (if they exist) for 245 field. Should allow cataloguing to change db info.
+- **Inclusion of "rss season" and "rss_number" Columns**: Add 2 columns with episode  season and number from rss feed (if they exist).
 
 ### 2. MARC Record Changes
 - **Usage of Publication Date for 490 $v and 800/830 $v**: Switch to using the publication date for these fields in all titles. This will ensure consistency and accuracy in bibliographic records.
