@@ -3,12 +3,19 @@ import os
 try:
     from settings import script_folder, working_folder, database_fullname
 except:
-    from settings_prod import script_folder, working_folder, database_fullname
+    try:
+        from settings_prod import script_folder, working_folder, database_fullname
+    except:
+        script_folder = os.getcwd()
+        working_folder = "\\".join(script_folder.split("\\")[:-1])
+        database_folder = os.path.join(working_folder, "database")
+        database_fullname = os.path.join(database_folder, "podcasts.db")
 
 database = peewee.SqliteDatabase(database_fullname)
 
 #'title' VARCHAR(30) PRIMARY KEY, 'paged_feed_next' VARCHAR(30)  , 'link' VARCHAR(30) , 'description' VARCHAR(30) , 'cover_url' INTEGER(14));")  
 #q = "CREATE TABLE IF NOT EXISTS [{}] ('podcast_title' VARCHAR(30), 'title' VARCHAR(30) PRIMARY KEY, 'subtitle'  VARCHAR(30)  ,  'description'  VARCHAR(500), 'published'  VARCHAR(30),  'link'  VARCHAR(30), 'total_time'  VARCHAR(30), 'payment_url'  VARCHAR(30), 'enclosures'  VARCHAR(30) , 'guid'  VARCHAR(30)); ".format(title) 
+
 
 class Podcast(peewee.Model):
 

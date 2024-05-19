@@ -237,9 +237,10 @@ class Podcast_pipeline():
 							if self.check_sip_status(ies_list[0]):
 								# print(ies_list[0])
 								# print(mms)
-								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
+								logger.info("Processed.")
 								self.db_handler.db_update_ie(ies_list[0],mm["episode_id"])
 							else:
+								logger.error("Check if the SIP {} was processed well through Rosetta".format(mms))
 								quit()
 
 				elif not mms and mm["serial_mms"] in serials and "ie_num" in mm.keys():
@@ -504,6 +505,9 @@ class Podcast_pipeline():
 					try:
 						ws.delete_row(my_row_numb)
 						logger.info("Deleted from spreadsheet")
+						with open(os.path.join(report_folder, "deleted_rows_log.csv"), "a", newline='', encoding="utf-8") as csv_file:
+							csv_writer = csv.writer(csv_file)
+							csv_writer.writerow(my_row)
 						sleep(1)
 						my_row_numb = my_row_numb-1
 					except Exception as e:
@@ -513,9 +517,10 @@ class Podcast_pipeline():
 						try:
 							ws = self.load_spreadsheet()
 							ws.delete_row(my_row_numb)
-							my_row_numb = my_row_numb-1
-
-							
+							with open(os.path.join(report_folder, "deleted_rows_log.csv"), "a", newline='', encoding="utf-8") as csv_file:
+								csv_writer = csv.writer(csv_file)
+								csv_writer.writerow(my_row)		
+							my_row_numb = my_row_numb-1				
 						except Exception as e:
 							logger.warning(str(e))
 
@@ -540,27 +545,30 @@ class Podcast_pipeline():
 		shutil.copyfile(database_fullname, os.path.join(database_archived_folder, "podcasts_{}.db".format(dt.now().strftime("%Y-%m-%d_%H"))))
 		self.db_handler = DbHandler()
 
-		self.file_cleaning()
+		#self.file_cleaning()
 
-		self.get_ies_from_reports()
-		lst = self.read_ies_file()
-		self.insert_ies()
+		# self.get_ies_from_reports()
+		# lst = self.read_ies_file()
+		# self.insert_ies()
 
-		self.finish_existing_records_and_delete_files("prod")#update with 942 and make items and delete SIPs form prod (project and rosetta folder)
+		# self.finish_existing_records_and_delete_files("prod")#update with 942 and make items and delete SIPs form prod (project and rosetta folder)
 
-		self.db_handler.delete_done_from_db()
+		# self.db_handler.delete_done_from_db()
 
-		self.update_database_from_spreadsheetand_delete_row() 
+		# self.update_database_from_spreadsheetand_delete_row() 
 
-		my_rec = RecordCreator(self.alma_key)
-		my_rec.record_creating_routine()
+		#my_rec = RecordCreator(self.alma_key)
+		#my_rec.record_creating_routine()
 
-		sip_routine() #only 
+		#sip_routine() #only 
 
-		##############################################
-		harvest() #first time when episode enter db
+		# #############################################
+		#harvest() #first time when episode enter db
 		self.db_handler.update_the_last_issue()
-		# ###############################################
+		###############################################
+		with open("finished.txt","w") as f:
+			f.write("updated "+ dt.now().strftime("%Y-%m-%d_%H"))
+
 
 		 		
 def main():

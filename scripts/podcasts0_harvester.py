@@ -311,8 +311,9 @@ class Harvester():
 		if podcast_name_flag:
 			print(parsed_title)
 			if parsed_title.lower() != podcasts_dict[self.podcast_name]["parsed_title"].lower():
-					print(parsed_title)
-					print(self.podcast_name)
+					print(parsed_title.lower())
+					#print(self.podcast_name)
+					print(podcasts_dict[self.podcast_name]["parsed_title"].lower())
 					print("Check podcast title might changed!!!")
 					quit()
 			#logger.setLevel("DEBUG")
@@ -405,11 +406,6 @@ class Harvester():
 				# 		self.time_flag = True
 				# 	else:
 				# 		self.time_flag=False
-				# if self.podcast_name == "On the rag":
-				# 	if "Scrambled brains" in self.episode_title:
-				# 		self.time_flag = True
-				# 	else:
-				# 		self.time_flag = False
 
 				# if "Chris and Sam" in self.podcast_name:
 				# 	chris_sam_list = ["Chris Laughing","Indian Scammer Phone Call","Camp Quality","Rated Shackles","Dub FX in the Car"]
@@ -423,29 +419,15 @@ class Harvester():
 				# 		if cpe in self.episode_title:
 				# 			self.time_flag = True
 
-				if self.podcast_name == "B-side stories":
-					bs_list = ["Sarah Child & Pip Cameron","New Zealand Society Of Authors 20170523","Joris De Bres on Trees That Count","The 2017 Wellington Jazz Festival preview"]
-					for cpe in bs_list:
-						if cpe in self.episode_title:
-							self.time_flag = True
-
-				# if self.podcast_name == "Hosting":
-				# 	if self.episode_date <1481540400.0:
-				# 		self.time_flag = True
-				# 	else:
-				# 		self.time_flag=False
-				# if self.podcast_name == "Dietary requirements":
-				# 	if self.episode_date <1601463600.0:
-				# 		self.time_flag = True
-				# 	else:
-				# 		self.time_flag=False
-				# if self.podcast_name == "Democracy Project":
-				# 	dem_proj_list = ['lowering the voting age','Labour tax and dental care policie','Wayne Mapp','Green Party private school controversy']
-				# 	for dpe in dem_proj_list:
-				# 		if dpe in self.episode_title:
+				# if self.podcast_name == "B-side stories":
+				# 	bs_list = ["Sarah Child & Pip Cameron","New Zealand Society Of Authors 20170523","Joris De Bres on Trees That Count","The 2017 Wellington Jazz Festival preview"]
+				# 	for cpe in bs_list:
+				# 		if cpe in self.episode_title:
 				# 			self.time_flag = True
-				# if self.podcast_name == "Advanced analytics":
-				# 	if "End of season survey" in self.episode_title:
+
+
+				# if self.podcast_name == "Dont give up your day job":
+				# 	if "123" in self.episode_title:# or "124" in self.episode_title:
 				# 		self.time_flag = True
 				# 	else:
 				# 		self.time_flag = False
@@ -460,11 +442,7 @@ class Harvester():
 				# 	for mbe in mab_list:
 				# 		if mbe in self.episode_title:
 				# 			self.time_flag = True
-				# if self.podcast_name == 'The watercooler':
-				# 	if self.episode_date >1476529200.0:
-				# 		self.time_flag = True
-				# 	else:
-				# 		self.time_flag=False
+				#######################################################################################################
 				self.time_flag=True
 				#######################################################################################################3
 				if self.time_flag and not stop_episode_flag:
@@ -478,7 +456,7 @@ class Harvester():
 					print(self.episode_title)
 
 					######################USE THIS CONDITION  FOR BACKLOGS##################################3
-					if self.podcast_name: #in ["Love this podcast"]:
+					if self.podcast_name: #in [""]:
 						my_flag = True
 					# for el in my_list:
 					# 	if el in self.episode_title:
@@ -517,7 +495,7 @@ class Harvester():
 				######################################################################Some rools for links for different podcasts##########################################################################################
 						if self.podcast_name in ["Taxpayer talk","Board matters"] and not self.episode_link:
 							self.episode_link = self.episode_download_link.split(".mp3")[0]
-						if self.podcast_name in ["Paige's space","Kelli from the Tron","Top writers radio show", "Dont give up your day job","Motherness","Kiwi birth tales"]:
+						if self.podcast_name in ["Dont give up your day job","Kiwi birth tales"]:
 							self.episode_link = self.podcast_url
 						
 				############################################################################################################################################################################################################
@@ -655,6 +633,7 @@ class Harvester():
 										self.episode_title == self.spreadsheet_message + self.episode_title
 									if not self.description:
 										self.description = ""
+									self.description = self.description.replace(r"<br/>", " ")
 									self.description = bs(self.description,"lxml").text
 									self.description = self.description.replace(r"\n", " ").replace(r"\'s", 's').replace("  "," ")#.replace("►"," ").
 									self.description = self.description.rstrip(" ").lstrip("!").replace("–", "-").replace("’", "'").replace("‘","").replace('”', '"').replace('“', '"').replace("—","-")
@@ -669,14 +648,33 @@ class Harvester():
 										tick = True
 									if podcasts_dict[self.podcast_name]["automated_flag"] == True:
 										tick = True
+									
+									episode_dict2= my_podcast.db_reader(["episode_title"],[self.podcast_name],True)
+
+									#checks if episode title in db
+									for epsd in episode_dict2:
+										if not epsd == {}:
+											if epsd["episode_title"] == self.episode_title:
+												logger.info(f"the episode {self.episode_title} is in db")
+												self.flag_for_epis_table = True
 									if not self.flag_for_epis_table:
+
+
 
 										logger.info("this episode is not in db")
 
 										episode_data = {"podcast": self.podcast_id,"episode_title":self.episode_title, "description":self.description, "date_harvested":downloader.datetime, "date":self.episode_date, "harvest_link": self.episode_download_link, "episode_link":self.episode_link, "epis_numb" : self.epis_numb, "epis_seas" : self.epis_seas, "tick" : tick}
 										my_podcast.table_creator("Episode", episode_data)
 										episode = my_podcast.my_id.id
-										
+									try:
+										file_dict = my_podcast.db_reader(["filepath"], [self.podcast_name], True)
+										for flpth in file_dict:
+											if not flpth =={}:
+												if flpth["filepath"] == downloader.filepath:
+													self.flag_for_file = True
+													logger.info(f"the file {downloader.filepath} exists")
+									except KeyError as e:
+										logger.debug(str(e))
 									if not self.flag_for_file:
 										if self.flag_for_epis_table:
 											id_dict = my_podcast.db_reader(["episode_id","episode_title"],[self.podcast_name],True)
