@@ -11,6 +11,7 @@ The podcast processing pipeline currently in place manages the workflow of podca
 - **Inclusion of "Episode Numbering" Column**: Add a column to handle episode numbering in titles. This will be used to separate the episode number from the rest of the title, enabling easier processing. Should allow cataloguing to change db info.
 - **Inclusion of "245 title" Column**: Add a column to keep title text separated from number (if they exist) for 245 field. Should allow cataloguing to change db info.
 - **Inclusion of "rss season" and "rss_number" Columns**: Add 2 columns with episode  season and number from rss feed (<itunes:season>` and `<itunes:episode> if they exist). This information can enhance the metadata of the podcast episodes.
+- **Inclusion of "cataloguer" column
 
 ### 2. MARC Record Changes
 - **Usage of Publication Date for 490 $v and 800/830 $v**: Switch to using the publication date for these fields in all titles. This will ensure consistency and accuracy in bibliographic records.
@@ -18,11 +19,13 @@ The podcast processing pipeline currently in place manages the workflow of podca
 - **Inclusion of additional 520 Field for episode numbering**:  puts episode number in a second 520 field subfield "a" (separate from the other 520 Field for the episode description).
 
 ### 4. Script Updates
-- **Database models Script Modification**: Modify db structure to add columns for "245 Title" and "Episode numbering" variables.
+- **Main Script Modification**: Add and check function which is logging each spreadsheet line before deletion.
+- **Database models Script Modification**: Modify db structure to add columns for "bib_title" and "bib_numbering" variables as well as "cataloguer"
 - **Data base handler Script Modification**: Modify db handler script to accommodate the new db columns for "245 title" and "Episode Numbering" in the spreadsheet.
 - **Harvesting script modification**: Modify the existing harvesting script to add rules for each title (which are currently in record making script), accommodate the new columns for "Date harvested" and "Episode Numbering" and "245 title" into the spreadsheet. Ensure that "245 title", "Episode number" and "Description" are writable back to db.
 - **Record making script modification**: remove rules for each title, use new "245 title" and "episode numbering" variables instead. Add new 520 field and "a" subfield for "episode numbering".
 - **Enhanced Logging**: Improve logging functionality to include details of the date harvested and episode numbering changes.
+
 
 ## Implementation Plan
 
