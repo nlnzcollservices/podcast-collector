@@ -146,7 +146,7 @@ The script is located in the Cascade LD_working folder and could be accessible t
 
 ## Future Development
 Updates will be made based on requests or technical needs.
-The script could be wrapped into a GUI.
+The script is wrapped into a GUI, GUI might have more features as instructions etc.
 
 ### Planned Improvements
 There are no current plans. Changes will be made as needed.
