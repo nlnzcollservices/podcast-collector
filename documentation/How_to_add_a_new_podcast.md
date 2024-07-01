@@ -54,7 +54,7 @@ Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in 
 ## Making necessary changes to Alma record creating rools
 ***
 Sometimes original title contains episode number and season. In this case to make a correct record in fields 245,490 and 830(810) new rules should be created.
-Open **podcasts1_create_record.py** and add the podcast title to existing rules, if they are suit or create your own using the following example.
+Open **podcasts0_harvester.py** and add the podcast title to existing rules, if they are suit or create your own using the following example.
 Example:
 ```
 	if self.podcast_name in ["Advanced analytics"]:
