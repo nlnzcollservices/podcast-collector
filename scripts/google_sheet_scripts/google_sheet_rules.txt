@@ -1,0 +1,2 @@
+//logical function that evaluates whether the first character in each cell of column Z is "0", "1", or "3". Here's a detailed breakdown of the formula:
+=OR(LEFT(Z:Z)= "0", LEFT(Z:Z) = "1",LEFT(Z:Z)= "3")

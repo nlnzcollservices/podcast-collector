@@ -7,12 +7,8 @@ import dateparser
 from podcast_dict import podcasts_dict, serials
 from rosetta_sip_factory.sip_builder import build_sip_from_json
 import shutil
-try:
-	from settings import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type, ie_entity_type_serial, rosetta_sb_folder, report_folder
-except:
-	from settings_prod import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type,  ie_entity_type_serial, rosetta_sb_folder, report_folder
-
-from database_handler import DbHandler
+from settings import log_folder, file_folder, sip_folder, rosetta_folder, rosetta_folder_for_serials, logging, ie_entity_type, ie_entity_type_serial, rosetta_sb_folder, report_folder
+from podcasts_database_handler import DbHandler
 sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
 logger = logging.getLogger(__name__)
@@ -269,9 +265,10 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 	to_do_flag = False
 	sip_count = 0
 	file_count = 0
-	my_dict=my_db.db_reader(["podcast_name", "serial_mms", "access_policy", "mis_mms","episode_title","publish_link_to_record","tick","filepath","filesize","sip"], podcast_list)
+	my_dict=my_db.db_reader(["podcast_name", "serial_mms", "access_policy", "mis_mms","episode_title","publish_link_to_record","tick","filepath","filesize","sip"], podcast_list, True)
 	logger.info("Making SIPs")
 	for episode in my_dict:
+		#print(episode)
 		if "mis_mms" in episode.keys():# or (not "mis_mms" in episode.keys() and "serial" in podcast_dict[my_dict["podcast_name"].keys()):
 			ar_policy = episode["access_policy"]
 			podcast_name =  episode["podcast_name"]
@@ -297,7 +294,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 				my_check = sip_checker(output_dir, mis_mms, filename, filesize, podcast_name)
 				if my_check:
 					if update_sip_in_db:
-						my_db.db_update_sip(episode_title)
+						my_db.db_update_sip(episode_title, podcast_name)
 					if copy_to_rosetta_prod_folder:
 						destination = os.path.join(rosetta_folder, serial_mms )
 					if copy_to_sb_folder:
@@ -331,9 +328,10 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 				output_dir, filename = generate_sips_for_serials(podcast_name, ar_policy, serial_mms, episode_title, filepath, met_filename)
 				logger.info("SIP created in " + output_dir)
 				my_check = sip_checker_serial(output_dir, met_filename, filename, filesize, podcast_name)
+
 				if my_check:
 					if update_sip_in_db:
-						my_db.db_update_sip(episode_title)
+						my_db.db_update_sip(episode_title, podcast_name)
 					if copy_to_rosetta_prod_folder:
 						destination = os.path.join(rosetta_folder_for_serials, episode_title.split('-')[0].rstrip(" ") )
 					if copy_to_sb_folder:
@@ -352,7 +350,7 @@ def sip_routine(podcast_list=[], copy_to_rosetta_prod_folder = True, copy_to_sb_
 						 		logger.error(str(e))
 						 		quit()
 						logger.info("Copied to {}".format(destination))
-						my_db.db_update_sip(episode_title)
+						my_db.db_update_sip(episode_title, podcast_name)
 						with open(os.path.join(report_folder, "sips.txt"), "a") as f:
 							f.write("{}|{}".format(destination, episode_title))
 							f.write("\n")

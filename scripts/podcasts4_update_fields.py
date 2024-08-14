@@ -10,15 +10,12 @@ from pymarc import parse_xml_to_array,record_to_xml, Field, Subfield
 import time
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
-try:
-	from settings import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
-except:
-	from settings_prod import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
+from settings import logging, file_folder, template_folder, pr_key, sb_key, logging, start_xml, end_xml
 import sys
 sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
 from openpyxl import load_workbook
-from database_handler import DbHandler
+from podcasts_database_handler import DbHandler
 logger = logging.getLogger(__name__)
 
 class Manage_fields():
@@ -82,9 +79,9 @@ class Manage_fields():
 		"""
 		
 		fields = self.record.get_fields(field_num)
-		print(len(fields))
-		print(field_num)
-		print(self.record)
+		# print(len(fields))
+		# print(field_num)
+		# print(self.record)
 		if len(fields) != 0:
 			field_dict = {}
 			for ind in range(len(fields)):
@@ -104,10 +101,13 @@ class Manage_fields():
 
 		else:
 			if field_num == "942":
-				date_942 = 	(str(dt.now().strftime( '%Y-%m')))
-				f942 = Field(tag = '942', indicators = ["",""], subfields = [Subfield(code='a', value="nznb {}".format(date_942))])
-				self.record.add_ordered_field(f942)
-				logger.info("record updated with 942")
+				if not self.short_record_flag:
+					date_942 = 	(str(dt.now().strftime( '%Y-%m')))
+					f942 = Field(tag = '942', indicators = ["",""], subfields = [Subfield(code='a', value="nznb {}".format(date_942))])
+					self.record.add_ordered_field(f942)
+					logger.info("record updated with 942")
+				else:
+					logger.info("the short record should not have 942")
 				self.update_flag = True
 						
 
@@ -121,6 +121,7 @@ class Manage_fields():
 		self.field_list = ["347", "500", "856", "942"]
 		for field_num in self.field_list:
 			self.removing_dup_fields_add_942(field_num)
+		print(self.record)
 		self.bib_data =start_xml+str(record_to_xml(self.record)).replace("\\n", "\n").replace("\\", "")+end_xml
 		logger.debug(self.bib_data)
 
@@ -182,27 +183,37 @@ class Manage_fields():
 		self.f942 = None
 		self.mms_id = None
 		self.bib_data = None
+		self.short_record_flag = False
+		self.template_dict= {}
 		if self.mms_id_list == []:
 			# print("here")
 			my_db =DbHandler()
-			upd_dictionary = my_db.db_reader(["podcast_name","serial_mms","mis_mms","episode_title","holdings", "ie_num","item","updated", "serial_pol"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
+			upd_dictionary = my_db.db_reader(["podcast_name","serial_mms","mis_mms","episode_title","holdings", "ie_num","item","updated", "serial_pol","template_name"],None, True)#episode_title", "episode_id", "date", "podcast_name","serial_pol"],None,True)
 			
 			for dictr in upd_dictionary:
 				if 'item' in dictr.keys():
 					if dictr["item"]:
 						if dictr["mis_mms"]:
 							self.mms_id_list.append(dictr["mis_mms"])
+							if "mis_podcst_sr_" in dictr["template_name"].lower():
+								self.template_dict[dictr["mis_mms"]]=True
+							else:
+								self.template_dict[dictr["mis_mms"]]=False
 		for mms in self.mms_id_list:
 			self.duplicate_flag = False
 			self.update_flag = False
+			self.short_record_flag = False
+			self.template_dict[mms]
 			self.mms_id = mms
 			logger.info(self.mms_id)
 			my_rec = AlmaTools(self.key)
 			my_rec.get_bib(self.mms_id)
 			self.bib_data = my_rec.xml_response_data
 			self.parsing_bib_xml()
+			if self.template_dict[mms]:
+				self.short_record_flag = True
 			# print(self.update_flag)
-			if self.update_flag:
+			if self.update_flag or self.short_record_flag:
 				my_rec.update_bib(self.mms_id, self.bib_data)
 				# print(my_rec.status_code)
 				logger.info(self.mms_id + " - updated")
@@ -210,6 +221,7 @@ class Manage_fields():
 				my_db.db_update_updated(self.mms_id)
 			else:
 				logger.info("Already has 942 field")
+
 
 
 	def get_mms_list_from_alma_set_xlsx_result(self, path_to_xlsx):

@@ -1,0 +1,38 @@
+Richard "Validation check"
+
+- mothly check template errors coding errors
+
+
+008 and 405 3xx
+
+not relevant to podcasts
+
+most of podcast have ISSN and serious authority record
+possibly 490  with the serial record
+title of serias title
+ 245 490a 246 of the corresponding serial
+
+Svetlana catch up with Richard
+520 publisher supplied
+Summary notes
+
+490 in monograph record should be compared with 246 and 245 of serial
+
+Description : Subject , Intervier
+
+
+Amy: 2 processes Automatic vs Visual
+
+
+All people names for one year for all title - Analyze 
+People name extaction
+
+Annual check or Six
+Richard report
+
+Svetlana organize meeting with Richard and WG
+
+Svetlana extract all fields of one title
+
+
+

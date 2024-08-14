@@ -17,13 +17,10 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
-try:
-	from settings import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items
-except:
-	from settings_prod import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items_holdings
+from settings import file_folder, template_folder, working_folder, report_folder, config, logging, sb_key, deleted_items_holdings
 from openpyxl import load_workbook
 from podcast_dict import podcasts_dict, serials
-from database_handler import DbHandler
+from podcasts_database_handler import DbHandler
 logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")	
 

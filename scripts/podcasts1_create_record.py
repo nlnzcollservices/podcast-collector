@@ -1,15 +1,12 @@
 import os
 import io
-import re
 from pymarc import parse_xml_to_array,record_to_xml, Field, Subfield, MARCWriter
 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
-try:
-	from settings import logging, template_folder,start_xml, end_xml, report_folder, marc_folder
-except:
-	from settings_prod import logging, template_folder,start_xml, end_xml, report_folder, marc_folder
-from database_handler import DbHandler
+from settings import logging, template_folder,start_xml, end_xml, report_folder, marc_folder
+
+from podcasts_database_handler import DbHandler
 import dateparser
 from podcast_dict import serials
 import sys
@@ -105,8 +102,8 @@ def __init__(self, key):
 		record = None
 		self.mms_id = None
 		self.template_path = None
-		self.epis_numb = None
-		self.epis_seas = None
+		self.episode_numbering = None
+		self.episode_title = None
 		self.record = None
 		self.f600_first = None
 		self.f600_second = None
@@ -121,6 +118,7 @@ def __init__(self, key):
 		self.f700_first = None
 		self.f700_second = None
 		self.f700_third = None
+
 
 
 	def find_episode(self):
@@ -199,7 +197,7 @@ def __init__(self, key):
 		Modifies 500  field.
 
 		"""
-		print(my_record_xml)
+		#print(my_record_xml)
 		try:
 			self.record = parse_xml_to_array(my_record_xml)[0]
 		except Exception as e:
@@ -255,186 +253,7 @@ def __init__(self, key):
 		##################################################Parsing rules##################################################################
 		#This part is very flexible. It is parsing titles to create correct 490 and 800 or 830 field#####################################
 		
-		if self.podcast_name in ["CIRCUIT cast"]:
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0]
-			elif "-" in self.episode_title:
-				f245= "-".join(self.episode_title.split("-")[1:]).lstrip(" ").rstrip(" ")
-				f490v = self.episode_title.split("-")[0].lstrip(" ")
-
-		if self.podcast_name in ["Dirt Church Radio"]:
-			if "-" in self.episode_title:
-				f245 = self.episode_title.lstrip("DCR").lstrip(" ").split("-")[-1].lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(" ")
-
-		if self.podcast_name in ["Advanced analytics"]:
-			if ":" in self.episode_title:
-				f245 = self.episode_title.split(":")[-1].lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(" ")
-				f830v = str(f490v)
 		
-		if self.podcast_name  in ["Kiwi birth tales"]:
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(" ")
-			elif "-" in self.episode_title:
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(" ")	
-
-		if self.podcast_name in ["Taringa"]:
-			f245 = " - ".join(self.episode_title.split(" - ")[2:]).rstrip(" ").lstrip(" ")
-			f490v = self.episode_title.split(" - ")[1].lstrip(' ').rstrip(" ").replace(" |",",")
-			f830v = f490v.lower().replace(", ", " ")
-		if self.podcast_name in ["Dancing in your head"]:
-			pass #placeholder
-
-
-		if self.podcast_name in ["DOC sounds of science podcast",  "All Blacks"]:
-			if ":" in self.episode_title: 
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(" ")
-			if f490v:
-				try:
-					if not "episode" in f490v.lower() and not "ep" in f490v.lower() and not f490v.lower().startswith("e") and not "podcast" in f490v.lower():# and not f490v.lower().startswith("E"):
-						f490v = "Episode " + f490v
-				except:
-					f490v=None
-
-
-		if self.podcast_name in ["76 small rooms","History of Aotearoa New Zealand podcast", "Dirt Church Radio"]:
-			if "-" in self.episode_title:
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(" ")
-			if not f490v and self.epis_numb:
-				f490v = "Episode " + self.epis_numb
-			
-
-		if self.podcast_name in ["The real pod" ,  "Taxpayer talk","The fold"]:
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-
-			
-		if self.podcast_name in ["Better off read"]:
-			if "Ep " in self.episode_title or "Episode" in self.episode_title:
-					f245 = " ".join(self.episode_title.split(" ")[2:])
-					f490v = " ".join(self.episode_title.split(" ")[:2]).rstrip(":")
-					f830v = f490v.lower()
-
-		if self.podcast_name in ["The Angus Dunn"]:
-			if "The Angus Dunn Podcast " in my_alma.xml_response_data:
-				f245 = my_rec["245"]["a"].lstrip("The Angus Dunn Podcast ")
-				if "-" in f245:
-					divider = "-"
-				if ":" in f245:
-					divider = ":"
-				f490v =f245.split(divider)[0]
-				f830v = f490v.lower()+"."
-				f245a = divider.join(f245.split(divider)[1:])
-				
-		if self.podcast_name in ["Business is boring"]:
-			if "Business is boring" in self.episode_title:
-				f245 = self.episode_title.lstrip("Business is boring").lstrip(" ").lstrip(":").lstrip(" ")
-			if "Business is Boring" in self.episode_title:
-				f245 = self.episode_title.lstrip("Business is Boring").lstrip(" ").lstrip(":").lstrip(" ")
-
-
-		if self.podcast_name in ["TOA Tabletop"]:
-			if ":" in self.episode_title:
-				if self.episode_title.split(":")[0].isdigit():
-					f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-					f490v = self.episode_title.split(":")[0].rstrip(' ')
-
-		if self.podcast_name in ["Stag roar"]:
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(' ')
-			elif '-' in self.episode_title:
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(' ')
-
-
-		if self.podcast_name in ["Dr. Tennant's verbal highs"]:
-			if ":" in self.episode_title:
-				f245 = ":".join(self.episode_title.split(":")[1:]).lstrip(" ")
-				f490v = self.episode_title.split(":")[0].rstrip(' ')
-
-		if self.podcast_name in ["Girls on top"]:
-			if "-" in  self.episode_title and self.episode_title.startswith("Episode"):
-				f245 = "-".join(self.episode_title.split("-")[1:]).lstrip(" ")
-				f490v = self.episode_title.split("-")[0].rstrip(' ')
-		
-		if self.podcast_name in ["Untamed Aotearoa"]:
-			if "#" in  self.episode_title:
-				f245 = "#".join(self.episode_title.split("#")[1:]).lstrip(" ")
-				f490v = "# "+ self.episode_title.split("#")[0].rstrip(' ')
-			
-		if self.podcast_name in ["NZ tech podcast with Paul Spain"]:
-			# print(self.episode_title)
-			if  ":" in self.episode_title and ("NZ Tech Podcast" in self.episode_title or "Episode" in self.episode_title) and not "Running time" in self.episode_title:
-				ep_number = None
-				# print(self.episode_title)
-				if ": NZ Tech Podcast" in self.episode_title:
-					f245 =  ":".join(self.episode_title.split(":")[:-1])
-					ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[-1])[0]
-				elif "NZ Tech Podcast" in self.episode_title:
-					f245 = ":".join(self.episode_title.split(":")[1:])
-					try:
-						ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[0])[0]
-					except:
-						logger.info("no episode number")
-				elif ": Episode"	 in self.episode_title:
-					ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[1])[0]
-				elif self.episode_title.startswith("Episode"):
-					ep_number = re.findall(r'[0-9]+', self.episode_title.split(":")[0])[0]
-
-			elif "- NZ Tech Podcast" in self.episode_title:
-					f245 =  "-".join(self.episode_title.split(":")[:-1])
-			if f245 and ep_number:
-				try:
-					f490v = str(ep_number)
-					f830v = "episode "+ep_number
-				except:
-					pass
-			
-	
-
-		if self.podcast_name in ["Stirring the pot", "UC science radio"]:
-			f245 = str(self.episode_title)
-			if self.epis_numb:
-				f245 = self.episode_title.strip(self.epis_numb).rstrip(" ").lstrip(" ")
-				if self.epis_seas:
-					f490v = "S{}:E{}".format(self.epis_seas, self.epis_numb)
-				else:
-					f490v ="Episode " +  self.epis_numb
-		if self.podcast_name in ["Queenstown life", "Windows on dementia"]:
-			f490v ="Episode " +  self.epis_numb
-
-		if self.podcast_name in ["Property Academy"]:
-			if "⎮" in self.episode_title:
-				divider = "⎮"
-			else:
-				divider = "|"
-			f245 = "|".join(self.episode_title.split(divider)[:-1])
-			f490v = self.episode_title.split(divider)[-1]
-
-		if self.podcast_name == "Chris and Sam podcast":
-			f245 = self.episode_title.split(" | ")[0]
-			if  " | EP" in self.episode_title:
-				f490v = "EP"+self.episode_title.split("EP")[1].split(" ")[0]
-			elif "EP" in self.episode_title:
-				f245 = self.episode_title.split("EP")[0]
-				if " - " in self.episode_title:
-					f490v="EP" + self.episode_title.split("EP")[1].split(" - ")[0]
-		if self.podcast_name in  ["Dont give up your day job"]:
-			f245  = " ".join(self.episode_title.split(" ")[2:])
-			f490v = " ".join(self.episode_title.split(" ")[:2])
-		if self.podcast_name in ["thehappy$aver.com."]:
-			if "." and self.episode_title and self.episode_title.split(".")[0].isdigit():
-				f245 =".".join(self.episode_title.split(".")[1:]).lstrip(" ")
-				f490 ="Episode "+self.episode_title.split('.')[0]
-		if f490v and not f830v:
-			f830v = f490v.lower() 
 
 		##########################################################################################################################################################################################################################################
 
@@ -459,31 +278,21 @@ def __init__(self, key):
 		self.record.remove_fields("008")
 		self.record.add_ordered_field(field)  
 
-		#f100
-
-			# additional_fields_list = [["100", self.f100]]
-
-			# for fld in additional_fields_list:
-			# 	if fld[1]:
-			# 		self.construct_field(fld)
-			
+	
 		
 		#Field 245
-		dot_or_something = "."
 
-		
-		if self.episode_title.rstrip(" ").endswith("?") or self.episode_title.rstrip(" ").endswith("!") or self.episode_title.rstrip(" ").endswith("."):
-			dot_or_something = ""
+		#print(self.bib_title)
 
-		self.record["245"]["a"] = self.episode_title + dot_or_something
-		if f245:
-			if f245.rstrip(" ").endswith("?") or f245.rstrip(" ").endswith("!") or f245.rstrip(" ").endswith("."):
-				dot_or_something = ""
-			self.record["245"]["a"] = f245 + dot_or_something
-		if "100" in self.record or "110" in self.record:
-			self.record["245"].indicators =["1","0"]
-		else:
-			self.record["245"].indicators = ["0","0"]
+		self.record["245"]["a"] = self.bib_title
+
+
+	#################################################################################		
+
+		self.record["245"].indicators = ["0","0"]
+
+	##########################################################################3
+
 		title_words =self.record["245"]["a"].split(' ')
 
 		if title_words[0].lower() in NON_FILING_WORDS:
@@ -508,22 +317,35 @@ def __init__(self, key):
 			my_date = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
 		except ValueError:
 			my_date = dateparser.parse(self.date).strftime('%B %d, %Y')
-		if f490v:
-			self.record["490"]["v"] = f490v
-		else:
-			try:
-				self.record["490"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
-			except ValueError:
-				self.record["490"]["v"]= my_date
+		try:
+			self.record["490"]["v"] = dt.fromtimestamp(int(self.date)).strftime('%B %d, %Y')
+		except ValueError:
+			self.record["490"]["v"]= my_date
 
 		#Field 520
+
+		#First 520 field
 		self.description = self.description#.replace#("&nbsp;"," ")
 		try:
 			self.record["520"]["a"] = '"{}"--RSS feed.'.format(self.description)
 		except:
 			logger.debug("No description")
 
+		#Second 520 field
+
+		if self.bib_numbering:
+			if self.bib_numbering != "":
+				f520_2 = Field(
+					        tag='520',
+					        indicators=['', ''],
+					        subfields=[Subfield(code='a', value=self.bib_numbering)]
+					    )
+				self.record.add_ordered_field(f520_2)
+
+
+
 		#Fields 600, 610, 650,  700, 710
+
 
 		additional_fields_list = [["600", self.f600_first], ["600",self.f600_second], ["600",self.f600_third], ["610",self.f610_first], ["610",self.f610_second], ["610",self.f610_third], ["650",self.f650_first], ["650",self.f650_second], ["650",self.f650_third], ["650",self.f650_forth], ["700",self.f700_first], ["700",self.f700_second], ["700",self.f700_third]]
 		for fld in additional_fields_list:
@@ -531,15 +353,17 @@ def __init__(self, key):
 				self.construct_field(fld)
 
 		#reo 650 changing orders
+
 		my_field = None
 		for ind in range(len(self.record.get_fields('650'))-1):
 
-			if self.record.get_fields('650')[ind]["a"] == "Kōnae ipurangi.":
-			#	print("HERE")
-				my_subfield = self.record.get_fields("650")[ind]["a"]
-			#	print(my_subfield.encode("utf-8"))
-				my_field = self.record.get_fields("650")[ind]
-				self.record.remove_field(my_field)
+				if self.record.get_fields('650')[ind]["a"] == "Kōnae ipurangi.":
+				#	print("HERE")
+					my_subfield = self.record.get_fields("650")[ind]["a"]
+				#	print(my_subfield.encode("utf-8"))
+					my_field = self.record.get_fields("650")[ind]
+					self.record.remove_field(my_field)
+
 
 
 		if my_field:	#print(self.record.get_fields("650")[ind].value().encode("utf-8"))
@@ -548,58 +372,52 @@ def __init__(self, key):
 		#Field 830 or 800
 
 		if "830" in self.record:
-			if f830v:
-				self.record["830"]["v"] = f830v + "."
-			else:
-				self.record["830"]["v"] = my_date + "."
+			self.record["830"]["v"] = my_date + "."
 		elif "800" in self.record:
-			if f830v:
-				self.record["800"]["v"] = f830v + "."
-			else:
-				self.record["800"]["v"] = my_date + "."
+			self.record["800"]["v"] = my_date + "."
 
 		elif "830" in self.record:
-			if f830v:
-				self.record["810"]["v"] = f830v + "."
-			else:
-				self.record["810"]["v"] = my_date + "."
+			self.record["810"]["v"] = my_date + "."
+
 		#Field 856
 		
 		my_fields = self.record.get_fields("856")
-		for ind in  range(len(self.record.get_fields("856"))):
-			ndha_archived_flag=False
-			subfields = self.record.get_fields("856")[ind].subfields
-			indicators = self.record.get_fields('856')[ind].indicators
-			#For updates to exlude automated field
-			for sld in subfields:
-				if sld.code == "z":
-					idha_archived_flag = True
-			if not ndha_archived_flag:
-				#datafield tag="856" ind1="4" ind2="0"><subfield code="u"></subfield></datafield><datafield tag="856" ind1="4" ind2="2"><subfield code="3">File host</subfield><subfield code="u">&lt;insert page URL&gt;</subfield></datafield><datafield tag="901" ind1="" ind2=""><subfield code="a">MGR</subfield></datafield></recor
-				print(subfields)
-				print(len(subfields))
-				if len(subfields) == 1:
-					for idx in range(len(subfields)):
-						if subfields[idx].code =="u":
-							subfields[idx] = Subfield(code='u', value=self.harvest_link)
-					field1 = Field(tag = "856", indicators = indicators, subfields = subfields)
-				elif len(subfields) == 2:
-					for idx in range(len(subfields)):
-						if subfields[idx].code  == "u":
-							subfields[idx] = Subfield(code='u', value=self.episode_link)
+		if len(my_fields) !=0:
+			for ind in  range(len(self.record.get_fields("856"))):
+				ndha_archived_flag=False
+				subfields = self.record.get_fields("856")[ind].subfields
+				indicators = self.record.get_fields('856')[ind].indicators
+				#For updates to exlude automated field
+				for sld in subfields:
+					if sld.code == "z":
+						idha_archived_flag = True
+				if not ndha_archived_flag:
+					# print(subfields)
+					# print(len(subfields))
+					if len(subfields) == 1:
+						for idx in range(len(subfields)):
+							if subfields[idx].code =="u":
+								subfields[idx] = Subfield(code='u', value=self.harvest_link)
+						field1 = Field(tag = "856", indicators = indicators, subfields = subfields)
+					elif len(subfields) == 2:
+						for idx in range(len(subfields)):
+							if subfields[idx].code  == "u":
+								subfields[idx] = Subfield(code='u', value=self.episode_link)
 
-					field2 = Field(tag = "856", indicators = indicators, subfields = subfields)
+						field2 = Field(tag = "856", indicators = indicators, subfields = subfields)
 
 		logger.debug(str(self.record))
 		self.record.remove_fields("856")
 		self.record.add_ordered_field(field1)
 		if self.episode_link:
 			self.record.add_ordered_field(field2)
-			print(self.record)
-
+			#print(self.record)
+		#print("HERE")
+		print(self.record)
 		bib_data = record_to_xml(self.record)
 		bib_data = str(bib_data).replace("\\n", "\n").replace("\\", "")
-		self.bib_data = start_xml + bib_data +end_xml	
+		self.bib_data = start_xml + bib_data +end_xml
+
 		
 	def record_creating_routine(self, update = False, list_of_podcasts = []):
 
@@ -616,10 +434,11 @@ def __init__(self, key):
 			logger.info("Creating Alma record")
 		my_db = DbHandler()
 		my_dict=my_db.db_reader(
-			["podcast_name", "podcast_id", "serial_mms","rss_link","location","publish_link_to_record","episode_title","mis_mms","ie_num","tags","description",
-			"date","episode_link","harvest_link","date_harvested","f100","f600_first","f600_second","f600_third","f610_first",
-			"f610_second","f610_third","f650_first","f650_second","f650_third","f650_forth","f655","f700_first","f700_second",
-			"f700_third","f710_first","f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
+			["podcast_name", "podcast_id", "serial_mms","rss_link","location","publish_link_to_record","episode_title", "bib_title",
+			"bib_numbering","mis_mms","ie_num","tags","description", "date","episode_link","harvest_link","date_harvested",
+			"f600_first","f600_second","f600_third","f610_first", "f610_second","f610_third","f650_first",
+			"f650_second","f650_third","f650_forth","f655","f700_first","f700_second", "f700_third","f710_first",
+			"f710_second","f710_third", "template_name","tick", "epis_numb", "epis_seas"],list_of_podcasts
 			)
 		for epis  in my_dict:
 			self.podcast_name = epis["podcast_name"]
@@ -641,13 +460,14 @@ def __init__(self, key):
 						print(self.year)
 						print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 					self.episode_title = epis["episode_title"]
+					self.bib_numbering = epis["bib_numbering"]
+					self.bib_title = epis["bib_title"]
 					self.tags = epis["tags"]
 					self.description = epis["description"]
 					self.date = epis["date"]
 					self.episode_link = epis["episode_link"]
 					self.harvest_link = epis["harvest_link"]
 					self.date_harvested = epis["date_harvested"]
-					self.f100 = epis["f100"]
 					self.f600_first = epis["f600_first"]
 					self.f600_second = epis["f600_second"]
 					self.f600_third = epis["f600_third"]
@@ -665,8 +485,6 @@ def __init__(self, key):
 					self.f710_first = epis["f710_first"]
 					self.f710_second = epis["f710_second"]
 					self.f710_third = epis["f710_third"]
-					self.epis_numb = epis["epis_numb"]
-					self.epis_seas = epis["epis_seas"]
 					self.parsing_bib_xml()
 					logger.debug(self.bib_data)
 					my_alma = AlmaTools(self.alma_key)
@@ -691,9 +509,11 @@ def __init__(self, key):
 										mms_title_file.write("\n")
 								except Exception as e:
 									print(str(e))
-									quit()
 									statement =  "Could not grab mms from {}. {}".format ( my_alma.xml_response_data, str(e)  ) 
 									logger.error(statement)
+									quit()
+
+
 						if self.mms_id:
 							my_db.db_update_mms (self.mms_id, self.episode_title, self.podcast_id)
 								

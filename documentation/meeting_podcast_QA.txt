@@ -1,0 +1,8 @@
+Serial:
+If frequance changes template should be changed.
+MIS:
+Numbering in template.
+Serial record.
+Changing titles for serials.
+
+

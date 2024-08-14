@@ -1,5 +1,5 @@
 
-# How to add a new podcast guide
+#How to add a new podcast guide
 
 ## Table of Contents
 1. [Preparation](#preparation)
@@ -18,17 +18,17 @@ There are 3 (or more) ways to download a template:
 #### Alma Enhancer and Tampermonkey FireFox add-on. 
 Alma Enhancer is internal script so if you are  not in the Library use other methods.
 Otherwise install Tampermonkey FireFox add-on.
-Add Alma Enchancer script from Alma Enhancement Scripts folder and Cataloguing Checks and Tools script to Tampermonkey (Open Tampermonkey, choose "create new" script,  copy all the content of the script file from the folder to new script, save, repeat for another script)
+Add Alma Enchancer script from Alma Enhancement Scripts folder to Tampermonkey(create new script and copy content of the files from the folder)
 Use file download MARK as XML option.
-Save the template in “assets”, “text_templates” folder. 
+Save the template in “assets”, “text templates” folder. 
 Run   **text_to_xml.py** script from the script folder.
-Check  in "xml_templates" folder and copy the template to “assets”/“templates” folder.
+Check and copy the template to “assets”/“templates” folder.
 #### Alma 
 Create a record from a template
 Add 245 field.
 Save the record.
 Create a set from the records.
-Run a job to import a set.
+Run a job to import a set
 Separate the templates and save them by their own names in “assets”/“templates” folder.
 Delete all the records.
 #### Possible half python, half Alma  way.
@@ -54,7 +54,7 @@ Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in 
 ## Making necessary changes to Alma record creating rools
 ***
 Sometimes original title contains episode number and season. In this case to make a correct record in fields 245,490 and 830(810) new rules should be created.
-Open **podcasts0_harvester.py** and add the podcast title to existing rules, if they are suit or create your own using the following example.
+Open **podcasts1_create_record.py** and add the podcast title to existing rules, if they are suit or create your own using the following example.
 Example:
 ```
 	if self.podcast_name in ["Advanced analytics"]:

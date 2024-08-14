@@ -788,7 +788,9 @@ def main():
 	mms_id = ""
 
 	my_api = AlmaTools("prod")
-	# my_api.get_bibs({"view":"brief"})
+	my_api.get_bib("9919235271102836")
+	print(my_api.xml_response_data)
+		# my_api.get_bibs({"view":"brief"})
 	# print(my_api.xml_response_data)
 	# quit()
 	# item_pid = "23376150750002836"

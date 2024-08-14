@@ -28,40 +28,45 @@ rosetta_folder = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\prod\ld_schedul
 rosetta_sb_folder = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\UAT\podcasts"
 rosetta_folder_for_serials = r"Y:\NDHA\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\periodic"
 archived_folder = os.path.join(working_folder, "archived")
+doc_folder = os.path.join(working_folder, "documentation")
 database_archived_folder = os.path.join(working_folder, "archived","db_copy")
 ndha_report_folder = os.path.join(report_folder, "NDHA_reports")
 ndha_used_report_folder = os.path.join(report_folder, "NDHA_used_reports")
 done_ies = os.path.join(report_folder,"done_report_ies.txt")
-deleted_items_holdings = os.path.join(report_folder, "deleted_iems_holdings.txt")
+failed_ies = os.path.join(report_folder,"failed_report_ies.txt")
+deleted_items_holdings = os.path.join(report_folder, "deleted_iems_holdings.txt") 
 database_content_filename =    os.path.join(report_folder,"database_content.csv")
+marc_folder = os.path.join(working_folder, "marc_records", "Records")
 ########################Setting folder for git scripts######################
 
 # *-mainly used for Amy's downloader but might be used for other modules downloaded from git storage
-git_folder = r"C:\Users\granthrh\Documents\NDHA\NDHA\project\file-downloader"
+git_folder = r"H:\GIT\file-downloader"
 sys.path.insert(0, git_folder)
 
 ########################SETTING FOLDER FOR CREDENTIAL FILES#################
 
 # *-used for proxies, google credentials, alma APIs and DNZ APIs
-secrets_and_credentials_fold = r'H:\Secrets'
+secrets_and_credentials_fold = r'H:\secrets_and_credentials'
 sys.path.insert(0, secrets_and_credentials_fold)
-secret_file = os.path.join(secrets_and_credentials_fold, "shopping") 
+secret_file = os.path.join(secrets_and_credentials_fold, "secrets") 
 config = configparser.ConfigParser()
+# print(secret_file)
 config.read(secret_file)
 
 #######################Setting google sreadsheet credentials#################
 
 #* - google spreadsheet code could be replaced on another one
 podcast_sprsh = config.get("configuration", "google_spreadsheet_key")
+# print(podcast_sprsh)
 
 #* - getting google credentials from client_secrect.json file
 client_secrets_file = os.path.join(secrets_and_credentials_fold, "client_secrets.json")
 store = file.Storage(client_secrets_file )
 creds = store.get()
-print("here")
-# * - this part could be removed after setting new tokens
+
+# # # # * - this part could be removed after setting new tokens
 if creds.access_token_expired:
-    creds.refresh(httplib2.Http())
+	creds.refresh(httplib2.Http())
 
 ####################Getting API keys from secret file##########################
 
@@ -75,12 +80,11 @@ sb_key= config.get("configuration", "sandbox")
 ##########################Getting proxies##############################################
 #* - optional might not be used and removed from requests
 
-# proxy_file = os.path.join(secrets_and_credentials_fold, "proxies.json")
-# with open(proxy_file, "r") as f_proxy:
-# 	proxies = json.load(f_proxy)
+proxy_file = os.path.join(secrets_and_credentials_fold, "proxies.json")
+with open(proxy_file, "r") as f_proxy:
+	proxies = json.load(f_proxy)
 
 ############################Logging#####################################################
-	
 #Logging levels:
 # DEBUG: Detailed information, for diagnosing problems. Value=10.
 # INFO: Confirm things are working as expected. Value=20.
@@ -103,7 +107,7 @@ end_xml = '</bib>'
 ie_entity_type = 'AudioIE'
 ie_entity_type_serial= 'PeriodicIE'
 ##################################e-mail settings########################################
-my_email_box = "Rhonda.grantham@dia.govt.nz"
+my_email_box = "Svetlana.Koroteeva@dia.govt.nz"
 report_part_name = "45. Weekly Published"
 #####################################SET UP Folders#######################################
 ## Run the current script to create full folder structure
@@ -113,7 +117,7 @@ report_part_name = "45. Weekly Published"
 
 
 def main():
-	for folder in [file_folder , script_folder, assets_folder, template_folder, logs_folder, database_folder, report_folder,  log_folder, database_fullname, sip_folder,archived_folder, database_archived_folder, ndha_report_folder, ndha_used_report_folder]:
+	for folder in [file_folder , script_folder, assets_folder, template_folder, logs_folder, database_folder, report_folder,  log_folder, database_fullname, sip_folder,archived_folder, database_archived_folder, ndha_report_folder, ndha_used_report_folder ,marc_folder]:
 		print(folder)
 		if not os.path.exists(folder):
 			os.mkdir(folder)

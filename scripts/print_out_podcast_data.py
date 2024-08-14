@@ -1,6 +1,7 @@
 import peewee
 import requests
 import re
+import sys
 from podcast_models import Podcast, Episode, File
 from datetime import datetime as dt
 from time import mktime
@@ -9,22 +10,25 @@ from datetime import time
 from bs4 import BeautifulSoup as bs
 from podcast_dict import podcasts_dict
 from alma_tools import AlmaTools
-# import wget
 import os
+sys.path.insert(0, r'H:\GIT\file-downloader')
+from downloader_light_modified import DownloadResource as Downloader
 
 my_files = []
-# my_api = AlmaTools("prod")
-# my_time  = mktime(dt.strptime('November 13 2022', "%B %d %Y").timetuple())
-# print(my_time)
-# quit()
+my_api = AlmaTools("prod")
+my_time  = mktime(dt.strptime('September 01 2021', "%B %d %Y").timetuple())
+print(my_time)
 
-# print(dt.fromtimestamp(157).strftime('%B %d %Y'))
+
+
+# print(dt.fromtimestamp(1557074657).strftime('%B %d %Y'))
 # print(my_time)
 #quit()
 
 
-# q = Podcast.update(last_issue= my_time).where(Podcast.podcast_name  == "Consume this")
+# q = Podcast.update(podcast_name= "B better podcast").where(Podcast.podcast_name  == "Purpose fuelled performance")
 # q.execute()
+# quit()
 
 # q = Podcast.update(serial_pol= "POL-138668").where(Podcast.serial_pol == "POL-138668 ")
 # q.execute()
@@ -77,93 +81,113 @@ my_files = []
 # 		my_list.append(el)
 # print(my_list)
 my_dict={}
-big_dic={}
+big_dict={}
 count = 0
-podcasts = Podcast.select()#.where(Podcast.podcast_name == "Access Granted NZ")
-for pod in podcasts:
-	#!!!!!!!!!!Do not remove. Should be deleted from Alma!!!!!Love podcast and Dirt Church ['9919046572802836','9919046573002836']:
-	#!!!!Back to the disc-player not in report
-	#!!!Coronavirus podcast maybe 1 missing 49 in rss and 48 in report
-	#The creative spear could not grab anything
 
-
-			# q = Podcast.update(serial_holding="22361981660002836").where(Podcast.id == pod.id)
+# episodes = Episode.select()
+# for ep in episodes:
+# 	if "Behind The Story: Reporting on the news within the news" in ep.episode_title:
+# 			print(ep.episode_title)
+# 			print(ep.date_harvested)
+			# q = Episode.delete().where(Episode.id==ep.id)
 			# q.execute()
-	#if pod.podcast_name  in ["Cooking the books"]:#Purpose fuelled performance',"Advanced analytics","UC science radio","Queenstown life","Windows on dementia","Animal matters","Selfie reflective", "The Angus Dunn"]:
-	# #if pod.id == 109:
+#podcasts = Podcast.select()#.where(Podcast.podcast_name == "Access Granted NZ")
 
-		# if "On the rag" in pod.podcast_name:# or "tips" in pod.podcast_name:
-		# 	print(pod.podcast_name)
-		# 	print(pod.rss_link)
-		# 	print(pod.template_name)
-		# 	# print(pod.id)
-		# 	print(pod.last_issue)
-		# 	print(dt.fromtimestamp(pod.last_issue).strftime('%B %d %Y'))
+my_list = []
 
-		# # if pod.automated_flag:
+
+
+podcasts = Podcast.select()#.where(Podcast.last_issue < 1685534400.0)
+for pod in podcasts:
+
+	#if pod.podcast_name  in ["Maxim Institute podcast"]:#Purpose fuelled performance',"Advanced analytics","UC science radio","Queenstown life","Windows on dementia","Animal matters","Selfie reflective", "The Angus Dunn"]:
+	#if pod.id == 51:
+			print("#"*10)
+		#if pod.serial_mms == "9918951472702836":
+		#if "Paul" in pod.podcast_name:
+			# print(pod.podcast_name)
+			# print(pod.id)
+
 		# 	# print("#"*50)
-		# 	# print(pod.podcast_name)
+			#print(pod.rss_link)
+			# q = Podcast.update(rss_link="https://anchor.fm/s/d6909530/podcast/rss" ).where(Podcast.id==pod.id)
+			# q.execute()
 
-		# 	# print("#"*50)
+			# print(pod.serial_mms)
+			# print(pod.serial_pol)
+			# print(pod.serial_holding)
+			# print(pod.location)
+			# print(pod.rss_link)
+			# print(pod.serial_mms)
+			# print(pod.automated_flag)
+			# print (pod.serial_pol)
+			# print(pod.last_issue)
+			#print(pod.template_name)
 
-		# 	print(pod.serial_holding)
-		# 	print(pod.location)
-		# 	print(pod.serial_mms)
-		# 	print("automated_flag")
-		# 	print(pod.automated_flag)
-		# 	print (pod.serial_pol)
-			# print(dt.fromtimestamp(pod.last_issue).strftime('%B %d %Y'))
+
+			# try:
+			# 	print(dt.fromtimestamp(pod.last_issue).strftime('%B %d %Y'))
+			# except Exception as e:
+			# 	print(str(e))
 			episodes = Episode.select().where(Episode.podcast==pod.id)
-			
 			for ep in episodes:
-				# for nmb in  list(range(12011,12022)):
-				# 	if nmb==  ep.id:
-				# if ep.mis_mms and ep.ie_num == None and ep.item == None:
-				# 	count+=1
-				# if ep.date < 1560254400.0: #and not ep.mis_mms:#1547204400.0
-				#if ep.mis_mms == "9919081869002836":
-					
-					# if not flag:
-					# 	print("#"*50)
-					# 	print(pod.podcast_name)
-					# 	flag = True
-				# if "school" in ep.episode_title:
-				# if ep.mis_mms in ["9919235191102836"]:
-				#if "Episode 2 - Lawrence Arabia" in ep.episode_title:
-				#if ep.item == "23374000450002836" and ep.mis_mms:#ep.ie_num:
-				# if ep.id in [11835,11836]:
-						# print("-"*50)
-						# # print(pod.podcast_name)
-						# # print(pod.serial_mms)
-						# print(ep.id)
-						# print(ep.episode_title)
-						# print(ep.harvest_link)
-						# print(ep.episode_link)
-						# print(ep.mis_mms)
-						# print(ep.episode_title)
-						# #print(ep.holdings)
-						# print(ep.tick)
-						# print(ep.description)
-						# # print(ep.sip)
-						# #print(ep.ie_num)
-						# # print(ep.item)
-						# # print(ep.updated)
-						# # print("-"*50)
-						# print(dt.fromtimestamp(ep.date).strftime('%B %d %Y'))
-						# count+=1
-						# print(count)
-						# 		# print(ep.id)
-						
-						# print(ep.ie_num)
-						# print(ep.item)
-						#print(ep.harvest_link)
-						#print(ep.location)
-						#print(ep.updated)
-						# q = Episode.delete().where(Episode.id==ep.id)
-						# q.execute()
-						#q = Episode.update(ie_num = "IE73103744").where(Episode.id==ep.id)
-						# # q = Episode.update(sip =False).where(Episode.id==ep.id)
-						#q.execute()
+				#mms_list = ["9919414535402836"]
+
+
+				#if "2024-08-14" in str(ep.date_harvested):
+
+				if ep.episode_title in ["Test","test"]:
+					# #if pod.serial_mms == "9918741764902836":
+					# 	q= Episode.update(updated=True).where(Episode.id == ep.id)
+					# 	q.execute()
+						print(pod.podcast_name)
+						print(pod.serial_mms)
+						print(ep.mis_mms)
+						print(ep.sip)
+						print(ep.episode_title)
+						print(ep.updated)
+						print(ep.id)
+					#print(ep.episode_title)
+					# print(ep.bib_title)
+					# print(str(ep.date_harvested))
+					# print("2024-08-10" in str(ep.date_harvested) )
+			# 		print(ep.harvest_link)
+			# 		print(ep.tick)
+			# 		print(ep.sip)
+			# 		# print(
+			# 		#     f"{pod.podcast_name}\t{pod.serial_mms}\t{pod.rss_link}\t"
+			# 		#     f"{ep.episode_title}\t{ep.bib_title}\t{ep.bib_numbering}\t"
+			# 		#     f"{ep.epis_seas}\t{ep.epis_numb}\t{ep.episode_title}\t"
+			# 		#     f"{ep.episode_link}\t{dt.fromtimestamp(int(ep.date)).strftime('%B %d %Y')}\t"
+			# 		#     f"{ep.tags}\t{ep.harvest_link}\t"
+			# 		#     f"{ep.date_harvested.strftime('%B %d %Y')}"
+			# 		# )
+
+			# 			#print(ep.description)
+			# 		print(dt.fromtimestamp(int(ep.date)).strftime('%B %d %Y'))
+			# 		print(ep.date_harvested)
+			# 		# print(ep.ie_num)
+			# 		#print(ep.item)
+			# 		#print(ep.tick)
+			# 		#print(ep.mis_mms)
+			# 		# print(ep.harvest_link)
+					# print(ep.updated)
+					# print(ep.sip)
+					# print(ep.description)
+					# print(ep.tags)
+					# print(ep.episode_link)
+					# print(ep.cataloguer)
+					# print(ep.bib_title)
+					# print(ep.bib_numbering)
+					# q = Episode.delete().where(Episode.id==ep.id)
+					# q.execute()
+					#q = Episode.update(ie_num = "IE65247787").where(Episode.id==ep.id)
+					#q = Episode.update(sip =True).where(Episode.id==ep.id)
+					# q = Episode.update(mis_mms="9919054467002836" ).where(Episode.id==ep.id)
+					# q = Episode.update(tick=True ).where(Episode.id==ep.id)
+					# q.execute()
+					# q = Episode.delete().where(Episode.id==ep.id)
+					# q.execute()
 								# print(pod.serial_mms)
 
 
@@ -184,67 +208,88 @@ for pod in podcasts:
 
 
 						files = File.select().where(File.episode == ep.id)
-						# print("#"*20)
-						#print(files)
+			# 				# print("#"*20)
+			# 				#print(files)
+
 						for fl in files:
-							if "LD_Proj" in fl.filepath:
-								print("#"*50)
-								print(fl.filepath)
-								# q = File.delete().where(File.id==fl.id)
-								# q.execute()
-								print(pod.podcast_name)
-								print(ep.episode_title)
-								print(ep.mis_mms)
-								# print(ep.holdings)
-								print(ep.tick)
-								print(ep.sip)
-								print(ep.ie_num)
-								# print(ep.item)
 
+		# 				if "NZH_Presents_-_Accused_The_Polkinghorne_Trial.mp3" in fl.filepath :#and "reds" in fl.filepath:#and "asthma" in fl.filepath:
+		# # 						#print(ep.harvest_link)
+		 						print(fl.filepath)
+		# 						print(ep.episode_title)
+		# 						print(fl.file_type)
+		# 						print(fl.filesize)
+		# 						print(fl.md5sum)
+		# 						print(ep.harvest_link)
+		# 						#print(pod.podcast_name)
+		# # 						# new_filepath = fl.filepath.replace(r"LD_Proj","LD_working")
+		# 						q = File.update(filesize = 1729227).where(File.id==fl.id)
+		# 						q.execute()
+		# # # # 				# 		# if not os.path.exists(fl.filepath):
 
-						 	#	print("-"*50)
+		# 						q = File.delete().where(File.id==fl.id)
+		# 						q.execute()
+		# 			q = Episode.delete().where(Episode.id==ep.id)
+		# 			q.execute()
+		# 						q = Episode.delete().where(Episode.id==ep.id)
+		# 						q.execute()
+		# # 				# 		print(ep.episode_title)
+		# # 				# 		print(ep.mis_mms)
+		# # 				# 		# print(ep.holdings)
+		## 				# 		# print(ep.tick		# # 				# 		# print(ep.sip)
+		# # 				# 		# print(ep.ie_num)
+		# # 				# 		# print(ep.date_harvested)
+		# # 				 		# print(ep.harvest_link)
+		# # 				# 		# print(ep.item)
+		# # 				# 		folderpath = "\\".join(fl.filepath.split("\\")[:-1])
+		# 						# print(folderpath)
+		# 						# downloader = Downloader(ep.harvest_link, folderpath, collect_html=False, proxies=None)
+		# 						# print(downloader.filename)
+		# 						# print(downloader.filepath)
+		# 						# q = File.update(filepath = downloader.filepath).where(File.filepath == fl.filepath)
+		# 						# q.execute()
+		# 				 	#	print("-"*50)
 							
 
 
-		# 				#if fl.md5sum == "7ee29280ef3ccca9769e622d7f630e23":
-		# 				# if not  "f287913a-88eb-4d99-a224-c8a15e1df44a" in fl.filepath:
-		# 				if len(files)>1:and pod.podcast_name not in fl.filepath:
-		# 				# 	if "Purpose fuelled performance" in fl.filepath and pod.podcast_name == "Cooking the books":
-		# 			# # 		
-		# 			# # count+=1
-		# 			# # 	#print("here")
-		# 			# 	# if not "Dietary requirements" in fl.filepath:
-		# 			# # 		print("here2")
-		# 			# # 		print(ep.harvest_link)					
-		# 						print(ep.episode_title)
-		# 						print(ep.id)
-		# 						print(pod.podcast_name)
-		# 						print(ep.mis_mms)
-		# 						print(pod.serial_mms)
+		# # 				#if fl.md5sum == "7ee29280ef3ccca9769e622d7f630e23":
+		# # 				# if not  "f287913a-88eb-4d99-a224-c8a15e1df44a" in fl.filepath:
+		# # 				if len(files)>1:and pod.podcast_name not in fl.filepath:
+		# # 				# 	if "Purpose fuelled performance" in fl.filepath and pod.podcast_name == "Cooking the books":
+		# # 			# # 		
+		# # 			# # count+=1
+		# # 			# # 	#print("here")
+		# # 			# 	# if not "Dietary requirements" in fl.filepath:
+		# # 			# # 		print("here2")
+		# # 			# # 		print(ep.harvest_link)					
+		# # 						print(ep.episode_title)
+		# # 						print(ep.id)
+		# # 						print(pod.podcast_name)
+		# # 						print(ep.mis_mms)
+		# # 						print(pod.serial_mms)
+		# # 						print(fl.filepath)
+		# # 						print(fl.filesize)
+		# # 						# if ep.episode_title in my_dict.keys():
+		# # 						# 	if not fl.filesize in my_dict[ep.episode_title]:
+		# # 						# 		my_dict[ep.episode_title] +=[fl.filesize]
+		# # 						# else:
+		# # 						# 	my_dict[ep.episode_title]=[fl.filesize]
+		# # 						# print(dt.fromtimestamp(int(ep.date)).strftime('%B %d %Y'))
+		# # 						# print(ep.harvest_link)
+
+		# # 			# 		# q = Episode.update(podcast = 102).where(Episode.id == ep.id)
+		# # 					# q.execute()
+		# # 					# q = File.update(filesize=os.path.getsize(fl.filepath)).where(File.id ==fl.id)
+		# # 					# q.execute()
+		# # 						# q= File.update(md5sum=r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\CIRCUIT cast\pznO5UOwoFsa.128.mp3").where(File.id == fl.id)
+		# # 						# q.execute()
+		# # 					# q= File.update(filepath=r"Y:\ndha\pre-deposit_prod\LD_Proj\podcasts\files\Kiwi yarns\TIM_LIGHTBOURNE_SECOND_EDIT.mp3").where(File.id == fl.id)
+
 		# 						print(fl.filepath)
-		# 						print(fl.filesize)
-		# 						# if ep.episode_title in my_dict.keys():
-		# 						# 	if not fl.filesize in my_dict[ep.episode_title]:
-		# 						# 		my_dict[ep.episode_title] +=[fl.filesize]
-		# 						# else:
-		# 						# 	my_dict[ep.episode_title]=[fl.filesize]
-		# 						# print(dt.fromtimestamp(int(ep.date)).strftime('%B %d %Y'))
-		# 						# print(ep.harvest_link)
-
-		# 			# 		# q = Episode.update(podcast = 102).where(Episode.id == ep.id)
-		# 					# q.execute()
-		# 					# q = File.update(filesize=os.path.getsize(fl.filepath)).where(File.id ==fl.id)
-		# 					# q.execute()
-		# 						# q= File.update(md5sum=r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\CIRCUIT cast\pznO5UOwoFsa.128.mp3").where(File.id == fl.id)
-		# 						# q.execute()
-		# 					# q= File.update(filepath=r"Y:\ndha\pre-deposit_prod\LD_Proj\podcasts\files\Kiwi yarns\TIM_LIGHTBOURNE_SECOND_EDIT.mp3").where(File.id == fl.id)
-
-		# 						# print(fl.filepath)
-		# 						# # new_filename = "".join(fl.filepath.split("track_G799B1_static1_squarespace_com_static_5b958f42e2ccd190d7d93e8a_t_"))
-		# 						# # q= File.update(filepath=new_filename).where(File.id == fl.id)
-		# 						# # q.execute()	
-		# 						# print(fl.filepath)
-		# 						# print(os.path.getsize(fl.filepath))
-		# # 					# 		print(fl.md5sum)
-
-print(count)
+		# # 						new_filename = r"Y:\ndha\pre-deposit_prod\LD_working\podcasts\files\Tick tick\750891.mp3"
+		# # 						q= File.update(filepath=new_filename).where(File.id == fl.id)
+		# # 						q.execute()	
+		# # # 						# print(fl.filepath)
+		# # 						print(os.path.getsize(fl.filepath))
+		# # 						q= File.update(filesize=os.path.getsize(fl.filepath)).where(File.id == fl.id)
+		# # 						q.execute()

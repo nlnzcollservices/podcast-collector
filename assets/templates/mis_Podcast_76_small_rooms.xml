@@ -5,7 +5,7 @@
     <controlfield tag="006">m|||||o||h||||||||</controlfield>
     <controlfield tag="007">cr#||a||||||||</controlfield>
     <controlfield tag="007">sr#|||||||||ed</controlfield>
-    <controlfield tag="008">231110s        nz ||nn o      t|   eng  </controlfield>
+    <controlfield tag="008">231110s        nz nnnn o      t  n eng  </controlfield>
     <controlfield tag="005">20231110133116.0</controlfield>
     <datafield ind1=" " ind2=" " tag="040">
       <subfield code="a">Nz</subfield>
@@ -19,11 +19,7 @@
     <datafield ind1=" " ind2=" " tag="043">
       <subfield code="a">u-nz---</subfield>
     </datafield>
-    <datafield ind1="1" ind2=" " tag="100">
-      <subfield code="a">Hansen, Jeremy,</subfield>
-      <subfield code="e">interviewer.</subfield>
-    </datafield>
-    <datafield ind1="1" ind2="0" tag="245">
+    <datafield ind1="0" ind2="0" tag="245">
       <subfield code="a">templates maker</subfield>
     </datafield>
     <datafield ind1=" " ind2="1" tag="264">
@@ -75,12 +71,16 @@
       <subfield code="2">lcgft</subfield>
     </datafield>
     <datafield ind1="1" ind2=" " tag="700">
+      <subfield code="a">Hansen, Jeremy,</subfield>
+      <subfield code="e">interviewer.</subfield>
+    </datafield>
+    <datafield ind1="1" ind2=" " tag="700">
       <subfield code="a">Markham, Natasha,</subfield>
       <subfield code="e">interviewer.</subfield>
     </datafield>
     <datafield ind1="1" ind2=" " tag="700">
       <subfield code="a">Brown, Mat</subfield>
-      <subfield code="c">(Architect),</subfield>
+      <subfield code="q">(Mathew),</subfield>
       <subfield code="e">interviewer.</subfield>
     </datafield>
     <datafield ind1="1" ind2=" " tag="700">

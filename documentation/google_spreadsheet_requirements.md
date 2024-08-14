@@ -7,54 +7,48 @@ As the script is based on  strict order of cells in row where which piece of inf
 0. A Podcast name
 1. B Serial MMS
 2. C RSS link
-3. D Rss title
-4. E Bib title (245 a)
-5. F Bib numbering (520 a)
-6. G RSS season
-7. H Rss number
-8. I Episode description
-9. J Episode link (File host)
-10. K Episode date
-11. L Tags
-12. M Episode download link
-13. N Date Harvested
+3. D Episode title
+4. E Episode description
+5. F Episode link
+6. G Episode date
+7. H Tags
+8. I Episode download link
 
 **Fields to be filled in by cataloguing team. Machine readable**
 
-14. O 600
-15. P 600
-16. Q 600
-17. R 610
-18. S 610
-19. T 610
-20. U 650
-21. V 650
-22. W 650
-23. X 650
-24. Y 655
-25. Z 700
-26. AA 700
-27. AB 700
-28. AC 710
-29. AD 710
-30. AE 710
+9. J 100
+10. K 600
+11. L 600
+12. M 600
+13. N 610
+14. O 610
+16. P 610
+17. Q 650
+18. R 650
+19. S 650
+20. Y 650
+21. U 655
+22. V 700
+23. W 700
+24. X 700
+25. Y 710
+26. Z 710
+27. AA 710
 
 **If done True, orherwise False. Machine readable**
 
-31. AF Tick
-    
-**Cataloguing fill. Machine readable**
-
-32. AG Cataloguer
+28. AB Tick
 
 **Could be filled by cataloguin team for their use. Not machine readable**
 
-33. AH Cataloguing notices
+29. AC Cataloguing notices
 
-**Could be implemented**
+**Not implemented yet**
 
-34. AI Automatic notice
+30. AD Automatic notice
 
-**For manually entered podcasts only. Machine readable by additional tools**
+**For manually entered podcasts only. Machine readable**
 
-33. AJ Filepath	
+31. AE Episode number
+32. AF Season number
+33. AG Filepath	

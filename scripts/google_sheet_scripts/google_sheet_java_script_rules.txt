@@ -1,0 +1,19 @@
+//this script performs additional validation, replacing ‡ char by $ which is recognized by script as separator
+
+function replaceText() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var range = sheet.getRange("O:AE");
+  var values = range.getValues();
+  
+  for (var i = 0; i < values.length; i++) {
+    for (var j = 0; j < values[i].length; j++) {
+      var oldValue = values[i][j];
+      if (typeof oldValue === 'string') {
+        var newValue = oldValue.replace(/‡/g, "$");
+        values[i][j] = newValue;
+      }
+    }
+  }
+  
+  range.setValues(values);
+}

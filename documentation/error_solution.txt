@@ -79,3 +79,64 @@ Solution:
 Make sure that all titles uncommented
 
 ------------------------------------------------------------------------------------------------------------------------------------
+Error:
+
+Update_database_from_spreadsheetand_delete_row
+    f100 = my_row[9]
+IndexError: list index out of range
+
+Reason:
+First sheet in google spreadsheet is not main one.
+
+Solution:
+Go to browser
+https://docs.google.com/spreadsheets/d/147Rdj_oxaAuJjj82YgYwwL6CqHdMh7s6ay3Ackrhq5c/edit#gid=0
+Move main sheet on the first place and run script again
+
+------------------------------------------------------------------------------------------------------------------------------------
+Error:
+  File "Y:\ndha\pre-deposit_prod\LD_working\podcasts\scripts\podcasts1_create_record.py", line 147, in parsing_added_fields
+    indicator2 = indicators[1]
+IndexError: string index out of range
+
+Reason:
+Cataloguers put incorrect data
+
+Solution:
+Uncomment 
+		for fld in additional_fields_list:
+			#print(fld)
+in create_record script to see where is the  error.
+
+use print_out script to update this field with correct information using existing for loops 
+
+Example:
+podcasts = Podcast.select()
+for pod in podcasts:
+	episodes = Episode.select().where(Episode.podcast==pod.id)
+	for ep in episodes:
+		if ep.f700_first == ".":
+			print(ep.episode_title)
+			q = Episode.update(f700_first= None).where(Episode.id==ep.id)
+			q.execute()
+
+------------------------------------------------------------------------------------------------------------------------------------
+Error:
+
+  File "Y:\ndha\pre-deposit_prod\LD_working\podcasts\scripts\podcasts.py", line 419, in update_database_from_spreadsheetand_delete_row
+    f100 = my_row[9]
+IndexError: list index out of range
+
+Reason:
+First sheet in google spreadsheet is not main one.
+
+Solution:
+Go to browser
+https://docs.google.com/spreadsheets/d/147Rdj_oxaAuJjj82YgYwwL6CqHdMh7s6ay3Ackrhq5c/edit#gid=0
+Move main sheet on the first place and run script again
+
+------------------------------------------------------------------------------------------------------------------------------------
+Error:
+
+
+

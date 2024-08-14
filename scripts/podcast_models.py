@@ -2,10 +2,8 @@ import peewee
 import os
 try:
     from settings import script_folder, working_folder, database_fullname
+
 except:
-    try:
-        from settings_prod import script_folder, working_folder, database_fullname
-    except:
         script_folder = os.getcwd()
         working_folder = "\\".join(script_folder.split("\\")[:-1])
         database_folder = os.path.join(working_folder, "database")
@@ -39,13 +37,14 @@ class Episode(peewee.Model):
     podcast = peewee.ForeignKeyField(Podcast) 
     episode_title = peewee.CharField(max_length = 255)
     subtitle = peewee.CharField(max_length=255,null= True, default = None )
+    bib_title = peewee.CharField(max_length=255)
+    bib_numbering= peewee.CharField(max_length=255)
     description = peewee.CharField(max_length=4000)
     date = peewee.DateTimeField()
     episode_link = peewee.CharField(125)
     tags = peewee.CharField(max_length=700, null= True, default = None )
     date_harvested = peewee.DateTimeField()
-    harvest_link = peewee.CharField(max_length=125, null= True, default = None )
-    f100 = peewee.CharField(max_length=700, null= True, default = None )
+    harvest_link = peewee.CharField(max_length=125, null= True, default =None)
     f600_first = peewee.CharField(max_length=700, null= True, default = None )
     f600_second = peewee.CharField(max_length=700 , null= True, default = None)
     f600_third = peewee.CharField(max_length=700, null= True, default = None)
@@ -64,6 +63,7 @@ class Episode(peewee.Model):
     f710_second = peewee.CharField(max_length=700, null= True, default = None) 
     f710_third = peewee.CharField(max_length=700, null= True, default = None)
     tick = peewee.BooleanField(default=False)
+    cataloguer= peewee.CharField(max_length=125, null= True, default =None)
     mis_mms = peewee.CharField(max_length=125, null= True, default = None )
     sip = peewee.BooleanField(default=False)
     mis_pol = peewee.CharField(max_length=125, null= True, default = None )
