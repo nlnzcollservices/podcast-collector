@@ -21,4 +21,4 @@ regex
 requests
 requests-oauthlib
 rosetta-sip-factory
-tkinter
+tk
