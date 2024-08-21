@@ -19,11 +19,11 @@ Records for the newly-collected episodes are then created in Alma and submission
 ## Technologies
 ***
 A list of technologies used within the project:
-* [Python](https://www.python.org/downloads/release/python-370/): Version  3.7.2 
+* [Python](https://www.python.org/downloads/release/python-370/): Version > 3.7.2 
 * [Google Spreadsheets APIs](https://developers.google.com/sheets/api/quickstart/python): Version current
-* [AlmaTools](https://github.com/nlnzcollservices/alma-tools): Vesion 3
-* [Exiftool](https://exiftool.org/): Version 12.10
-* [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
+* [AlmaTools](https://github.com/nlnzcollservices/alma-tools): Vesion > 3
+* [Exiftool](https://exiftool.org/):  Version > 12.10
+* [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version > 0.1.1
 
 
 ## Installation
@@ -72,7 +72,7 @@ $ cd ..
 $ move secrets "path\to\your\secret\folder"
 
 ```
-Make sure that your client_secrets.json file is also in the same folder
+Make sure that your client_secrets.json file is also in the same folder and ros_api.py file with a="YourPasswordForRosettaAPi" is there too.
 
 Run podcasts_models.py to create db.
 
