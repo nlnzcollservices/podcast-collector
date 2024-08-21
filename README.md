@@ -72,7 +72,7 @@ $ cd ..
 $ move secrets "path\to\your\secret\folder"
 
 ```
-Make sure that your client_secrets.json file is also in the same folder and ros_api.py file with a="YourPasswordForRosettaAPi" is there too.
+Make sure that your client_secrets.json file is also in the same folder and ros_api.py file with a="YourPasswordForRosettaAPI" is there too. As well as proxies.json.
 
 Run podcasts_models.py to create db.
 
