@@ -24,21 +24,7 @@ A list of technologies used within the project:
 * [AlmaTools](https://github.com/nlnzcollservices/alma-tools): Vesion 3
 * [Exiftool](https://exiftool.org/): Version 12.10
 * [PyExifTool](https://smarnach.github.io/pyexiftool/) : Version 0.1.1
-* [Downloader](https://github.com/nlnzcollservices/file-downloader): Version downloader_light_modified
-* [Rosetta sip factory](https://github.com/NLNZDigitalPreservation/rosetta_sip_factory): Version 0.1.9
-* [beautifulsoup4](https://https://www.crummy.com/software/BeautifulSoup/bs4/doc/): Version 4.9.1
-* [configparser](https://docs.python.org/3/library/configparser.html): Version 5.0.0
-* [dateparser](https://pypi.org/project/dateparser/): Version 0.7.6
-* [feedparser](https://pypi.org/project/feedparser/): Version 5.2.1
-* [gspread](https://gspread.readthedocs.io/en/latest/): Version 3.6.0
-* [httplib2](https://pypi.org/project/httplib2/): Version 0.18.1
-* [lxml](https://pypi.org/project/lxml/): Version 4.5.2
-* [nltk](https://pypi.org/project/nltk/): Version 3.5
-* [openpyxl](https://pypi.org/project/openpyxl/): Version 3.0.4
-* [peewee](http://docs.peewee-orm.com/en/latest/): Version 3.13.3
-* [pymarc](https://pypi.org/project/pymarc/): Version 4.0.0
-* [requests](https://pypi.org/project/requests/): Version 2.24.0
-* [urllib3](https://pypi.org/project/urllib3/): Version 1.25.9
+
 
 ## Installation
 ***
