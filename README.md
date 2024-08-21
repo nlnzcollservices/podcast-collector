@@ -14,6 +14,35 @@ For some podcast titles, the pipeline then presents the harvested metadata for e
 
 Records for the newly-collected episodes are then created in Alma and submission information packages (SIPs) are created for ingest to Rosetta.
 
+Each created bib goes to marc_records folder in marc format. The app has a GUI. 
+
+Temporary 08.2024:
+The pipeline creates full records with 942 field if template does not have _SR_ in its name.
+
+#### Main scripts:
+
+podcasts.py
+podcasts_GUI.py
+podcasts0_harvester.py
+podcasts1_create_record.py
+podcasts2_make_sips.py
+podcasts3_holdings_items.py
+podcasts4_update_fields.py
+podcasts_database_handler.py
+podcasts_GUI.py
+podcast_dict.py
+podcast_models.py
+settings.py
+
+#### Additional tools:
+
+podcasts_cleaning_scripts.py
+print_out_podcast_data.py
+query_find_title.py
+query_possibly_ceased.py
+query_read_db_to_csv.py
+read_episode_from_googlesheet_to_db.py
+
 ### Pipeline
 ![Podcasts](/documentation/Podcasts.png)
 ## Technologies
@@ -85,6 +114,12 @@ Cross fingers and run!
 ```
 $ python podcasts.py
 ```
+or
+
+```
+$ python podcasts_GUI.py
+```
+
 ## Collaboration and integration
 
 It is also possible to attach other scripts to the existing pipline. 
