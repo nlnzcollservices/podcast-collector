@@ -24,3 +24,4 @@ rosetta-sip-factory
 tk
 tkhtmlview
 tkcalendar
+tkinterweb
