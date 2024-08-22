@@ -140,6 +140,8 @@ ws.append_row([podcast_name, serial_mms, "",episode_title, description, episode_
 
 
 ![installation_tips.md](/documentation/installation_tips.md)
+
+![file_downloader+exiftool problems](https://github.com/nlnzcollservices/file-downloader)
  
 		
 
