@@ -135,9 +135,9 @@ ws = gs.get_worksheet(0)
 ...
 ws.append_row([podcast_name, serial_mms, "",episode_title, description, episode_link, episode_date in'%B %d %Y'format, tags, episode_download_link])
  ```
- See also 
+ See also:
+ 
  ![google_spreadsheet_requirements.md](/documentation/google_spreadsheet_requirements.md)
-
 
 ![installation_tips.md](/documentation/installation_tips.md)
 
