@@ -1,0 +1,78 @@
+<record>
+  <leader>01225cim a22003493i 4500</leader>
+  <controlfield tag="006">m|||||o||h||||||||</controlfield>
+  <controlfield tag="007">cr#||a||||||||</controlfield>
+  <controlfield tag="007">sr#|||||||||ed</controlfield>
+  <controlfield tag="008">221110s        nz nnnn o      t  n eng  </controlfield>
+  <datafield ind1=" " ind2=" " tag="040">
+    <subfield code="a">Nz</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="c">Nz</subfield>
+  </datafield>
+  <datafield tag="043" ind1="" ind2="">
+    <subfield code="a">u-nz---</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="245">
+    <subfield code="a">consumeconsume</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="264">
+    <subfield code="a">[Wellington] :</subfield>
+    <subfield code="b">[Consumer],</subfield>
+    <subfield code="c">[&lt;year from date of podcast&gt;]</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="300">
+    <subfield code="a">1 online resource</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="490">
+    <subfield code="a">Consume this,</subfield>
+    <subfield code="x">[2816-0185] ;</subfield>
+    <subfield code="v">&lt;day month, year&gt;</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="500">
+    <subfield code="a">Converted from audio files to streaming audio format.</subfield>
+    <subfield code="5">Nz</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="520">
+    <subfield code="a">"&lt;abstract from website&gt; "--RSS feed.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="588">
+    <subfield code="a">Record automatically derived from RSS feed.</subfield>
+    <subfield code="5">Nz</subfield>
+  </datafield>
+  <datafield tag="590" ind1="" ind2="">
+    <subfield code="a">Mis podcast episode short record BULK</subfield>
+   </datafield>
+  <datafield ind1=" " ind2="0" tag="650">
+    <subfield code="a">Consumer education</subfield>
+    <subfield code="z">New Zealand.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">Podcasts.</subfield>
+    <subfield code="2">lcgft</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="700">
+    <subfield code="a">Duffy, Jon.</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="700">
+    <subfield code="a">Richardson, Sophie</subfield>
+    <subfield code="c">(Consumer rights advocate).</subfield>
+  </datafield>
+  <datafield ind1="2" ind2=" " tag="710">
+    <subfield code="a">Consumer NZ (Organization).</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="800">
+    <subfield code="a">Duffy, Jon.</subfield>
+    <subfield code="t">Consume this ;</subfield>
+    <subfield code="v">&lt;day month, year&gt;.</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="0">
+    <subfield code="u"></subfield>
+  </datafield>
+  <datafield ind1="4" ind2="2" tag="856">
+    <subfield code="3">File host</subfield>
+    <subfield code="u">&lt;URL for podcast&gt;</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="901">
+    <subfield code="a">MGR</subfield>
+  </datafield>
+</record>

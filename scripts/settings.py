@@ -40,15 +40,18 @@ marc_folder = os.path.join(working_folder, "marc_records", "Records")
 ########################Setting folder for git scripts######################
 
 # *-mainly used for Amy's downloader but might be used for other modules downloaded from git storage
-git_folder = r"H:\GIT\file-downloader"
-sys.path.insert(0, git_folder)
+#downloader_folder = r"H:\GIT\file-downloader"
+downloader_folder = r"H:\project\file-downloader"
+sys.path.insert(0, downloader_folder)
 
 ########################SETTING FOLDER FOR CREDENTIAL FILES#################
 
 # *-used for proxies, google credentials, alma APIs and DNZ APIs
-secrets_and_credentials_fold = r'H:\secrets_and_credentials'
+secrets_and_credentials_fold = r'H:\secrets_credentials'
+#secrets_and_credentials_fold = r'H:\secrets_and_credentials'
 sys.path.insert(0, secrets_and_credentials_fold)
-secret_file = os.path.join(secrets_and_credentials_fold, "secrets") 
+#secret_file = os.path.join(secrets_and_credentials_fold, "secrets") 
+secret_file = os.path.join(secrets_and_credentials_fold, "shopping") 
 config = configparser.ConfigParser()
 # print(secret_file)
 config.read(secret_file)
@@ -106,9 +109,7 @@ end_xml = '</bib>'
 ###############################SIP settings###############################################
 ie_entity_type = 'AudioIE'
 ie_entity_type_serial= 'PeriodicIE'
-##################################e-mail settings########################################
-my_email_box = "Svetlana.Koroteeva@dia.govt.nz"
-report_part_name = "45. Weekly Published"
+
 #####################################SET UP Folders#######################################
 ## Run the current script to create full folder structure
 

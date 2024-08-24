@@ -5,8 +5,7 @@ import feedparser
 import podcastparser
 import subprocess
 import gspread
-sys.path.insert(0, r'H:\GIT\file-downloader')
-from downloader_light_modified import DownloadResource as Downloader
+
 sys.path.insert(0, r"Y:\ndha\pre-deposit_prod\LD_working\alma_tools")
 from alma_tools import AlmaTools
 from urllib.request import urlopen
@@ -27,7 +26,9 @@ if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
 ssl._create_default_https_context = ssl._create_unverified_context
 ##############################################################################
-from settings import  file_folder, report_folder, podcast_sprsh, logging,creds
+from settings import  file_folder, report_folder, podcast_sprsh, logging,creds, downloader_folder
+sys.path.insert(0, downloader_folder)
+from downloader_light_modified import DownloadResource as Downloader
 logger = logging.getLogger(__name__)
 
 #######################################Creating google spreadsheet object#################################################
@@ -660,6 +661,8 @@ class Harvester():
 							self.epis_seas = d["entries"][ind]['itunes_season']
 						except:
 							pass
+
+						print(self.episode_download_link)
 
 						if self.episode_download_link:
 							self.download_flag = True

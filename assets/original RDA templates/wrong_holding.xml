@@ -1,0 +1,11 @@
+<holding>
+	<holding_id></holding_id>
+	<record>
+		<leader>#####nu##a22#####1n#4500</leader>
+		<controlfield tag="008">######0u####8###4001bueng0000000<controlfield>
+		<datafield tag="852" ind1="8" ind2=" ">
+			<subfield code="b">ATL</subfield>
+			<subfield code="c">ATL.DA</subfield>
+    	</datafield>
+</record>
+</holding>
