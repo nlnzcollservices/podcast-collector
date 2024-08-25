@@ -16,12 +16,15 @@ Several query scripts are part of the pipeline, allowing specific searches and a
 - **`query_delete_episode_by_id.py`**: Deletes episodes from the database by their unique ID.
 - **`query_read_db_to_csv.py`**: Exports the database records to a CSV format for external analysis or archiving purposes.
 
-These queries interact with the database handler, providing flexibility for cataloguers and system administrators to manage the podcast collection effectively.
+These queries interact with the database handler, providing flexibility for cataloguers and DCS to manage the podcast collection effectively.
 
 ### 3. Cleaning Scripts
 
 - **`podcasts_cleaning_scripts.py`**: This script handles the cleaning of podcast data, files, and metadata. It removes outdated or incomplete records from the database and filesystem. The cleaning functions are automated but can be triggered from the GUI, allowing users to ensure that no unnecessary files or data are stored.
 
+Cleaning workflow should be run at least once per 6 month or on request.
+
 Cleaning workflow:
+
 ![final](podcasts_cleaning.png)
 
