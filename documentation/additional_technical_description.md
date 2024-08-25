@@ -24,5 +24,5 @@ These queries interact with the database handler, providing flexibility for cata
 
 Cleaning workflow:
 ![draft](podcasts_cleaning_scheme.jpg)
-![final](podcasts_cleaning.jpg)
+![final](podcasts_cleaning.png)
 
