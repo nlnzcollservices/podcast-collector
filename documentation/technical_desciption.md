@@ -98,15 +98,13 @@ The pipeline logic is organized in separate scripts:
 ### d. Monitoring and Alerting Plan
 
 - **Logging**: Implement logging for all key actions (file collection, record creation)
-- **Monitoring**: Ensure Google Sheets API and Alma API are responsive
+- **Monitoring**: Export to csv, Google spreadsheet, regular cleaning workflow.
 - **Metrics**: Track the number of episodes collected and records created
 
 ### e. Release / Roll-out and Deployment Plan
 
-The pipeline can be deployed in the following stages:
-- Initial deployment and testing with a small set of podcasts
-- Gradual increase in the number of titles covered
 - Full roll-out with continuous monitoring
+- Adding new podcasts and removing old.
 
 ### f. Rollback Plan
 
@@ -114,48 +112,48 @@ In case of failure, the script can resume from the last completed step. Each sta
 
 ### g. Alternate Solutions / Designs
 
-- **Alternative 1**: Manual collection
+- **Manual collection**: 
   - **Cons**: Labor-intensive, error-prone
-- **Alternative 2**: Pre-built API for podcast collection
-  - **Cons**: Limited customization and dependency on third-party services
+
 
 ## 4. Further Considerations
 
 ### a. Impact on Other Teams
 
-- **Cataloguers**: Will need to review and enrich metadata
-- **IT team**: Responsible for maintaining access to APIs and managing the infrastructure
+- **Cataloguers**: Will need to review and enrich metadata.
+- **PRC**: Server side deposit load.
 
 ### b. Third-party Services Considerations
 
-- **Google Sheets API**: Ensure security and privacy when handling metadata
-- **Alma and Rosetta APIs**: Handle potential limitations in API availability and response times
+- **Google Sheets API**: Handle limitations in API availability and response times
 
 ### c. Cost Analysis
 
-- **Operational Costs**: Minimal, limited to API usage and server runtime
+- **Operational Costs**: Minimal, ase uses free tools and existing software.
 - **Infrastructure Costs**: No significant hardware or software expenses
 
 ### d. Security Considerations
 
 - Secure API access using credentials stored in a protected folder
-- Ensure proper handling of bibliographic data with no leaks
+- Keeping in "secrets" Google spreadsheet key.
 
 ### e. Privacy Considerations
 
-- Metadata should comply with New Zealand's legal deposit regulations
-- Ensure that no personally identifiable information (PII) is collected or stored
+- Metadata should comply with New Zealand's legal deposit regulations particularly around the person names.
+
 
 ### f. Accessibility Considerations
 
-- No specific accessibility concerns as the system is automated with minimal manual interaction
+- Cascade access.
+- Developers permissions.
+- API and spreadsheet keys.
 
 ## 5. Success Evaluation
 
 ### a. Impact
 
 - **Performance Impact**: Significant reduction in manual effort
-- **Security Impact**: Secure handling of data through encrypted API connections
+- **Security Impact**: Secure handling API keys
 - **Cost Impact**: Low operational costs
 
 ### b. Metrics
@@ -168,18 +166,11 @@ In case of failure, the script can resume from the last completed step. Each sta
 
 ### a. Work Estimates and Timelines
 
-- **Task 1**: Complete initial setup and testing (2 weeks)
-- **Task 2**: Integrate additional podcast titles (3 weeks)
+- Run the process weekly.
 
 ### b. Prioritization
 
-- High priority: Automating podcast collection for existing feeds
-- Medium priority: Expanding collection to podcasts without RSS feeds
-
-### c. Milestones
-
-- **Milestone 1**: Complete end-to-end pipeline for initial podcast title (Month 1)
-- **Milestone 2**: Expand to full catalog of titles (Month 2)
+-Prioritize new podcast tiles based on selective digital collecting desisions.
 
 ## 7. Deliberation
 
@@ -190,19 +181,15 @@ In case of failure, the script can resume from the last completed step. Each sta
 ### b. Open Questions
 
 - How to handle podcasts without RSS feeds?
-- Future improvements for metadata enrichment?
+- How to handle monographic podcasts?
+- Future changes related with RDA workflow.
 
-## 8. End Matter
 
-### a. Related Work
-
-- Similar projects may be happening in other national libraries with similar legal deposit requirements.
-
-### b. References
+## 8. References
 
 - [ExLibris Alma API](https://developers.exlibrisgroup.com/alma/apis/)
 - [Google Sheets API](https://developers.google.com/sheets/api)
 
 ### c. Acknowledgments
 
-- Thanks to the Legal Deposit team and the IT team for their support and contributions.
+- Thanks to the Legal Deposit, Cataloguing and PRC team for their support and contributions.
