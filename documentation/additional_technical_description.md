@@ -21,11 +21,8 @@ These queries interact with the database handler, providing flexibility for cata
 ### 3. Cleaning Scripts
 
 - **`podcasts_cleaning_scripts.py`**: This script handles the cleaning of podcast data, files, and metadata. It removes outdated or incomplete records from the database and filesystem. The cleaning functions are automated but can be triggered from the GUI, allowing users to ensure that no unnecessary files or data are stored.
-  
-The cleaning process is essential for maintaining the integrity of the dataset, and the cleaning scripts ensure that only relevant and correctly formatted data are retained.
 
-### 4. Database Interactions
+Cleaning workflow:
+[draft](documents/podcasts_cleaning_scheme.jpg)
+[final](documents/podcasts_cleaning.jpg)
 
-- **`read_episode_from_googlesheet_to_db.py`**: Reads episode metadata from Google Sheets and updates the database. This ensures that metadata enrichment, performed manually by cataloguers, is synced back to the main podcast database for further processing.
-
-Each of these scripts plays a role in maintaining the pipeline's efficiency and usability, ensuring that the podcast data is well-organized, clean, and accessible.
