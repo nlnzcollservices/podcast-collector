@@ -19,4 +19,3 @@ def test_construct_field():
     assert field.tag == "700"
     assert field.indicators == ["1", ""]
     assert field.subfields == [Subfield(code = "a", value = "Duffy, Laura,")]
-
