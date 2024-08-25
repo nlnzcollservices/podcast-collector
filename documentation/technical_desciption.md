@@ -2,288 +2,207 @@
 
 ## 1. Front matter
 
-Title **Podcasts**
-
-Author(s)?
-
-Team **Legal Deposite**
-
-Reviewer(s)? 
-
-Created on **2020**
-
-Last updated **2020**
-
-Epic, ticket, issue, or task tracker reference link ?
+- **Title**: Podcasts
+- **Team**: Legal Deposit
+- **Created on**: 2020
+- **Last updated**: 2020
 
 ## 2. Introduction
-The following script is bulky collecting podcast episodes, interracting with google spreadsheet to write rss metadata and collecting back enriched metadata, creating bibliograhic records in Exlibris Alma and managing audio files to be preserved with Exlibris Rosetta.
 
-### a. Overview, Problem Description, Summary, or Abstract
+The podcast pipeline is designed to automate the collection and management of podcast episodes, their metadata, and their preservation in the National Library of New Zealand's systems. The pipeline interacts with Google Sheets, processes RSS metadata, and creates bibliographic records in Exlibris Alma. Additionally, it prepares audio files for long-term preservation in Exlibris Rosetta.
 
-    Summary of the problem (from the perspective of the user), the context, suggested solution, and the stakeholders. 
+### a. Overview, Problem Description, or Summary
 
-The aim of the script is a systematic automative collecting of podcast episodes and managing audio file preservation in the library system. It contineously tracks new episodes published in rss feed, collects audio files and episodes' metadata and places them to human readable and machine readable source, to allow cataloguing team to make changes and add new bibliographic inforamtion, creatse full bibliographic records, checks files, creates SIPs and places them in a special folder for futher preservation, finishes aquisition part by creating items and updates the existing record with additional field to allow them be published worldwide. It is stable againsed and can be run from any step after interruption. 
+This pipeline automates the systematic collection of podcast episodes, tracks new releases from RSS feeds, gathers audio files and metadata, and updates bibliographic records. The script performs the following tasks:
 
-The script contains several code blocks and database. Each block is responsible for one of the steps in the pipelinse
- 
- - harvesting episodes
- - creating record
- - creating and submitting SIP
- - finishin record
- - cleaning files, db and spreadsheet
- 
- and special operations 
- 
- - database
- - Alma APIs
- - general settings
+- **Harvests podcast episodes** (via `podcasts0_harvester.py`)
+- **Creates records** in Alma (via `podcasts1_create_record.py`)
+- **Creates and submits SIPs** for Rosetta (via `podcasts2_make_sips.py`)
+- **Manages holdings and items** (via `podcasts3_holdings_items.py`)
+- **Updates records** with additional fields for global publishing (via `podcasts4_update_fields.py`)
+- **Cleans files, databases, and spreadsheets**
 
-There are the flags which mark the end of each step, and script will not run the next one, until previous is finished, which allow to run and rerun script as many times as required.
+The system allows cataloguers to enrich metadata through a Google Sheet interface. It ensures the podcasts are preserved in the library system and stable enough to resume from any step after interruptions.
 
-The script is using Downloader module, Google spreadsheet and APIs, JHOVe and Exiftool. Could be combined with Macro Express  and batch script to run automatucally on schedule.
+### b. Glossary or Terminology
 
-## b. Glossary  or Terminology
-
-    New terms you come across as you research your design or terms you may suspect your readers/stakeholders not to know.  
+- **SIP**: Submission Information Package
+- **Alma**: ExLibris Alma for managing bibliographic records
+- **Rosetta**: Digital preservation system used for long-term storage
 
 ### c. Context or Background
 
-    Reasons why the problem is worth solving
-    Origin of the problem
-    How the problem affects users and company goals
-    Past efforts made to solve the solution and why they were not effective
-    How the product relates to team goals, OKRs
-    How the solution fits into the overall product roadmap and strategy
-    How the solution fits into the technical strategy
-The purpuse of script to reduce manual work as much as possible in context of increasing amount of digital materials.  The podcast episodes previously were preserved manually one by one. So the script helps to safe time. 
+Due to an increasing amount of digital materials, this pipeline was created to reduce the manual labor involved in preserving podcasts. Previously, episodes were preserved manually one by one. Automating this process saves time and improves consistency.
 
-### d. Goals or Product and Technical Requirements
+### d. Goals or Technical Requirements
 
-    Product requirements in the form of user stories 
-    Technical requirements
+- Automate the collection and preservation of podcast episodes
+- Enrich and manage metadata in Google Sheets
+- Create SIPs for ExLibris Rosetta
+- Manage and update bibliographic records in ExLibris Alma
 
 ### e. Non-Goals or Out of Scope
 
-    Product and technical requirements that will be disregarded
+- No support for podcasts without an RSS feed (future work)
 
 ### f. Future Goals
 
-    Product and technical requirements slated for a future time
-
-Increase amount of collecting podcast titles. And attach scrapers for podcast without feed.
-
+- Automate the collection of podcasts without RSS feeds via web scraping.
+- Increase the number of podcast titles collected.
 
 ### g. Assumptions
 
-    Conditions and resources that need to be present and accessible for the solution to work as described. 
-    
-For stable and continuess work podcast should have rss feeds, the same title, the same format of title, otherwise additional adjustment required.
+- Podcasts must have RSS feeds for the pipeline to work without manual intervention.
 
 ## 3. Solutions
 
-### a. Current or Existing Solution / Design
+### a. Current Solution
 
-    Current solution description
-    Pros and cons of the current solution
-Pros:
-Stable, rerunable, interruptable, includes all the stages of creating library record with digital source.
+The pipeline runs in multiple stages, with dependencies on the Google Sheets API, Alma API, and Rosetta.
 
-Cons:
+- **Pros**:
+  - Stable, rerunable, and interruptible
+  - Fully automates the creation of bibliographic records with digital sources
+- **Cons**:
+  - Dependence on Google Sheets and external APIs (Alma, Rosetta)
 
-Depending on cataloguing impact, Google account and APIs, Alma APIs
+### b. Suggested Solution / Design
 
-### b. Suggested or Proposed Solution / Design 
+The current pipeline is composed of several modules, each performing specific tasks:
+- **Downloader module**: Downloads new podcast episodes based on RSS feeds.
+- **Google Sheets API**: Enriches metadata via cataloguer interaction.
+- **Alma and Rosetta APIs**: Manages bibliographic records and digital preservation.
 
-    External components that the solution will interact with and that it will alter
-    Dependencies of the current solution
-    Pros and cons of the proposed  solution 
-    Data Model / Schema Changes
-        Schema definitions
-        New data models
-        Modified data models
-        Data validation methods
-    Business Logic
-        API changes
-        Pseudocode
-        Flowcharts
-        Error states
-        Failure scenarios
-        Conditions that lead to errors and failures
-        Limitations
-    Presentation Layer
-        User requirements
-        UX changes
-        UI changes
-        Wireframes with descriptions
-        Links to UI/UX designer’s work
-        Mobile concerns
-        Web concerns
-        UI states
-        Error handling
-    Other questions to answer
-        How will the solution scale?
-        What are the limitations of the solution?
-        How will it recover in the event of a failure?
-        How will it cope with future requirements?
+**External Components**:
+- Google Sheets API
+- ExLibris Alma
+- ExLibris Rosetta
 
-c. Test Plan
+**Business Logic**:
+The pipeline logic is organized in separate scripts:
+- **Harvester**: `podcasts0_harvester.py`
+- **Record Creation**: `podcasts1_create_record.py`
+- **SIP Creation**: `podcasts2_make_sips.py`
+- **Holdings and Items Management**: `podcasts3_holdings_items.py`
+- **Field Updates**: `podcasts4_update_fields.py`
+- **Database Management**: `podcasts_database_handler.py`, `podcast_models.py`
 
-    Explanations of how the tests will make sure user requirements are met
-    Unit tests
-Will make a test for checking bib record.
-    Integrations tests
-Will make Test for writing to spreadsheet, Test for get API
-    QA
+### c. Test Plan
 
-d. Monitoring and Alerting Plan 
+- **Unit Tests**:
+  - Test for bibliographic record creation
+- **Integration Tests**:
+  - Test writing to Google Sheets
+  - Test API calls to Alma and Rosetta
 
-    Logging plan and tools
-    Monitoring plan and tools
-    Metrics to be used to measure health
-    How to ensure observability
-    Alerting plan and tools
+### d. Monitoring and Alerting Plan
 
-e. Release / Roll-out and Deployment Plan
+- **Logging**: Implement logging for all key actions (file collection, record creation)
+- **Monitoring**: Ensure Google Sheets API and Alma API are responsive
+- **Metrics**: Track the number of episodes collected and records created
 
-    Deployment architecture 
-    Deployment environments
-    Phased roll-out plan e.g. using feature flags
-    Plan outlining how to communicate changes to the users, for example, with release notes
+### e. Release / Roll-out and Deployment Plan
 
-f. Rollback Plan
+The pipeline can be deployed in the following stages:
+- Initial deployment and testing with a small set of podcasts
+- Gradual increase in the number of titles covered
+- Full roll-out with continuous monitoring
 
-    Detailed and specific liabilities 
-    Plan to reduce liabilities
-    Plan describing how to prevent other components, services, and systems from being affected
+### f. Rollback Plan
 
-g. Alternate Solutions / Designs
+In case of failure, the script can resume from the last completed step. Each stage is marked with flags, ensuring that no previous steps are repeated unnecessarily.
 
-    Short summary statement for each alternative solution
-    Pros and cons for each alternative
-    Reasons why each solution couldn’t work 
-    Ways in which alternatives were inferior to the proposed solution
-    Migration plan to next best alternative in case the proposed solution falls through
+### g. Alternate Solutions / Designs
 
-4. Further Considerations
+- **Alternative 1**: Manual collection
+  - **Cons**: Labor-intensive, error-prone
+- **Alternative 2**: Pre-built API for podcast collection
+  - **Cons**: Limited customization and dependency on third-party services
 
-a. Impact on other teams
+## 4. Further Considerations
 
-    How will this increase the work of other people?
+### a. Impact on Other Teams
 
-b. Third-party services and platforms considerations
+- **Cataloguers**: Will need to review and enrich metadata
+- **IT team**: Responsible for maintaining access to APIs and managing the infrastructure
 
-    Is it really worth it compared to building the service in-house?
-    What are some of the security and privacy concerns associated with the services/platforms?
-    How much will it cost?
-    How will it scale?
-    What possible future issues are anticipated? 
+### b. Third-party Services Considerations
 
-c. Cost analysis
+- **Google Sheets API**: Ensure security and privacy when handling metadata
+- **Alma and Rosetta APIs**: Handle potential limitations in API availability and response times
 
-    What is the cost to run the solution per day?
-    What does it cost to roll it out? 
+### c. Cost Analysis
 
-d. Security considerations
+- **Operational Costs**: Minimal, limited to API usage and server runtime
+- **Infrastructure Costs**: No significant hardware or software expenses
 
-    What are the potential threats?
-    How will they be mitigated?
-    How will the solution affect the security of other components, services, and systems?
+### d. Security Considerations
 
-e. Privacy considerations
+- Secure API access using credentials stored in a protected folder
+- Ensure proper handling of bibliographic data with no leaks
 
-    Does the solution follow local laws and legal policies on data privacy?
-    How does the solution protect users’ data privacy?
-    What are some of the tradeoffs between personalization and privacy in the solution? 
+### e. Privacy Considerations
 
-f. Regional considerations
+- Metadata should comply with New Zealand's legal deposit regulations
+- Ensure that no personally identifiable information (PII) is collected or stored
 
-    What is the impact of internationalization and localization on the solution?
-    What are the latency issues?
-    What are the legal concerns?
-    What is the state of service availability?
-    How will data transfer across regions be achieved and what are the concerns here? 
+### f. Accessibility Considerations
 
-g. Accessibility considerations
+- No specific accessibility concerns as the system is automated with minimal manual interaction
 
-    How accessible is the solution?
-    What tools will you use to evaluate its accessibility? 
+## 5. Success Evaluation
 
-h. Operational considerations
+### a. Impact
 
-    Does this solution cause adverse aftereffects?
-    How will data be recovered in case of failure?
-    How will the solution recover in case of a failure?
-    How will operational costs be kept low while delivering increased value to the users? 
+- **Performance Impact**: Significant reduction in manual effort
+- **Security Impact**: Secure handling of data through encrypted API connections
+- **Cost Impact**: Low operational costs
 
-i. Risks
+### b. Metrics
 
-    What risks are being undertaken with this solution?
-    Are there risks that once taken can’t be walked back?
-    What is the cost-benefit analysis of taking these risks? 
+- Number of episodes collected
+- Number of records created
+- Errors or failed attempts in creating records or SIPs
 
-j. Support considerations
+## 6. Work
 
-    How will the support team get across information to users about common issues they may face while interacting with the changes?
-    How will we ensure that the users are satisfied with the solution and can interact with it with minimal support?
-    Who is responsible for the maintenance of the solution?
-    How will knowledge transfer be accomplished if the project owner is unavailable? 
+### a. Work Estimates and Timelines
 
-5. Success Evaluation
+- **Task 1**: Complete initial setup and testing (2 weeks)
+- **Task 2**: Integrate additional podcast titles (3 weeks)
 
-a. Impact
+### b. Prioritization
 
-    Security impact
-    Performance impact
-    Cost impact
-    Impact on other components and services
+- High priority: Automating podcast collection for existing feeds
+- Medium priority: Expanding collection to podcasts without RSS feeds
 
-b. Metrics
+### c. Milestones
 
-    List of metrics to capture
-    Tools to capture and measure metrics
+- **Milestone 1**: Complete end-to-end pipeline for initial podcast title (Month 1)
+- **Milestone 2**: Expand to full catalog of titles (Month 2)
 
-6. Work
+## 7. Deliberation
 
-a. Work estimates and timelines
+### a. Discussion
 
-    List of specific, measurable, and time-bound tasks
-    Resources needed to finish each task
-    Time estimates for how long each task needs to be completed
+- None at this stage, as the system has been tested with live data.
 
-b. Prioritization
+### b. Open Questions
 
-    Categorization of tasks by urgency and impact
+- How to handle podcasts without RSS feeds?
+- Future improvements for metadata enrichment?
 
-c. Milestones
+## 8. End Matter
 
-    Dated checkpoints when significant chunks of work will have been completed
-    Metrics to indicate the passing of the milestone
+### a. Related Work
 
-d. Future work
+- Similar projects may be happening in other national libraries with similar legal deposit requirements.
 
-    List of tasks that will be completed in the future
+### b. References
 
-7. Deliberation
+- [ExLibris Alma API](https://developers.exlibrisgroup.com/alma/apis/)
+- [Google Sheets API](https://developers.google.com/sheets/api)
 
-a. Discussion
+### c. Acknowledgments
 
-    Elements of the solution that members of the team do not agree on and need to be debated further to reach a consensus.
-
-b. Open Questions
-
-    Questions about things you do not know the answers to or are unsure that you pose to the team and stakeholders for their input. These may include aspects of the problem you don’t know how to resolve yet. 
-
-8. End Matter
-
-a. Related Work
-
-    Any work external to the proposed solution that is similar to it in some way and is worked on by different teams. It’s important to know this to enable knowledge sharing between such teams when faced with related problems. 
-
-b. References
-
-    Links to documents and resources that you used when coming up with your design and wish to credit. 
-
-c. Acknowledgments
-
-    Credit people who have contributed to the design that you wish to recognize.
+- Thanks to the Legal Deposit team and the IT team for their support and contributions.
