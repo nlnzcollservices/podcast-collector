@@ -23,6 +23,6 @@ These queries interact with the database handler, providing flexibility for cata
 - **`podcasts_cleaning_scripts.py`**: This script handles the cleaning of podcast data, files, and metadata. It removes outdated or incomplete records from the database and filesystem. The cleaning functions are automated but can be triggered from the GUI, allowing users to ensure that no unnecessary files or data are stored.
 
 Cleaning workflow:
-![draft](documents/podcasts_cleaning_scheme.jpg)
-![final](documents/podcasts_cleaning.jpg)
+![draft](podcasts_cleaning_scheme.jpg)
+![final](podcasts_cleaning.jpg)
 
