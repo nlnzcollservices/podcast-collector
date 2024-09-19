@@ -47,7 +47,7 @@ Open podcasts_dict.py  and add to podcast_dict variable the podcast metadata in 
 ```
 "podcast_name:{"rss_filename":"link","url":"link","serial_mms":"99…", "serial_pol":"pol-…","publish_link_ro_record":True, "automated_flag":False,"access_policy":"100", "template":"template_name.xml"}
 ```
-* Don't add special characters e.g. macrons in the the Podcast_name value
+* Don't add special characters e.g. macrons in the the podcast_name value
 * publish_link_to_record  should be turned False  if it should be concealed from public;
 * automated_flag should be turned True if there is no cataloguing corrections required;
 * access policy should be turned 200 for restricted access
