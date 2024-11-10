@@ -367,8 +367,8 @@ class Harvester():
 		for el in parsed["episodes"]:
 			if el["enclosures"]!=[]:
 				if el["title"]== self.episode_title:
-					self.episode_download_link=enclosure["url"]
-
+					self.episode_download_link=el["enclosures"][0]["url"]
+					return self.episode_download_link
 
 	def reverse_episodes(self, episodes):
 	    
