@@ -227,7 +227,7 @@ def copy_sip(output_dir, destination, mis_mms, filename):
 		os.makedirs(os.path.join(destination, "content", "streams", mis_mms))
 	shutil.copyfile(os.path.join(output_dir, "content", "streams", mis_mms, filename ),os.path.join(destination, "content", "streams", mis_mms, filename) )
 	# After the SIP has been copied, create a ready-for-ingestion file so the dashboard will pick it up"
-	with open(os.path.join(destination, "content", "ready-for-ingestion-FOLDER-COMPLETED"), 'w') as f:
+	with open(os.path.join(destination, "ready-for-ingestion-FOLDER-COMPLETED"), 'w') as f:
 		f.write("")
 
 
@@ -251,7 +251,7 @@ def copy_sip_serial(output_dir, destination, filename, met_filename):
 	shutil.copyfile(os.path.join(output_dir, "content", met_filename), os.path.join(destination, "content", met_filename))
 	shutil.copyfile(os.path.join(output_dir, "content", "streams", filename ),os.path.join(destination, "content", "streams", filename) )
 	# After the SIP has been copied, create a ready-for-ingestion file so the dashboard will pick it up"
-	with open(os.path.join(destination, "content", "ready-for-ingestion-FOLDER-COMPLETED"), 'w') as f:
+	with open(os.path.join(destination, "ready-for-ingestion-FOLDER-COMPLETED"), 'w') as f:
 		f.write("")
 
 
